@@ -8,10 +8,17 @@ from datetime import datetime
 # CONFIGURACIÓN DE PÁGINA
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Centro Meteorológico Multi-Modelo & Asimilación Davis",
-    page_icon="📡",
+    page_title="MeteoUy - Centro Meteorológico & Redes",
+    page_icon="⛅",
     layout="wide"
 )
+
+# Mostrar el Logotipo Oficial de MeteoUy en la barra lateral o cabecera
+# (Asegúrate de haber subido tu imagen a GitHub con el nombre 'logo.png')
+try:
+    st.sidebar.image("logo.png", use_container_width=True)
+except:
+    st.sidebar.info("💡 Sube tu archivo 'logo.png' al repositorio para visualizar el logotipo.")
 
 # Estilos CSS personalizados
 st.markdown("""
@@ -33,7 +40,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📡 Sistema Pro de Pronóstico Multi-Modelo & Redes de Superficie")
+st.title("📡 MeteoUy | Sistema Pro de Pronóstico & Redes de Superficie")
 st.caption("Consenso Numérico: ECMWF (Europa) | GFS (NOAA/EE.UU.) | ICON (Alemania) + Asimilación de Redes Davis & METAR")
 
 # ---------------------------------------------------------
