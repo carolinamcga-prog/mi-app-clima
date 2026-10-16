@@ -137,12 +137,12 @@ with st.sidebar:
     st.markdown("<h2 style='text-align: center; color: #1e293b; margin: 5px 0 15px 0;'>MeteoUy</h2>", unsafe_allow_html=True)
     st.markdown("---")
     
-    # Menú en español tal como solicitaste
+    # Menú en español apuntando al archivo correcto (streamlit_app.py)
     st.markdown("### 🗂️ Menú")
-    st.page_link("app.py", label="Dashboard", icon="🎛️")
-    st.page_link("app.py", label="Mapa", icon="🗺️")
-    st.page_link("app.py", label="Alertas", icon="⚠️")
-    st.page_link("app.py", label="Ayuda", icon="❓")
+    st.page_link("streamlit_app.py", label="Dashboard", icon="🎛️")
+    st.page_link("streamlit_app.py", label="Mapa", icon="🗺️")
+    st.page_link("streamlit_app.py", label="Alertas", icon="⚠️")
+    st.page_link("streamlit_app.py", label="Ayuda", icon="❓")
     
     st.markdown("---")
     st.markdown("📞 **Línea de contacto:**")
