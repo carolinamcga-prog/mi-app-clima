@@ -1,6 +1,6 @@
 
 # @title Mini App del Clima Interactiva
-import ipywidgets as widgets
+
 from IPython.display import display, clear_output
 
 # Crear elementos visuales simples
