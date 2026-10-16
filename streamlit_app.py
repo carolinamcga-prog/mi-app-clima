@@ -166,4 +166,4 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                         st.markdown(f"**Condición:** {estado_str}")
                         
                         st.write(f"**Confiabilidad Multi-Modelo:** {confianza_score}")
-                        st.caption(conf
+                        st.caption(conf)
