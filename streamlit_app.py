@@ -82,7 +82,6 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                 pais = loc.get("country", "")
 
                 # 2. Obtener datos individuales de modelos numéricos para ensamble (3 Días)
-                # ECMWF / GFS / ICON
                 url_models = (
                     f"https://api.open-meteo.com/v1/forecast?"
                     f"latitude={lat}&longitude={lon}"
@@ -92,7 +91,7 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                 )
                 res_models = requests.get(url_models).json()
                 
-                # Extracto de observaciones actuales en tiempo real (Simulando/Calibrando con estación cercana Davis / METAR)
+                # Extracto de observaciones actuales en tiempo real
                 url_current = (
                     f"https://api.open-meteo.com/v1/forecast?"
                     f"latitude={lat}&longitude={lon}"
@@ -102,7 +101,7 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                 res_current = requests.get(url_current).json().get("current", {})
 
                 # ---------------------------------------------------------
-                # SECCIÓN 1: CONDICIONES EN TIEMPO REAL (ESTACIÓN DAVIS / SURFACE)
+                # SECCIÓN 1: CONDICIONES EN TIEMPO REAL
                 # ---------------------------------------------------------
                 st.subheader(f"🌐 Observación en Superficie & Calibración: {nombre}, {pais}")
                 st.caption(f"Coordenadas exactas: Lat {lat:.4f}°, Lon {lon:.4f}° | Estación de referencia local activa")
@@ -130,17 +129,12 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                 for i in range(min(3, len(dates))):
                     fecha_raw = dates[i]
                     
-                    # Extraer temperaturas de cada modelo para calcular desviación/confianza
-                    # Manejo seguro si las llaves específicas existen o están unificadas
                     t_max_ecmwf = daily.get("temperature_2m_max_ecmwf_ifs025", daily["temperature_2m_max"])[i]
                     t_max_gfs = daily.get("temperature_2m_max_gfs_seamless", daily["temperature_2m_max"])[i]
                     t_max_icon = daily.get("temperature_2m_max_icon_seamless", daily["temperature_2m_max"])[i]
 
-                    # Ensamble
                     temps_max = [t_max_ecmwf, t_max_gfs, t_max_icon]
-                    t_max_consensual = np.mean(temps_max)
                     
-                    # Criterio de Confianza basado en la desviación estándar inter-modelo
                     std_dev = np.std(temps_max)
                     if std_dev < 1.0:
                         confianza_text = "🟢 Alta (Modelos Convergentes)"
@@ -164,6 +158,8 @@ if st.button("🔬 Ejecutar Análisis de Convergencia (3 Días)", type="primary"
                         st.markdown(f"### 📅 {etiquetas[i]}")
                         st.caption(f"Fecha: {fecha_raw}")
                         st.markdown(f"**Condición:** {estado_str}")
-                        
                         st.write(f"**Confiabilidad Multi-Modelo:** {confianza_score}")
-                        st.caption(conf)
+                        st.caption(confianza_text)
+
+        except Exception as e:
+            st.error(f"❌ Ocurrió un error al procesar los datos meteorológicos: {e}")
