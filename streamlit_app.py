@@ -18,7 +18,6 @@ try:
     st.sidebar.image("logo.jpg", use_container_width=True)
 except:
     st.sidebar.info("💡 Sube tu archivo 'logo.jpg' al repositorio para visualizar el logotipo.")
-
 # Estilos CSS personalizados
 st.markdown("""
     <style>
