@@ -15,7 +15,7 @@ st.set_page_config(
 
 # Mostrar el Logotipo Oficial de MeteoUy en la barra lateral o cabecera
 try:
-    st.sidebar.image("logo.jpg", use_container_width=True)
+   st.sidebar.image("logo.jpeg", use_container_width=True)
 except:
     st.sidebar.info("💡 Sube tu archivo 'logo.jpg' al repositorio para visualizar el logotipo.")
 # Estilos CSS personalizados
