@@ -1,4 +1,3 @@
-
 import streamlit as st
 import requests
 import os
@@ -13,16 +12,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Videos de fondo en formato MP4
+# ---------------------------------------------------------
+# DICCIONARIO AMPLIADO DE VIDEOS DE FONDO (MP4 HD)
+# ---------------------------------------------------------
 VIDEOS = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
     "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
     "cloudy": "https://assets.mixkit.co/videos/preview/mixkit-time-lapse-of-clouds-moving-fast-4105-large.mp4",
     "fog": "https://assets.mixkit.co/videos/preview/mixkit-thick-fog-in-a-forest-42841-large.mp4",
     "drizzle": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-a-window-pane-17482-large.mp4",
-    "rain": "https://assets.mixkit.co/videos/preview/mixkit-heavy-rain-falling-on-the-ground-42862-large.mp4",
-    "thunder": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4",
-    "snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4"
+    "rain_heavy": "https://assets.mixkit.co/videos/preview/mixkit-heavy-rain-falling-on-the-ground-42862-large.mp4",
+    "thunderstorm": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4",
+    "hail_snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4"
 }
 
 # Control de estado de navegación
@@ -32,23 +33,58 @@ if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
 def obtener_clave_video(wcode):
-    if wcode in [0]:
+    """
+    Asigna el video adecuado según el código WMO de Open-Meteo:
+    0: Despejado / Soleado
+    1, 2: Poco nuboso / Parcialmente nublado
+    3: Cubierto / Nubes oscuras
+    45, 48: Niebla / Neblina
+    51-57: Llovizna / Garúa
+    61-67, 80-82: Lluvia moderada a fuerte / Chubascos
+    71-77, 85-86: Nieve / Granizo
+    95-99: Tormenta eléctrica / Tormenta con granizo
+    """
+    if wcode == 0:
         return "clear"
     elif wcode in [1, 2]:
         return "partly_cloudy"
-    elif wcode in [3]:
+    elif wcode == 3:
         return "cloudy"
     elif wcode in [45, 48]:
         return "fog"
     elif wcode in [51, 53, 55, 56, 57]:
         return "drizzle"
     elif wcode in [61, 63, 65, 66, 67, 80, 81, 82]:
-        return "rain"
+        return "rain_heavy"
     elif wcode in [71, 73, 75, 77, 85, 86]:
-        return "snow"
+        return "hail_snow"
     elif wcode in [95, 96, 99]:
-        return "thunder"
+        return "thunderstorm"
     return "clear"
+
+def obtener_descripcion_clima(wcode):
+    """Retorna una descripción legible en español según el código WMO."""
+    descripciones = {
+        0: "Cielo Despejado / Soleado ☀️",
+        1: "Poco Nuboso 🌤️",
+        2: "Parcialmente Nublado ⛅",
+        3: "Nublado / Cubierto ☁️",
+        45: "Niebla 🌫️",
+        48: "Neblina Helada 🌫️",
+        51: "Llovizna Leve 🌧️",
+        53: "Llovizna Moderada 🌧️",
+        55: "Garúa / Llovizna Densa 🌧️",
+        61: "Lluvia Leve 🌧️",
+        63: "Lluvia Moderada 🌧️",
+        65: "Lluvia Fuerte 🌧️⚡",
+        80: "Chubascos Leves 🌦️",
+        81: "Chubascos Moderados 🌧️",
+        82: "Chubascos Violentos ⛈️",
+        95: "Tormenta Eléctrica ⛈️⚡",
+        96: "Tormenta con Granizo Leve 🌩️🧊",
+        99: "Tormenta Eléctrica con Granizo Fuerte 🌩️🧊"
+    }
+    return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -61,7 +97,7 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #222; font-size: 3.5rem;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
 # PANTALLA 1: INICIO
@@ -70,7 +106,7 @@ if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
     .stApp {
-        background-color: white !important;
+        background-color: #ffffff !important;
     }
     .main-container {
         display: flex;
@@ -143,14 +179,13 @@ if not st.session_state.resultado_activo:
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="",
-            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Salto, Salinas...)",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Centro, Salto...)",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -173,7 +208,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (FONDO DE VIDEO TOTAL Y TARJETAS BLANCAS)
+# PANTALLA 2: RESULTADOS CON VIDEO TENUE DE FONDO TOTAL
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -195,14 +230,14 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # Estilos avanzados para colocar el video de fondo absoluto que cubra toda la pantalla
+        # Estilos para el video tenue y las tarjetas semi-transparentes
         st.markdown(f"""
         <style>
-        /* Ocultar el fondo por defecto de Streamlit y configurar el contenedor de video fijo */
         .stApp {{
             background: transparent !important;
         }}
         
+        /* Video de fondo en pantalla completa */
         .video-fondo-absoluto {{
             position: fixed;
             top: 0;
@@ -212,25 +247,30 @@ else:
             object-fit: cover;
             z-index: -99999;
             pointer-events: none;
-            filter: brightness(0.5); /* Ajusta la claridad del video de fondo */
+            filter: brightness(0.45) contrast(1.05); /* Efecto tenue elegante */
         }}
 
-        /* Tarjetas de pronóstico en blanco semi-transparente */
+        /* Tarjetas de pronóstico semi-transparentes estilo Glassmorphism */
         .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 22px;
             padding: 25px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            color: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            color: #0f172a;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
             margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }}
+        
+        .cuadrado-pronostico:hover {{
+            transform: translateY(-5px);
         }}
         </style>
 
-        <!-- Video HTML directo con autoplay forzado y pantalla completa -->
+        <!-- Video HTML5 directo -->
         <video autoplay muted loop playsinline class="video-fondo-absoluto">
             <source src="{url_video}" type="video/mp4">
         </video>
@@ -241,7 +281,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.85); font-size: 2.8rem; margin-top: 10px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -253,20 +293,24 @@ else:
         etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
         
         for i in range(min(3, len(fechas))):
+            codigo_clima = wcodes[i] if i < len(wcodes) else 0
+            estado_texto = obtener_descripcion_clima(codigo_clima)
+            
             with cols[i]:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
-                    <h2 style="color: #0f172a; margin-bottom: 5px; font-weight: 700;">{etiquetas[i]}</h2>
-                    <p style="font-size: 0.9em; color: #64748b; margin-bottom: 12px; font-weight: 600;">{fechas[i]}</p>
-                    <hr style="border-color: #e2e8f0; margin-bottom: 15px;">
-                    <p style="font-size: 1.15em; margin: 8px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                    <p style="font-size: 1.15em; margin: 8px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                    <p style="font-size: 1.15em; margin: 8px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                    <p style="font-size: 1.15em; margin: 8px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                    <h2 style="color: #0369a1; margin-bottom: 2px; font-weight: 800; font-size: 1.5rem;">{etiquetas[i]}</h2>
+                    <p style="font-size: 0.88em; color: #475569; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p>
+                    <p style="font-size: 0.95em; color: #0f172a; font-weight: 700; margin-bottom: 12px; min-height: 40px; display: flex; align-items: center; justify-content: center;">{estado_texto}</p>
+                    <hr style="border-color: #cbd5e1; margin-bottom: 15px;">
+                    <p style="font-size: 1.1em; margin: 8px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
+                    <p style="font-size: 1.1em; margin: 8px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
+                    <p style="font-size: 1.1em; margin: 8px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
+                    <p style="font-size: 1.1em; margin: 8px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
                 </div>
                 """, unsafe_allow_html=True)
     else:
-        st.error("No se encontró la ubicación ingresada en Uruguay.")
-        if st.button("Volver"):
+        st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
+        if st.button("Volver al inicio"):
             st.session_state.resultado_activo = False
             st.rerun()
