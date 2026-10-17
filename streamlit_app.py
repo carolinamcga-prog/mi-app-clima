@@ -12,12 +12,16 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Vídeos de fondo según la condición meteorológica
+# Videos de fondo según la condición meteorológica detallada
 VIDEOS = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
+    "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
     "cloudy": "https://assets.mixkit.co/videos/preview/mixkit-time-lapse-of-clouds-moving-fast-4105-large.mp4",
-    "rain": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-a-window-pane-17482-large.mp4",
-    "thunder": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4"
+    "fog": "https://assets.mixkit.co/videos/preview/mixkit-thick-fog-in-a-forest-42841-large.mp4",
+    "drizzle": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-a-window-pane-17482-large.mp4",
+    "rain": "https://assets.mixkit.co/videos/preview/mixkit-heavy-rain-falling-on-the-ground-42862-large.mp4",
+    "thunder": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4",
+    "snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4"
 }
 
 # Control de estado de navegación
@@ -25,6 +29,28 @@ if "resultado_activo" not in st.session_state:
     st.session_state.resultado_activo = False
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
+
+def obtener_clave_video(wcode):
+    """
+    Mapea el código de tiempo WMO de Open-Meteo al escenario de video correspondiente.
+    """
+    if wcode in [0]:
+        return "clear"
+    elif wcode in [1, 2]:
+        return "partly_cloudy"
+    elif wcode in [3]:
+        return "cloudy"
+    elif wcode in [45, 48]:
+        return "fog"
+    elif wcode in [51, 53, 55, 56, 57]:
+        return "drizzle"  # Llovizna
+    elif wcode in [61, 63, 65, 66, 67, 80, 81, 82]:
+        return "rain"     # Lluvia moderada / intensa
+    elif wcode in [71, 73, 75, 77, 85, 86]:
+        return "snow"
+    elif wcode in [95, 96, 99]:
+        return "thunder"  # Tormentas
+    return "clear"
 
 # Función para cargar el logo real
 def mostrar_logo():
@@ -41,7 +67,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #222; font-size: 3.5rem;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (LOGO GIGANTE, BARRA TITILANTE Y BOTONES CELESTES)
+# PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -73,7 +99,7 @@ if not st.session_state.resultado_activo:
         }
     }
 
-    /* Barra de búsqueda gigante, súper redondeada y titilante */
+    /* Barra de búsqueda gigante y redondeada */
     div[data-baseweb="input"] {
         border-radius: 45px !important;
         padding: 10px 22px !important;
@@ -103,7 +129,7 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
 
-    /* Estilo celeste claro para los 5 botones de redes/contacto */
+    /* Estilo celeste para botones de contacto */
     div[data-testid="stColumn"] .stButton > button {
         background: #e0f2fe !important;
         color: #0369a1 !important;
@@ -124,14 +150,12 @@ if not st.session_state.resultado_activo:
 
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
-    # Logo MÁS GRANDE
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Formulario con barra gigante y titilante
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="",
@@ -143,7 +167,6 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # Fila de botones celestes
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -166,7 +189,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (VÍDEO DE FONDO Y 3 CUADRADOS)
+# PANTALLA 2: RESULTADOS
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -179,26 +202,19 @@ else:
         lat = float(res_geo[0]["lat"])
         lon = float(res_geo[0]["lon"])
         
-        # Pronóstico
+        # Consulta del pronóstico
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
         data = requests.get(url_meteo).json()
         daily = data.get("daily", {})
         
-        # Detectar tipo de clima para el vídeo
+        # Determinar el tipo de clima para el día de hoy (índice 0)
         wcodes = daily.get("weathercode", [0])
-        wcode = wcodes[0] if wcodes else 0
-        if wcode in [0, 1]:
-            fondo = "clear"
-        elif wcode in [2, 3]:
-            fondo = "cloudy"
-        elif wcode in [61, 63, 65, 80, 81]:
-            fondo = "rain"
-        else:
-            fondo = "thunder"
-            
-        url_video = VIDEOS.get(fondo, VIDEOS["clear"])
+        wcode_hoy = wcodes[0] if wcodes else 0
         
-        # Estilos y vídeo de fondo dinámico
+        tipo_fondo = obtener_clave_video(wcode_hoy)
+        url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
+        
+        # CSS con video de fondo y cuadros blancos para el pronóstico
         st.markdown(f"""
         <style>
         #video-fondo {{
@@ -209,21 +225,21 @@ else:
             min-height: 100%;
             z-index: -10;
             object-fit: cover;
-            filter: brightness(0.4);
+            filter: brightness(0.55);
         }}
         .stApp {{
             background: transparent !important;
         }}
         .cuadrado-pronostico {{
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            padding: 25px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #1e293b;
             text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
             margin-bottom: 20px;
         }}
         </style>
@@ -238,8 +254,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 6px rgba(0,0,0,0.8);'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -254,13 +269,13 @@ else:
             with cols[i]:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
-                    <h2 style="color: #fff; margin-bottom: 5px;">{etiquetas[i]}</h2>
-                    <p style="font-size: 0.95em; opacity: 0.85; margin-bottom: 15px;">{fechas[i]}</p>
-                    <hr style="border-color: rgba(255,255,255,0.3); margin-bottom: 15px;">
-                    <p style="font-size: 1.2em;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                    <p style="font-size: 1.2em;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                    <p style="font-size: 1.2em;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                    <p style="font-size: 1.2em;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                    <h2 style="color: #0f172a; margin-bottom: 5px; font-weight: 700;">{etiquetas[i]}</h2>
+                    <p style="font-size: 0.9em; color: #64748b; margin-bottom: 12px; font-weight: 600;">{fechas[i]}</p>
+                    <hr style="border-color: #e2e8f0; margin-bottom: 15px;">
+                    <p style="font-size: 1.15em; margin: 8px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
+                    <p style="font-size: 1.15em; margin: 8px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
+                    <p style="font-size: 1.15em; margin: 8px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
+                    <p style="font-size: 1.15em; margin: 8px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
                 </div>
                 """, unsafe_allow_html=True)
     else:
@@ -268,4 +283,3 @@ else:
         if st.button("Volver"):
             st.session_state.resultado_activo = False
             st.rerun()
-    
