@@ -238,31 +238,27 @@ else:
             justify-content: space-between;
         }
         
-        /* ESTILO LIVE TITILANTE PROFESIONAL */
-        @keyframes titilarLive {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
+        /* ESTILO RADAR / ESTACIÓN METEOROLÓGICA EN VIVO */
+        @keyframes girarRadar {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .live-badge {
+        .radar-badge {
             display: inline-flex;
             align-items: center;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
+            background: #e0f2fe;
+            border: 1px solid #7dd3fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
             font-weight: 700;
-            color: #334155;
-            letter-spacing: 0.5px;
+            color: #0369a1;
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.15);
         }
-        .live-dot {
-            width: 7px;
-            height: 7px;
-            background-color: #ef4444;
-            border-radius: 50%;
+        .radar-icon {
+            display: inline-block;
             margin-right: 6px;
-            animation: titilarLive 1.5s infinite ease-in-out;
+            animation: girarRadar 6s infinite linear;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -277,9 +273,9 @@ else:
             st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.5rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("""
-            <div style='text-align: right; padding-top: 12px;'>
-                <span class='live-badge'>
-                    <span class='live-dot'></span>LIVE
+            <div style='text-align: right; padding-top: 10px;'>
+                <span class='radar-badge'>
+                    <span class='radar-icon'>📡</span> Radar Activo
                 </span>
             </div>
             """, unsafe_allow_html=True)
