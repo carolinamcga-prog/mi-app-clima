@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests
 import os
@@ -12,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Videos de fondo en formato MP4 (enlaces directos y estables)
+# Videos de fondo en formato MP4
 VIDEOS = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
     "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
@@ -172,7 +173,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (CON VIDEO NATIVO Y TARJETAS BLANCAS)
+# PANTALLA 2: RESULTADOS (FONDO DE VIDEO TOTAL Y TARJETAS BLANCAS)
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -194,20 +195,45 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # Estilos para las tarjetas de pronóstico blancas y elegantes
-        st.markdown("""
+        # Estilos avanzados para colocar el video de fondo absoluto que cubra toda la pantalla
+        st.markdown(f"""
         <style>
-        .cuadrado-pronostico {
-            background: rgba(255, 255, 255, 0.95);
+        /* Ocultar el fondo por defecto de Streamlit y configurar el contenedor de video fijo */
+        .stApp {{
+            background: transparent !important;
+        }}
+        
+        .video-fondo-absoluto {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -99999;
+            pointer-events: none;
+            filter: brightness(0.5); /* Ajusta la claridad del video de fondo */
+        }}
+
+        /* Tarjetas de pronóstico en blanco semi-transparente */
+        .cuadrado-pronostico {{
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 25px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             color: #1e293b;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
-        }
+        }}
         </style>
+
+        <!-- Video HTML directo con autoplay forzado y pantalla completa -->
+        <video autoplay muted loop playsinline class="video-fondo-absoluto">
+            <source src="{url_video}" type="video/mp4">
+        </video>
         """, unsafe_allow_html=True)
         
         if st.button("⬅️ Buscar otra ubicación"):
@@ -215,12 +241,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 15px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
-        
-        # Reproductor de video nativo de Streamlit (asegura visibilidad y reproducción automática)
-        st.video(url_video, format="video/mp4", autoplay=True, loop=True, muted=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
