@@ -43,22 +43,22 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
-# --- TRADUCTOR INTELIGENTE: EL TITULAR HUMANO ---
-def generar_titular_humano(temp, wcode, viento):
-    # Lluvia o tormenta según código WMO
-    if wcode in range(51, 68) or wcode in range(80, 100):
-        return "🌧️", "Pésimo momento para colgar ropa. Se vienen chaparrones o lloviznas, ¡llevá paraguas sí o sí!"
-    # Viento fuerte
-    if viento > 25:
-        return "🌬️", "Hay un viento bastante fuerte y molesto afuera. Si salís, ponete una buena campera porque refresca."
-    # Frío
-    if temp < 12:
-        return "🧥", "Día helado. Ponete abrigo pesado porque la temperatura amerita campera de invierno."
-    # Calor
-    if temp > 26:
-        return "☀️", "¡Hermoso sol y calorcito! Día ideal para aprovechar al aire libre, pero no te olvides del protector."
-    # Templado / Estable
-    return "⛅", "Tiempo lindo, estable y agradable. Ideal para salir a dar una vuelta sin grandes complicaciones."
+# --- TITULAR HUMANO ENFOCADO EN LAS PRÓXIMAS HORAS ---
+def generar_titular_pronostico_horas(wcode, lluvia_hoy, viento):
+    # Si hay pronóstico de lluvia acumulada importante para hoy
+    if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
+        return "🌧️", "Se esperan desmejoras y probabilidad de precipitaciones en las próximas horas. Conviene estar prevenido."
+    
+    # Si hay alerta de viento fuerte
+    if viento > 28:
+        return "🌬️", "Atención: se prevé un incremento notable de la intensidad del viento hacia la tarde y noche."
+    
+    # Si el día está despejado o estable
+    if wcode == 0 or wcode == 1:
+        return "🌤️", "Condiciones estables que se mantendrán favorables durante el resto de la jornada."
+    
+    # Si hay nubosidad variable
+    return "⛅", "Cielo variable con tendencia a mantenerse sin cambios significativos en las horas siguientes."
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -196,8 +196,13 @@ else:
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         
-        # Generamos el titular humano con los datos actuales
-        icono_humano, frase_humana = generar_titular_humano(temp_actual, wcode_actual, viento_actual)
+        # Extraemos la lluvia prevista para hoy del pronóstico diario
+        lluvia_diaria_hoy = 0.0
+        if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
+            lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
+
+        # Generamos el titular enfocado en las horas siguientes
+        icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
         st.markdown("""
         <style>
@@ -277,7 +282,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-        # Titular Humano (la frase en criollo que resume el día)
+        # Titular enfocado en lo que se viene en las próximas horas
         st.markdown(f"""
         <div class="human-headline">
             <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
@@ -312,15 +317,4 @@ else:
                     </div>
                     <div>
                         <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_diario[i]} km/h</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-    else:
-        st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
-        if st.button("🌧️↩️ Buscar otra localidad", help="Hacé clic para volver al buscador"):
-            st.session_state.resultado_activo = False
-            st.rerun()
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {t_max
