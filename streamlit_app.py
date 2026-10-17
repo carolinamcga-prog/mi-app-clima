@@ -43,52 +43,22 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
-# --- MOTOR ESTÉTICO: ATMÓSFERAS Y TITULAR HUMANO ---
-def generar_estilo_y_titular(temp, wcode, viento):
-    # Lluvia o tormenta
+# --- TRADUCTOR INTELIGENTE: EL TITULAR HUMANO ---
+def generar_titular_humano(temp, wcode, viento):
+    # Lluvia o tormenta según código WMO
     if wcode in range(51, 68) or wcode in range(80, 100):
-        return {
-            "emoji": "🌧️",
-            "frase": "Pésimo momento para colgar ropa. Se vienen chaparrones, ¡llevá paraguas sí o sí!",
-            "bg_panel": "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", # Azul noche elegante
-            "color_texto": "#f8fafc",
-            "border_color": "#334155"
-        }
+        return "🌧️", "Pésimo momento para colgar ropa. Se vienen chaparrones o lloviznas, ¡llevá paraguas sí o sí!"
     # Viento fuerte
     if viento > 25:
-        return {
-            "emoji": "🌬️",
-            "frase": "Hay un viento bastante fuerte y molesto afuera. Si salís, ponete una buena campera.",
-            "bg_panel": "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)", # Gris atmosférico
-            "color_texto": "#0f172a",
-            "border_color": "#cbd5e1"
-        }
+        return "🌬️", "Hay un viento bastante fuerte y molesto afuera. Si salís, ponete una buena campera porque refresca."
     # Frío
     if temp < 12:
-        return {
-            "emoji": "🧥",
-            "frase": "Día helado. Ponete abrigo pesado porque la temperatura amerita campera de invierno.",
-            "bg_panel": "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", # Azul fresco invernal
-            "color_texto": "#1e3a8a",
-            "border_color": "#93c5fd"
-        }
+        return "🧥", "Día helado. Ponete abrigo pesado porque la temperatura amerita campera de invierno."
     # Calor
     if temp > 26:
-        return {
-            "emoji": "☀️",
-            "frase": "¡Hermoso sol y calorcito! Día ideal para aprovechar al aire libre, con protector solar.",
-            "bg_panel": "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)", # Cálido solar suave
-            "color_texto": "#78350f",
-            "border_color": "#fde68a"
-        }
+        return "☀️", "¡Hermoso sol y calorcito! Día ideal para aprovechar al aire libre, pero no te olvides del protector."
     # Templado / Estable
-    return {
-        "emoji": "⛅",
-        "frase": "Tiempo lindo, estable y agradable. Ideal para salir a dar una vuelta sin complicaciones.",
-        "bg_panel": "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)", # Verde natural suave
-            "color_texto": "#14532d",
-            "border_color": "#bbf7d0"
-        }
+    return "⛅", "Tiempo lindo, estable y agradable. Ideal para salir a dar una vuelta sin grandes complicaciones."
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -201,7 +171,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO (ESTÉTICA DINÁMICA)
+# PANTALLA 2: RESULTADOS Y PRONÓSTICO
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -226,33 +196,48 @@ else:
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         
-        # Generamos la atmósfera visual según el clima
-        estilo = generar_estilo_y_titular(temp_actual, wcode_actual, viento_actual)
+        # Generamos el titular humano con los datos actuales
+        icono_humano, frase_humana = generar_titular_humano(temp_actual, wcode_actual, viento_actual)
         
-        st.markdown(f"""
+        st.markdown("""
         <style>
-        .stApp {{
-            background-color: #f8fafc !important;
-        }}
+        .stApp {
+            background-color: #f0f9ff !important;
+        }
         
-        .panel-atmosferico {{
-            background: {estilo['bg_panel']};
+        .panel-actual {
+            background: white;
             border-radius: 24px;
-            padding: 24px 28px;
-            border: 1.5px solid {estilo['border_color']};
-            color: {estilo['color_texto']};
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            padding: 22px 25px;
+            border: 1.5px solid #bae6fd;
+            color: #0f172a;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
         }
 
-        .cuadrado-pronostico {{
+        .human-headline {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border-left: 5px solid #0284c7;
+            padding: 18px 22px;
+            border-radius: 0 16px 16px 0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
+            border-top: 1.5px solid #bae6fd;
+            border-right: 1.5px solid #bae6fd;
+            border-bottom: 1.5px solid #bae6fd;
+        }
+
+        .cuadrado-pronostico {
             background: white;
             border-radius: 20px;
             padding: 20px 15px;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid #bae6fd;
             color: #0f172a;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
             margin-bottom: 20px;
             height: 360px;
             display: flex;
@@ -275,27 +260,29 @@ else:
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        # Panel Principal Atmosférico y Estético
+        # Panel principal con temperatura gigante
         st.markdown(f"""
-        <div class="panel-atmosferico">
-            <!-- Titular Humano Arriba -->
-            <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; line-height: 1.4;">
-                {estilo['emoji']} {estilo['frase']}
+        <div class="panel-actual">
+            <div style="text-align: center;">
+                <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7;">{temp_actual}°C</span>
+                <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 0;">{obtener_descripcion_clima(wcode_actual)}</p>
             </div>
-            
-            <div style="display: flex; align-items: center; justify-content: space-around; border-top: 1px solid rgba(100,116,139,0.2); padding-top: 18px;">
-                <div style="text-align: center;">
-                    <span style="font-size: 4rem; font-weight: 800; line-height: 1;">{temp_actual}°C</span>
-                    <p style="font-size: 0.95rem; font-weight: 700; margin: 5px 0 0 0; opacity: 0.85;">{obtener_descripcion_clima(wcode_actual)}</p>
-                </div>
-                <div style="border-left: 2px solid rgba(100,116,139,0.25); height: 75px; margin: 0 10px;"></div>
-                <div style="font-size: 0.95rem; font-weight: 600; line-height: 1.6;">
-                    <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
-                    <div>💧 Humedad: <b>{humedad_actual}%</b></div>
-                    <div>💨 Viento: <b>{viento_actual} km/h</b></div>
-                    <div>📊 Presión: <b>{presion_actual} hPa</b></div>
-                </div>
+            <div style="border-left: 2px solid #cbd5e1; height: 75px; margin: 0 10px;"></div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
+                <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
+                <div>💧 Humedad: <b>{humedad_actual}%</b></div>
+                <div>💨 Viento: <b>{viento_actual} km/h</b></div>
+                <div>📊 Presión: <b>{presion_actual} hPa</b></div>
             </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Titular Humano (la frase en criollo que resume el día)
+        st.markdown(f"""
+        <div class="human-headline">
+            <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
+                {icono_humano} {frase_humana}
+            </p>
         </div>
         """, unsafe_allow_html=True)
 
