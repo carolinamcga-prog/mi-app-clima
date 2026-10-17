@@ -237,6 +237,33 @@ else:
             flex-direction: column;
             justify-content: space-between;
         }
+        
+        /* ESTILO LIVE TITILANTE PROFESIONAL */
+        @keyframes titilarLive {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #334155;
+            letter-spacing: 0.5px;
+        }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: titilarLive 1.5s infinite ease-in-out;
+        }
         </style>
         """, unsafe_allow_html=True)
         
@@ -249,7 +276,13 @@ else:
         with col_top2:
             st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.5rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 8px;'><span style='background: #dc2626; color: white; padding: 5px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;'>LIVE</span></div>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style='text-align: right; padding-top: 12px;'>
+                <span class='live-badge'>
+                    <span class='live-dot'></span>LIVE
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
