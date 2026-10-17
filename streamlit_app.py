@@ -112,20 +112,13 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO
+# PANTALLA 1: INICIO (ESTILOS LIMPIOS SIN COLLAPSE)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
     .stApp {
         background-color: #ffffff !important;
-    }
-    .main-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-top: 2vh;
     }
     
     @keyframes pulseGlow {
@@ -136,16 +129,17 @@ if not st.session_state.resultado_activo:
 
     div[data-baseweb="input"] {
         border-radius: 45px !important;
-        padding: 10px 22px !important;
+        padding: 8px 20px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
         font-size: 1.25rem !important;
         background-color: #f8fafc !important;
     }
     div[data-baseweb="input"] input {
-        font-size: 1.2rem !important;
+        font-size: 1.15rem !important;
     }
 
+    /* Botón Principal VER PRONÓSTICO */
     .stButton > button {
         border-radius: 40px !important;
         height: 3.6rem !important;
@@ -162,6 +156,7 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
 
+    /* Botones de redes sociales */
     div[data-testid="stColumn"] .stButton > button {
         background: #e0f2fe !important;
         color: #0369a1 !important;
@@ -180,8 +175,6 @@ if not st.session_state.resultado_activo:
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="main-container">', unsafe_allow_html=True)
-    
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
@@ -189,4 +182,45 @@ if not st.session_state.resultado_activo:
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form(key="search_form"):
-        lugar_input = st.text
+        lugar_input = st.text_input(
+            label="Buscar ubicación",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Centro, Salto...)",
+            label_visibility="collapsed"
+        )
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1:
+        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
+    with c2:
+        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
+    with c3:
+        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
+    with c4:
+        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
+    with c5:
+        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
+
+    if submit and lugar_input.strip():
+        st.session_state.lugar_actual = lugar_input.strip()
+        st.session_state.resultado_activo = True
+        st.rerun()
+
+# =========================================================
+# PANTALLA 2: RESULTADOS (CON VIDEO DE FONDO Y NUBECITA DE VOLVER)
+# =========================================================
+else:
+    lugar = st.session_state.lugar_actual
+    
+    url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
+    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
+    
+    if res_geo:
+        lat = float(res_geo[0]["lat"])
+        lon = float(res_geo[0]["lon"])
+        
+        url_meteo = f"
