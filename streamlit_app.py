@@ -45,45 +45,50 @@ def obtener_descripcion_clima(wcode):
 
 # --- MOTOR ESTÉTICO: ATMÓSFERAS Y TITULAR HUMANO ---
 def generar_estilo_y_titular(temp, wcode, viento):
+    # Lluvia o tormenta
     if wcode in range(51, 68) or wcode in range(80, 100):
         return {
             "emoji": "🌧️",
             "frase": "Pésimo momento para colgar ropa. Se vienen chaparrones, ¡llevá paraguas sí o sí!",
-            "bg_panel": "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+            "bg_panel": "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", # Azul noche elegante
             "color_texto": "#f8fafc",
             "border_color": "#334155"
         }
+    # Viento fuerte
     if viento > 25:
         return {
             "emoji": "🌬️",
             "frase": "Hay un viento bastante fuerte y molesto afuera. Si salís, ponete una buena campera.",
-            "bg_panel": "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)",
+            "bg_panel": "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)", # Gris atmosférico
             "color_texto": "#0f172a",
             "border_color": "#cbd5e1"
         }
+    # Frío
     if temp < 12:
         return {
             "emoji": "🧥",
             "frase": "Día helado. Ponete abrigo pesado porque la temperatura amerita campera de invierno.",
-            "bg_panel": "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+            "bg_panel": "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", # Azul fresco invernal
             "color_texto": "#1e3a8a",
             "border_color": "#93c5fd"
         }
+    # Calor
     if temp > 26:
         return {
             "emoji": "☀️",
             "frase": "¡Hermoso sol y calorcito! Día ideal para aprovechar al aire libre, con protector solar.",
-            "bg_panel": "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)",
+            "bg_panel": "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)", # Cálido solar suave
             "color_texto": "#78350f",
             "border_color": "#fde68a"
         }
+    # Templado / Estable
     return {
         "emoji": "⛅",
         "frase": "Tiempo lindo, estable y agradable. Ideal para salir a dar una vuelta sin complicaciones.",
-        "bg_panel": "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
-        "color_texto": "#14532d",
-        "border_color": "#bbf7d0"
-    }
+        "bg_panel": "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)", # Verde natural suave
+            "color_texto": "#14532d",
+            "border_color": "#bbf7d0"
+        }
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -221,6 +226,7 @@ else:
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         
+        # Generamos la atmósfera visual según el clima
         estilo = generar_estilo_y_titular(temp_actual, wcode_actual, viento_actual)
         
         st.markdown(f"""
@@ -269,9 +275,10 @@ else:
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        # Panel Principal Atmosférico y Estético con Titular Humano
+        # Panel Principal Atmosférico y Estético
         st.markdown(f"""
         <div class="panel-atmosferico">
+            <!-- Titular Humano Arriba -->
             <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; line-height: 1.4;">
                 {estilo['emoji']} {estilo['frase']}
             </div>
