@@ -220,7 +220,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (DISEÑO ESTÉTICO Y ALTURAS UNIFICADAS)
+# PANTALLA 2: RESULTADOS (CON FLECHA DE RETORNO FLOTANTE Y TOOLTIP)
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -248,7 +248,7 @@ else:
             background: transparent !important;
         }}
         
-        /* Video tenue elegante de fondo */
+        /* Video tenue de fondo */
         .video-fondo-absoluto {{
             position: fixed;
             top: 0;
@@ -261,7 +261,7 @@ else:
             filter: brightness(0.4) contrast(1.1);
         }}
 
-        /* Tarjetas con altura idéntica y diseño glassmorphism superior */
+        /* Tarjetas de pronóstico idénticas */
         .cuadrado-pronostico {{
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
@@ -273,7 +273,7 @@ else:
             text-align: center;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
-            height: 385px; /* Altura fija absoluta para que los 3 cuadros sean idénticos */
+            height: 385px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -285,6 +285,23 @@ else:
             background: rgba(255, 255, 255, 0.93);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
         }}
+
+        /* Estilo personalizado para el botón de retroceso con tooltip profesional */
+        div[data-testid="stButton"] button[kind="secondary"] {{
+            background: rgba(255, 255, 255, 0.8) !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+            border-radius: 50px !important;
+            color: #0284c7 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+            transition: all 0.3s ease !important;
+        }}
+        div[data-testid="stButton"] button[kind="secondary"]:hover {{
+            background: #ffffff !important;
+            color: #0369a1 !important;
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35) !important;
+        }}
         </style>
 
         <video autoplay muted loop playsinline class="video-fondo-absoluto">
@@ -292,7 +309,8 @@ else:
         </video>
         """, unsafe_allow_html=True)
         
-        if st.button("⬅️ Buscar otra ubicación"):
+        # Botón de retroceso con flecha clara y tooltip explicativo
+        if st.button("⬅️ Volver", help="Buscar otra ubicación"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
@@ -331,6 +349,6 @@ else:
                 """, unsafe_allow_html=True)
     else:
         st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
-        if st.button("Volver al inicio"):
+        if st.button("Volver al inicio", help="Buscar otra ubicación"):
             st.session_state.resultado_activo = False
             st.rerun()
