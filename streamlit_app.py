@@ -109,70 +109,20 @@ def mostrar_logo():
 # PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
-    st.markdown("""
-    <style>
-    .stApp {
-        background-color: white !important;
-    }
-    .main-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-top: 2vh;
-    }
-    
-    @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
-        50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
-    }
-
-    div[data-baseweb="input"] {
-        border-radius: 45px !important;
-        padding: 10px 22px !important;
-        border: 2.5px solid #38bdf8 !important;
-        animation: pulseGlow 2.5s infinite ease-in-out !important;
-        font-size: 1.25rem !important;
-        background-color: #f8fafc !important;
-    }
-    div[data-baseweb="input"] input {
-        font-size: 1.2rem !important;
-    }
-
-    .stButton > button {
-        border-radius: 40px !important;
-        height: 3.6rem !important;
-        font-size: 1.25rem !important;
-        font-weight: 700 !important;
-        border: None !important;
-        background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
-        color: white !important;
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
-        transition: all 0.3s ease !important;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
-    }
-
-    div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    css_inicio = (
+        "<style>"
+        ".stApp { background-color: white !important; }"
+        ".main-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 2vh; }"
+        "@keyframes pulseGlow { 0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; } 50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; } 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; } }"
+        'div[data-baseweb="input"] { border-radius: 45px !important; padding: 10px 22px !important; border: 2.5px solid #38bdf8 !important; animation: pulseGlow 2.5s infinite ease-in-out !important; font-size: 1.25rem !important; background-color: #f8fafc !important; }'
+        'div[data-baseweb="input"] input { font-size: 1.2rem !important; }'
+        ".stButton > button { border-radius: 40px !important; height: 3.6rem !important; font-size: 1.25rem !important; font-weight: 700 !important; border: None !important; background: linear-gradient(135deg, #0284c7, #38bdf8) !important; color: white !important; box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important; transition: all 0.3s ease !important; }"
+        ".stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; }"
+        'div[data-testid="stColumn"] .stButton > button { background: #e0f2fe !important; color: #0369a1 !important; border: 1.5px solid #bae6fd !important; border-radius: 30px !important; height: 3rem !important; font-size: 0.95rem !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important; }'
+        'div[data-testid="stColumn"] .stButton > button:hover { background: #bae6fd !important; color: #0284c7 !important; border-color: #38bdf8 !important; }'
+        "</style>"
+    )
+    st.markdown(css_inicio, unsafe_allow_html=True)
 
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
@@ -240,53 +190,11 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        st.markdown("""
-        <style>
-        .stApp {
-            background: transparent !important;
-        }
-        .video-fondo-absoluto {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: -99999;
-            pointer-events: none;
-            filter: brightness(0.5);
-        }
-        div[data-testid="stHorizontalBlock"] {
-            align-items: stretch !important;
-        }
-        div[data-testid="stColumn"] {
-            display: flex !important;
-            flex-direction: column !important;
-        }
-        .cuadrado-pronostico {
-            background: rgba(255, 255, 255, 0.93);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 22px;
-            padding: 24px 18px;
-            border: 1.5px solid rgba(255, 255, 255, 0.9);
-            color: #1e293b;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            height: 410px !important;
-            max-height: 410px !important;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                        opacity 0.35s ease, 
-                        box-shadow 0.35s ease, 
-                        background 0.35s ease;
-            cursor: pointer;
-        }
-        .cuadrado-pronostico:hover {
-            transform: translateY(-8px) scale(1.05) !important;
-            background: rgba(255, 255, 255, 0.98) !important;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
-            border-color: #3
+        css_resultados = (
+            "<style>"
+            ".stApp { background: transparent !important; }"
+            ".video-fondo-absoluto { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -99999; pointer-events: none; filter: brightness(0.5); }"
+            'div[data-testid="stHorizontalBlock"] { align-items: stretch !important; }'
+            'div[data-testid="stColumn"] { display: flex !important; flex-direction: column !important; }'
+            ".cuadrado-pronostico { background: rgba(255, 255, 255, 0.93); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 22px; padding: 24px 18px; border: 1.5px solid rgba(255, 255, 255, 0.9); color: #1e293b; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25); height: 410px !important; max-height: 410px !important; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease, box-shadow 0.35s ease, background 0.35s ease; cursor: pointer; }"
+            ".cuadrado-pronostico:hover { transform: translateY(-8px) scale(1.05) !important; background: rgba(255, 255, 255,
