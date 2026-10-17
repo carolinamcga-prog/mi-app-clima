@@ -238,27 +238,29 @@ else:
             justify-content: space-between;
         }
         
-        /* ESTILO RADAR / ESTACIÓN METEOROLÓGICA EN VIVO */
-        @keyframes girarRadar {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* ESTILO UX: TIEMPO REAL PROFESIONAL */
+        @keyframes pulseRealtime {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
-        .radar-badge {
+        .realtime-badge {
             display: inline-flex;
             align-items: center;
             background: #e0f2fe;
             border: 1px solid #7dd3fc;
-            padding: 4px 12px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.78rem;
             font-weight: 700;
             color: #0369a1;
-            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.15);
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.12);
+            animation: pulseRealtime 2.5s infinite ease-in-out;
         }
-        .radar-icon {
+        .realtime-icon {
             display: inline-block;
             margin-right: 6px;
-            animation: girarRadar 6s infinite linear;
+            font-size: 0.85rem;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -274,8 +276,8 @@ else:
         with col_top3:
             st.markdown("""
             <div style='text-align: right; padding-top: 10px;'>
-                <span class='radar-badge'>
-                    <span class='radar-icon'>📡</span> Radar Activo
+                <span class='realtime-badge'>
+                    <span class='realtime-icon'>⚡</span> En tiempo real
                 </span>
             </div>
             """, unsafe_allow_html=True)
