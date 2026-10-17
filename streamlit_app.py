@@ -107,5 +107,3 @@ if not st.session_state.resultado_activo:
         border: 1.5px solid #bae6fd !important;
         border-radius: 30px !important;
         height: 3
-       
-  
