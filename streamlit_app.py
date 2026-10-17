@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Videos de fondo según la condición meteorológica detallada
+# Videos de fondo en formato MP4 (enlaces directos y estables)
 VIDEOS = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
     "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
@@ -31,9 +31,6 @@ if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
 def obtener_clave_video(wcode):
-    """
-    Mapea el código de tiempo WMO de Open-Meteo al escenario de video correspondiente.
-    """
     if wcode in [0]:
         return "clear"
     elif wcode in [1, 2]:
@@ -43,16 +40,15 @@ def obtener_clave_video(wcode):
     elif wcode in [45, 48]:
         return "fog"
     elif wcode in [51, 53, 55, 56, 57]:
-        return "drizzle"  # Llovizna
+        return "drizzle"
     elif wcode in [61, 63, 65, 66, 67, 80, 81, 82]:
-        return "rain"     # Lluvia moderada / intensa
+        return "rain"
     elif wcode in [71, 73, 75, 77, 85, 86]:
         return "snow"
     elif wcode in [95, 96, 99]:
-        return "thunder"  # Tormentas
+        return "thunder"
     return "clear"
 
-# Función para cargar el logo real
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
     logo_encontrado = None
@@ -83,23 +79,12 @@ if not st.session_state.resultado_activo:
         margin-top: 2vh;
     }
     
-    /* Animación titilante / resplandor pulsante para la barra */
     @keyframes pulseGlow {
-        0% {
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-            border-color: #38bdf8;
-        }
-        50% {
-            box-shadow: 0 0 25px rgba(14, 165, 233, 0.75);
-            border-color: #0284c7;
-        }
-        100% {
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-            border-color: #38bdf8;
-        }
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
 
-    /* Barra de búsqueda gigante y redondeada */
     div[data-baseweb="input"] {
         border-radius: 45px !important;
         padding: 10px 22px !important;
@@ -112,7 +97,6 @@ if not st.session_state.resultado_activo:
         font-size: 1.2rem !important;
     }
 
-    /* Botón principal VER PRONÓSTICO */
     .stButton > button {
         border-radius: 40px !important;
         height: 3.6rem !important;
@@ -129,7 +113,6 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
 
-    /* Estilo celeste para botones de contacto */
     div[data-testid="stColumn"] .stButton > button {
         background: #e0f2fe !important;
         color: #0369a1 !important;
@@ -194,7 +177,6 @@ if not st.session_state.resultado_activo:
 else:
     lugar = st.session_state.lugar_actual
     
-    # Búsqueda de coordenadas en Uruguay
     url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
     res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
     
@@ -202,59 +184,64 @@ else:
         lat = float(res_geo[0]["lat"])
         lon = float(res_geo[0]["lon"])
         
-        # Consulta del pronóstico
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
         data = requests.get(url_meteo).json()
         daily = data.get("daily", {})
         
-        # Determinar el tipo de clima para el día de hoy (índice 0)
         wcodes = daily.get("weathercode", [0])
         wcode_hoy = wcodes[0] if wcodes else 0
         
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # CSS con video de fondo y cuadros blancos para el pronóstico
+        # Inyección HTML/CSS robusta para asegurar que el video corra de fondo
         st.markdown(f"""
         <style>
-        #video-fondo {{
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            z-index: -10;
-            object-fit: cover;
-            filter: brightness(0.55);
-        }}
         .stApp {{
             background: transparent !important;
         }}
+        .video-container {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -999;
+            overflow: hidden;
+        }}
+        #video-fondo {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.5);
+        }}
         .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 25px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             color: #1e293b;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
         }}
         </style>
-        <video autoplay loop muted playsinline id="video-fondo">
-            <source src="{url_video}" type="video/mp4">
-        </video>
+        <div class="video-container">
+            <video autoplay loop muted playsinline id="video-fondo">
+                <source src="{url_video}" type="video/mp4">
+                Tu navegador no soporta videos HTML5.
+            </video>
+        </div>
         """, unsafe_allow_html=True)
         
-        # Botón para volver al inicio
         if st.button("⬅️ Buscar otra ubicación"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
