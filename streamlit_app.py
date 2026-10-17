@@ -172,7 +172,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS
+# PANTALLA 2: RESULTADOS (CON VIDEO NATIVO Y TARJETAS BLANCAS)
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -194,46 +194,20 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # Inyección HTML/CSS robusta para asegurar que el video corra de fondo
-        st.markdown(f"""
+        # Estilos para las tarjetas de pronóstico blancas y elegantes
+        st.markdown("""
         <style>
-        .stApp {{
-            background: transparent !important;
-        }}
-        .video-container {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -999;
-            overflow: hidden;
-        }}
-        #video-fondo {{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.5);
-        }}
-        .cuadrado-pronostico {{
+        .cuadrado-pronostico {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 25px 20px;
             border: 1px solid rgba(255, 255, 255, 0.9);
             color: #1e293b;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
-        }}
+        }
         </style>
-        <div class="video-container">
-            <video autoplay loop muted playsinline id="video-fondo">
-                <source src="{url_video}" type="video/mp4">
-                Tu navegador no soporta videos HTML5.
-            </video>
-        </div>
         """, unsafe_allow_html=True)
         
         if st.button("⬅️ Buscar otra ubicación"):
@@ -241,7 +215,12 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 15px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+        
+        # Reproductor de video nativo de Streamlit (asegura visibilidad y reproducción automática)
+        st.video(url_video, format="video/mp4", autoplay=True, loop=True, muted=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
