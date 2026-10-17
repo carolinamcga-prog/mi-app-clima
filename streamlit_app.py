@@ -238,34 +238,56 @@ else:
             justify-content: space-between;
         }
         
-        /* ESTILO MARCA Y TIEMPO REAL */
-        @keyframes girarLento {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* ESTILO MARCA Y CÍRCULO TITINANTE EN TIEMPO REAL */
+        @keyframes pulsoAzul {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
+            }
         }
-        .realtime-badge {
-            display: inline-flex;
+        .titulo-marca-lugar {
+            text-align: center;
+            color: #0284c7;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .live-circle-container {
+            display: flex;
             align-items: center;
-            background: #e0f2fe;
-            border: 1px solid #7dd3fc;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 14px;
+        }
+        .blue-pulse-circle {
+            width: 12px;
+            height: 12px;
+            background-color: #0284c7;
+            border: 2px solid #bae6fd;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulsoAzul 2s infinite ease-in-out;
+        }
+        .live-text-label {
+            font-size: 0.8rem;
             font-weight: 700;
             color: #0369a1;
-            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.12);
-            white-space: nowrap;
-        }
-        .realtime-icon {
-            display: inline-block;
-            margin-right: 5px;
-            font-size: 0.8rem;
-            animation: girarLento 8s infinite linear;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         </style>
         """, unsafe_allow_html=True)
         
-        # Cabecera optimizada: Botón volver, Título de Marca y Sello en Tiempo Real
+        # Cabecera optimizada: Botón volver, Título con tipografía de marca y Círculo azul titilante
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
             if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
@@ -273,13 +295,12 @@ else:
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.2rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("""
-            <div style='text-align: right; padding-top: 10px;'>
-                <span class='realtime-badge'>
-                    <span class='realtime-icon'>🔄</span> En tiempo real
-                </span>
+            <div class='live-circle-container'>
+                <span class='blue-pulse-circle'></span>
+                <span class='live-text-label'>En vivo</span>
             </div>
             """, unsafe_allow_html=True)
 
