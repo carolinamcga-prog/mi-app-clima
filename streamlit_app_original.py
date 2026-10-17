@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import urllib.parse
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -19,6 +20,47 @@ if "resultado_activo" not in st.session_state:
     st.session_state.resultado_activo = False
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
+
+# BASE DE DATOS LOCAL EXCLUSIVA PARA URUGUAY
+COORDS_URUGUAY = {
+    "montevideo": (-34.9011, -56.1645),
+    "artigas": (-30.4033, -56.4733),
+    "canelones": (-34.5228, -56.2822),
+    "cerro largo": (-32.3667, -54.1833),
+    "melo": (-32.3667, -54.1833),
+    "colonia": (-34.4625, -57.8397),
+    "colonia del sacramento": (-34.4625, -57.8397),
+    "durazno": (-33.4167, -55.5333),
+    "flores": (-33.5167, -56.7000),
+    "trinidad": (-33.5167, -56.7000),
+    "florida": (-34.1000, -56.2167),
+    "lavalleja": (-34.3667, -55.2333),
+    "minas": (-34.3667, -55.2333),
+    "maldonado": (-34.9000, -54.9500),
+    "paysandú": (-32.3167, -58.0750),
+    "río negro": (-32.7333, -58.2833),
+    "fray bentos": (-33.1333, -58.3000),
+    "rivera": (-30.9053, -55.5505),
+    "rocha": (-34.4833, -54.3333),
+    "salto": (-31.3833, -57.9667),
+    "salinas": (-34.7833, -55.8500),
+    "san josé": (-34.3375, -56.7136),
+    "soriano": (-33.2500, -58.3000),
+    "mercedes": (-33.2500, -58.3000),
+    "tacuarembó": (-31.7333, -55.9833),
+    "treinta y tres": (-33.2333, -54.3833),
+    "punta del este": (-34.9580, -54.9410),
+    "piriápolis": (-34.8628, -55.2747),
+    "atlántida": (-34.7719, -55.7583),
+    "ciudad de la costa": (-34.8231, -55.9525),
+    "carrasco": (-34.8760, -56.0520),
+    "pocitos": (-34.9120, -56.1470),
+    "centro": (-34.9050, -56.1910)
+}
+
+def es_coordenada_uruguay(lat, lon):
+    """Verifica si las coordenadas pertenecen estrictamente al mapa de Uruguay"""
+    return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
 
 def obtener_descripcion_clima(wcode):
     descripciones = {
@@ -43,7 +85,6 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
-# --- TITULAR HUMANO ENFOCADO EN LAS PRÓXIMAS HORAS ---
 def generar_titular_pronostico_horas(wcode, lluvia_hoy, viento):
     if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
         return "🌧️", "Se esperan desmejoras y probabilidad de precipitaciones en las próximas horas. Conviene estar prevenido."
@@ -144,7 +185,7 @@ if not st.session_state.resultado_activo:
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
-            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Centro, Artigas, Salto...)",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento en Uruguay...",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -171,21 +212,65 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO
+# PANTALLA 2: RESULTADOS Y PRONÓSTICO (CON FILTRO EXCLUSIVO URUGUAY)
 # =========================================================
 else:
-    lugar = st.session_state.lugar_actual
+    lugar_ingresado = st.session_state.lugar_actual.strip()
+    lugar_lower = lugar_ingresado.lower()
     
-    url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
-    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
+    lat, lon = None, None
+    lugar_encontrado = lugar_ingresado.title()
     
-    if res_geo:
-        lat = float(res_geo[0]["lat"])
-        lon = float(res_geo[0]["lon"])
-        
+    # PASO 1: Búsqueda prioritaria en base interna de Uruguay
+    for clave, coords in COORDS_URUGUAY.items():
+        if clave in lugar_lower or lugar_lower in clave:
+            lat, lon = coords
+            lugar_encontrado = clave.title()
+            break
+            
+    # PASO 2: Si no está en diccionario, consultar API forzando país Uruguay
+    if lat is None and lon is None:
+        try:
+            query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
+            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=5&language=es&format=json"
+            res_geo = requests.get(url_geo, timeout=8).json()
+            
+            if "results" in res_geo and len(res_geo["results"]) > 0:
+                for res in res_geo["results"]:
+                    cand_lat = float(res["latitude"])
+                    cand_lon = float(res["longitude"])
+                    pais = res.get("country", "").lower()
+                    
+                    # Validar estrictamente que sea dentro de Uruguay
+                    if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
+                        lat, lon = cand_lat, cand_lon
+                        lugar_encontrado = res.get("name", lugar_ingresado.title())
+                        break
+        except Exception:
+            pass
+
+    # PASO 3: Si se intentó buscar un lugar fuera de Uruguay o que no existe en el país
+    if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
+        st.markdown("""
+        <style>
+        .stApp { background-color: #f0f9ff !important; }
+        </style>
+        """, unsafe_allow_html=True)
+        st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
+        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
+        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
+            st.session_state.resultado_activo = False
+            st.session_state.lugar_actual = ""
+            st.rerun()
+    else:
+        # Petición a la API del Clima
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
-        data = requests.get(url_meteo).json()
         
+        try:
+            data = requests.get(url_meteo, timeout=10).json()
+        except Exception:
+            data = {}
+            
         current = data.get("current", {})
         daily = data.get("daily", {})
         
@@ -311,7 +396,7 @@ else:
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar.title()}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("""
             <div class='live-circle-container'>
@@ -385,8 +470,3 @@ else:
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
-    else:
-        st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
-        if st.button("🌧️↩️ Buscar otra localidad", help="Hacé clic para volver al buscador"):
-            st.session_state.resultado_activo = False
-            st.rerun()
