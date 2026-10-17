@@ -211,7 +211,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO (IMAGEN PANTALLA COMPLETA)
+# PANTALLA 2: RESULTADOS Y PRONÓSTICO (IMAGEN EN MOVIMIENTO)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -283,7 +283,7 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        # --- SELECCIÓN DINÁMICA DE IMAGEN DE FONDO A PANTALLA COMPLETA ---
+        # --- SELECCIÓN DE IMAGEN DE FONDO SEGÚN EL CLIMA ---
         if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
             bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop" # Lluvia
         elif wcode_actual in [2, 3, 45, 48]:
@@ -299,19 +299,28 @@ else:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }}
 
-        /* ESTILO E IMAGEN DE FONDO A PANTALLA COMPLETA CON MOVIMIENTO */
-        @keyframes panBackground {{
-            0% {{ background-position: 0% 50%; }}
-            50% {{ background-position: 100% 50%; }}
-            100% {{ background-position: 0% 50%; }}
+        /* ANIMACIÓN CINEMÁTICA DE MOVIMIENTO DE FONDO (PANORÁMICA + ZOOM) */
+        @keyframes moverFondo {{
+            0% {{
+                background-position: 0% 0%;
+                transform: scale(1);
+            }}
+            50% {{
+                background-position: 100% 100%;
+                transform: scale(1.08);
+            }}
+            100% {{
+                background-position: 0% 0%;
+                transform: scale(1);
+            }}
         }}
 
         .stApp {{
-            background: linear-gradient(rgba(15, 23, 42, 0.70), rgba(15, 23, 42, 0.60)), url('{bg_url}') !important;
-            background-size: cover !important;
-            background-position: center !important;
+            background: linear-gradient(rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.58)), url('{bg_url}') !important;
+            background-size: 120% 120% !important;
             background-attachment: fixed !important;
-            animation: panBackground 30s ease infinite !important;
+            animation: moverFondo 25s ease-in-out infinite !important;
+            overflow-x: hidden !important;
         }}
         
         /* TARJETA GLASSMORPHISM CLIMA ACTUAL */
