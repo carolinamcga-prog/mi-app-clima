@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# VIDEOS EN MOVIMIENTO EN VIVO (OPTIMIZADOS PARA CADA CLIMA)
+# RUTAS DE VIDEOS LOCALES Y RESPALDO EN LÍNEA EN VIVO
 # ---------------------------------------------------------
 VIDEOS_LOCALES = {
     "clear": "assets/videos/despejado.mp4",
@@ -27,13 +27,12 @@ VIDEOS_LOCALES = {
     "thunderstorm": "assets/videos/tormenta.mp4"
 }
 
-# Enlaces directos a videos fluidos en bucle (movimiento constante en vivo)
 VIDEOS_BACKUP = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
     "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
     "cloudy": "https://assets.mixkit.co/videos/preview/mixkit-time-lapse-of-clouds-moving-fast-4105-large.mp4",
     "fog": "https://assets.mixkit.co/videos/preview/mixkit-thick-fog-in-a-forest-42841-large.mp4",
-    "drizzle": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-the-water-surface-1510-large.mp4",
+    "drizzle": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-a-window-pane-17482-large.mp4",
     "rain_heavy": "https://assets.mixkit.co/videos/preview/mixkit-heavy-rain-falling-on-the-ground-42862-large.mp4",
     "hail_snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4",
     "thunderstorm": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4"
@@ -213,7 +212,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: EN VIVO CON VIDEO ANIMADO EN MOVIMIENTO
+# PANTALLA 2: EN VIVO CON VIDEO SEGUNDO A SEGUNDO
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -396,4 +395,20 @@ else:
                 <div class="cuadrado-pronostico">
                     <div>
                         <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
-                        <p style="font-size:
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fechas[i]}</p>
+                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                    </div>
+                    <div>
+                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+    else:
+        st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
+        if st.button("🌧️↩️ Buscar otra localidad", help="Hacé clic para volver al buscador"):
+            st.session_state.resultado_activo = False
+            st.rerun()
