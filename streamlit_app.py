@@ -53,7 +53,7 @@ def desc_clima(wcode):
     codigos = {
         0: "☀️ Despejado",
         1: "🌤️ Mayormente despejado",
-        2: "Partly Cloudy ⛅ Parcialmente nublado",
+        2: "⛅ Parcialmente nublado",
         3: "☁️ Nublado",
         45: "🌫️ Niebla",
         48: "🌫️ Niebla con escarcha",
@@ -220,7 +220,7 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # Estilos avanzados para colocar el video de fondo absoluto que cubra toda la pantalla
+        # Estilos CSS avanzados para el comportamiento hover + atenuación interactiva
         st.markdown(f"""
         <style>
         .stApp {{
@@ -239,17 +239,65 @@ else:
             filter: brightness(0.5);
         }}
 
+        /* Asegurar que el contenedor de las columnas tenga flex para igualar la altura */
+        div[data-testid="stHorizontalBlock"] {{
+            align-items: stretch !important;
+        }}
+
+        div[data-testid="stColumn"] {{
+            display: flex !important;
+            flex-direction: column !important;
+        }}
+
+        /* Tarjeta base con diseño responsivo */
         .cuadrado-pronostico {{
             background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 22px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 24px 18px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
             color: #1e293b;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            min-height: 340px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        opacity 0.35s ease, 
+                        box-shadow 0.35s ease, 
+                        background 0.35s ease;
+            cursor: pointer;
+        }}
+
+        /* EFECTO HOVER: Agrandar la tarjeta en la que te apoyas */
+        .cuadrado-pronostico:hover {{
+            transform: translateY(-8px) scale(1.05) !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+            border-color: #38bdf8 !important;
+            z-index: 10;
+        }}
+
+        /* ATENUACIÓN: Cuando te apoyas en una tarjeta, las otras dos quedan más tenues */
+        div[data-testid="stHorizontalBlock"]:has(.cuadrado-pronostico:hover) .cuadrado-pronostico:not(:hover) {{
+            opacity: 0.45 !important;
+            transform: scale(0.97) !important;
+            filter: blur(0.5px);
+        }}
+
+        .estado-clima-txt {{
+            font-size: 0.95em;
+            color: #0284c7;
+            font-weight: 700;
+            margin-bottom: 8px;
+            min-height: 2.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }}
         </style>
 
@@ -278,8 +326,7 @@ else:
             wc = wcodes[i] if i < len(wcodes) else 0
             estado_txt = desc_clima(wc)
             
-            # Formato HTML continuo en una sola línea para evitar errores de renderizado en Streamlit
-            html_tarjeta = f'<div class="cuadrado-pronostico"><h2 style="color: #0f172a; margin-bottom: 2px; font-weight: 700;">{etiquetas[i]}</h2><p style="font-size: 0.85em; color: #64748b; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p><p style="font-size: 0.95em; color: #0284c7; font-weight: 700; margin-bottom: 10px;">{estado_txt}</p><hr style="border-color: #e2e8f0; margin-bottom: 12px;"><p style="font-size: 1.1em; margin: 6px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p><p style="font-size: 1.1em; margin: 6px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p></div>'
+            html_tarjeta = f'<div class="cuadrado-pronostico"><div><h2 style="color: #0f172a; margin-bottom: 2px; font-weight: 700;">{etiquetas[i]}</h2><p style="font-size: 0.85em; color: #64748b; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p><div class="estado-clima-txt">{estado_txt}</div><hr style="border-color: #e2e8f0; margin-bottom: 12px;"></div><div><p style="font-size: 1.1em; margin: 6px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p><p style="font-size: 1.1em; margin: 6px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p></div></div>'
             
             with cols[i]:
                 st.markdown(html_tarjeta, unsafe_allow_html=True)
