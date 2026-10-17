@@ -215,7 +215,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (FONDO DE VIDEO TOTAL Y TARJETAS BLANCAS)
+# PANTALLA 2: RESULTADOS
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -240,13 +240,13 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        st.markdown(f"""
+        # 1. Estilos CSS limpios (sin f-string para evitar conflictos de llaves)
+        st.markdown("""
         <style>
-        .stApp {{
+        .stApp {
             background: transparent !important;
-        }}
-        
-        .video-fondo-absoluto {{
+        }
+        .video-fondo-absoluto {
             position: fixed;
             top: 0;
             left: 0;
@@ -256,11 +256,34 @@ else:
             z-index: -99999;
             pointer-events: none;
             filter: brightness(0.5);
-        }}
-
-        div[data-testid="stHorizontalBlock"] {{
+        }
+        div[data-testid="stHorizontalBlock"] {
             align-items: stretch !important;
-        }}
-
-        div[data-testid="stColumn"] {{
-            display: flex !
+        }
+        div[data-testid="stColumn"] {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .cuadrado-pronostico {
+            background: rgba(255, 255, 255, 0.93);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 22px;
+            padding: 24px 18px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            height: 410px !important;
+            max-height: 410px !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        opacity 0.35s ease, 
+                        box-shadow 0.35s ease, 
+                        background 0.35s ease;
+            cursor: pointer;
+        }
+        .cu
