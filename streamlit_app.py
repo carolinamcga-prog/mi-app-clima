@@ -59,7 +59,6 @@ COORDS_URUGUAY = {
 }
 
 def es_coordenada_uruguay(lat, lon):
-    """Verifica si las coordenadas pertenecen estrictamente al mapa de Uruguay"""
     return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
 
 def obtener_descripcion_clima(wcode):
@@ -108,7 +107,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (BUSCADOR LIMPIO CON ENTER Y BOTÓN)
+# PANTALLA 1: INICIO (BUSCADOR)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -211,7 +210,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO (IMAGEN EN MOVIMIENTO)
+# PANTALLA 2: RESULTADOS (FONDO EN MOVIMIENTO, PRONÓSTICO ESTÁTICO)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -220,14 +219,12 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # Búsqueda prioritaria en base interna de Uruguay
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
-    # Búsqueda en API con filtro estricto geográfico
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
@@ -248,14 +245,10 @@ else:
             pass
 
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
-        st.markdown("""
-        <style>
-        .stApp { background-color: #f0f9ff !important; }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown("<style>.stApp { background-color: #f0f9ff !important; }</style>", unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
         st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
-        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
+        if st.button("🌧️↩️ Volver al buscador"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
@@ -283,13 +276,13 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        # --- SELECCIÓN DE IMAGEN DE FONDO SEGÚN EL CLIMA ---
+        # URL de la imagen según el clima
         if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
             bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop" # Lluvia
         elif wcode_actual in [2, 3, 45, 48]:
             bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop" # Nublado
         else:
-            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop" # Despejado / Sol
+            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop" # Sol / Despejado
 
         st.markdown(f"""
         <style>
@@ -299,33 +292,33 @@ else:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }}
 
-        /* ANIMACIÓN CINEMÁTICA DE MOVIMIENTO DE FONDO (PANORÁMICA + ZOOM) */
-        @keyframes moverFondo {{
-            0% {{
-                background-position: 0% 0%;
-                transform: scale(1);
-            }}
-            50% {{
-                background-position: 100% 100%;
-                transform: scale(1.08);
-            }}
-            100% {{
-                background-position: 0% 0%;
-                transform: scale(1);
-            }}
+        /* --- ANIMACIÓN EXCLUSIVA PARA LAS NUBES / EL AGUA DE FONDO --- */
+        @keyframes deslizarFondo {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
         }}
 
+        /* EL FONDO SE MUEVE SUAVEMENTE */
         .stApp {{
-            background: linear-gradient(rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.58)), url('{bg_url}') !important;
-            background-size: 120% 120% !important;
-            background-attachment: fixed !important;
-            animation: moverFondo 25s ease-in-out infinite !important;
-            overflow-x: hidden !important;
+            background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.55)), url('{bg_url}') !important;
+            background-size: 200% 200% !important;
+            animation: deslizarFondo 35s ease infinite !important;
+        }}
+
+        /* EL CONTENEDOR PRINCIPAL Y LAS TARJETAS QUEDAN 100% ESTÁTICAS Y FIRMES */
+        .block-container {{
+            position: relative !important;
+            z-index: 2 !important;
         }}
         
-        /* TARJETA GLASSMORPHISM CLIMA ACTUAL */
+        .panel-actual, .human-headline, .cuadrado-pronostico {{
+            animation: none !important;
+            transform: none !important;
+        }}
+
         .panel-actual {{
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 22px 25px;
@@ -336,11 +329,10 @@ else:
             display: flex;
             align-items: center;
             justify-content: space-around;
-        }}
+        }
 
-        /* TARJETA HUMAN HEADLINE */
         .human-headline {{
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 244, 0.96) 100%);
             backdrop-filter: blur(12px);
             border-left: 5px solid #0284c7;
             padding: 18px 22px;
@@ -350,11 +342,10 @@ else:
             border-top: 1.5px solid rgba(255, 255, 255, 0.6);
             border-right: 1.5px solid rgba(255, 255, 255, 0.6);
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.6);
-        }}
+        }
 
-        /* TARJETAS DÍAS EXTENDIDOS */
         .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.94);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 20px 15px;
@@ -367,22 +358,13 @@ else:
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-        }}
+        }
         
         @keyframes pulsoAzul {{
-            0% {{
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8);
-            }}
-            70% {{
-                transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(56, 189, 248, 0);
-            }}
-            100% {{
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
-            }}
-        }}
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
         .titulo-marca-lugar {{
             text-align: center;
             color: #ffffff;
@@ -392,7 +374,7 @@ else:
             letter-spacing: -0.5px;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }}
+        }
         .live-circle-container {{
             display: flex;
             align-items: center;
