@@ -64,7 +64,7 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
 # PANTALLA 1: INICIO (BUSCADOR LIMPIO)
@@ -72,13 +72,6 @@ def mostrar_logo():
 if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
-    /* TIPOGRAFÍA GLOBAL */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    .stApp, html, body, [class*="st-"] {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-
     .stApp {
         background-color: #ffffff !important;
     }
@@ -204,17 +197,9 @@ else:
         
         st.markdown("""
         <style>
-        /* TIPOGRAFÍA GLOBAL */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        .stApp, html, body, [class*="st-"] {
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-
         .stApp {
             background-color: #f0f9ff !important;
         }
-        
         .panel-actual {
             background: white;
             border-radius: 24px;
@@ -227,7 +212,6 @@ else:
             align-items: center;
             justify-content: space-around;
         }
-
         .human-headline {
             background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
             border-left: 5px solid #0284c7;
@@ -239,7 +223,6 @@ else:
             border-right: 1.5px solid #bae6fd;
             border-bottom: 1.5px solid #bae6fd;
         }
-
         .cuadrado-pronostico {
             background: white;
             border-radius: 20px;
@@ -255,6 +238,7 @@ else:
             justify-content: space-between;
         }
         
+        /* ESTILO MARCA Y CÍRCULO TITINANTE EN TIEMPO REAL */
         @keyframes pulsoAzul {
             0% {
                 transform: scale(0.95);
@@ -276,7 +260,6 @@ else:
             font-weight: 800;
             margin: 0;
             letter-spacing: -0.5px;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         .live-circle-container {
             display: flex;
@@ -304,6 +287,7 @@ else:
         </style>
         """, unsafe_allow_html=True)
         
+        # Cabecera optimizada: Botón volver, Título con tipografía de marca y Círculo azul titilante
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
             if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
