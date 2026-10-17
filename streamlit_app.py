@@ -6,7 +6,7 @@ import os
 # CONFIGURACIÓN DE PÁGINA
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MeteoUI",
+    page_title="MeteoUy",
     page_icon="🌤️",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -20,14 +20,28 @@ VIDEOS = {
     "thunder": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4"
 }
 
-# Control de pantallas (Inicio vs Resultados)
+# Control de estado de navegación
 if "resultado_activo" not in st.session_state:
     st.session_state.resultado_activo = False
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
+# Función para cargar el logo real
+def mostrar_logo():
+    posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
+    logo_encontrado = None
+    for nombre in posibles_nombres:
+        if os.path.exists(nombre):
+            logo_encontrado = nombre
+            break
+            
+    if logo_encontrado:
+        st.image(logo_encontrado, use_container_width=True)
+    else:
+        st.markdown("<h1 style='text-align: center; color: #222;'>MeteoUy</h1>", unsafe_allow_html=True)
+
 # =========================================================
-# PANTALLA 1: INICIO (FONDO BLANCO, LOGO Y BARRA)
+# PANTALLA 1: INICIO (FONDO BLANCO + LOGO REAL + BARRA)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -40,26 +54,21 @@ if not st.session_state.resultado_activo:
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: 15vh;
+        margin-top: 10vh;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
-    # Logo grande en el centro
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Logo centrado
+    col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
-        if os.path.exists("logo.jpg"):
-            st.image("logo.jpg", use_container_width=True)
-        elif os.path.exists("logo.png"):
-            st.image("logo.png", use_container_width=True)
-        else:
-            st.markdown("<h1 style='text-align: center; color: #222;'>MeteoUI</h1>", unsafe_allow_html=True)
+        mostrar_logo()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Formulario para presionar Enter de forma natural
+    # Barra de búsqueda limpia debajo del logo
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="",
@@ -83,7 +92,7 @@ else:
     
     # Búsqueda de coordenadas en Uruguay
     url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
-    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUI-App"}).json()
+    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
     
     if res_geo:
         lat = float(res_geo[0]["lat"])
@@ -125,7 +134,7 @@ else:
             background: transparent !important;
         }}
         .cuadrado-pronostico {{
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border-radius: 20px;
@@ -178,4 +187,4 @@ else:
         if st.button("Volver"):
             st.session_state.resultado_activo = False
             st.rerun()
-     
+    
