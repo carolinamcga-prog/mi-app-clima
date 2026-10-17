@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import base64
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -13,37 +14,53 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# DICCIONARIO AMPLIADO DE VIDEOS DE FONDO (MP4 HD)
+# RUTAS DE VIDEOS LOCALES Y FUNCIÓN BASE64 CON RESPALDO EN LÍNEA
 # ---------------------------------------------------------
-VIDEOS = {
+VIDEOS_LOCALES = {
+    "clear": "assets/videos/despejado.mp4",
+    "partly_cloudy": "assets/videos/poco_nuboso.mp4",
+    "cloudy": "assets/videos/nublado.mp4",
+    "fog": "assets/videos/niebla.mp4",
+    "drizzle": "assets/videos/llovizna.mp4",
+    "rain_heavy": "assets/videos/lluvia_fuerte.mp4",
+    "hail_snow": "assets/videos/granizo_nieve.mp4",
+    "thunderstorm": "assets/videos/tormenta.mp4"
+}
+
+VIDEOS_BACKUP = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
     "partly_cloudy": "https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4",
     "cloudy": "https://assets.mixkit.co/videos/preview/mixkit-time-lapse-of-clouds-moving-fast-4105-large.mp4",
     "fog": "https://assets.mixkit.co/videos/preview/mixkit-thick-fog-in-a-forest-42841-large.mp4",
     "drizzle": "https://assets.mixkit.co/videos/preview/mixkit-rain-drops-falling-on-a-window-pane-17482-large.mp4",
     "rain_heavy": "https://assets.mixkit.co/videos/preview/mixkit-heavy-rain-falling-on-the-ground-42862-large.mp4",
-    "thunderstorm": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4",
-    "hail_snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4"
+    "hail_snow": "https://assets.mixkit.co/videos/preview/mixkit-snow-falling-silently-in-a-forest-42843-large.mp4",
+    "thunderstorm": "https://assets.mixkit.co/videos/preview/mixkit-lightning-strike-in-a-cloudy-sky-42861-large.mp4"
 }
 
-# Control de estado de navegación
+def obtener_fuente_video(tipo_fondo):
+    """
+    Si el video local existe en assets/videos/, lo codifica en base64.
+    Si no existe, utiliza la URL de respaldo en línea.
+    """
+    ruta_local = VIDEOS_LOCALES.get(tipo_fondo, "")
+    if os.path.exists(ruta_local):
+        with open(ruta_local, "rb") as video_file:
+            video_bytes = video_file.read()
+            b64_video = base64.b64encode(video_bytes).decode("utf-8")
+            return f"data:video/mp4;base64,{b64_video}"
+    else:
+        return VIDEOS_BACKUP.get(tipo_fondo, VIDEOS_BACKUP["clear"])
+
+# ---------------------------------------------------------
+# ESTADO DE LA SESIÓN
+# ---------------------------------------------------------
 if "resultado_activo" not in st.session_state:
     st.session_state.resultado_activo = False
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
 def obtener_clave_video(wcode):
-    """
-    Asigna el video adecuado según el código WMO de Open-Meteo:
-    0: Despejado / Soleado
-    1, 2: Poco nuboso / Parcialmente nublado
-    3: Cubierto / Nubes oscuras
-    45, 48: Niebla / Neblina
-    51-57: Llovizna / Garúa
-    61-67, 80-82: Lluvia moderada a fuerte / Chubascos
-    71-77, 85-86: Nieve / Granizo
-    95-99: Tormenta eléctrica / Tormenta con granizo
-    """
     if wcode == 0:
         return "clear"
     elif wcode in [1, 2]:
@@ -63,7 +80,6 @@ def obtener_clave_video(wcode):
     return "clear"
 
 def obtener_descripcion_clima(wcode):
-    """Retorna una descripción legible en español según el código WMO."""
     descripciones = {
         0: "Cielo Despejado / Soleado ☀️",
         1: "Poco Nuboso 🌤️",
@@ -76,7 +92,7 @@ def obtener_descripcion_clima(wcode):
         55: "Garúa / Llovizna Densa 🌧️",
         61: "Lluvia Leve 🌧️",
         63: "Lluvia Moderada 🌧️",
-        65: "Lluvia Fuerte 🌧️⚡",
+        65: "Lluvia Torrencial 🌧️⚡",
         80: "Chubascos Leves 🌦️",
         81: "Chubascos Moderados 🌧️",
         82: "Chubascos Violentos ⛈️",
@@ -100,7 +116,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO
+# PANTALLA 1: INICIO (FONDO BLANCO LIMPIO)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -208,7 +224,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS CON VIDEO TENUE DE FONDO TOTAL
+# PANTALLA 2: RESULTADOS CON VIDEO TENUE EN PANTALLA COMPLETA
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -228,16 +244,15 @@ else:
         wcode_hoy = wcodes[0] if wcodes else 0
         
         tipo_fondo = obtener_clave_video(wcode_hoy)
-        url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
+        src_video = obtener_fuente_video(tipo_fondo)
         
-        # Estilos para el video tenue y las tarjetas semi-transparentes
         st.markdown(f"""
         <style>
         .stApp {{
             background: transparent !important;
         }}
         
-        /* Video de fondo en pantalla completa */
+        /* Video tenue en segundo plano */
         .video-fondo-absoluto {{
             position: fixed;
             top: 0;
@@ -247,10 +262,10 @@ else:
             object-fit: cover;
             z-index: -99999;
             pointer-events: none;
-            filter: brightness(0.45) contrast(1.05); /* Efecto tenue elegante */
+            filter: brightness(0.45) contrast(1.05);
         }}
 
-        /* Tarjetas de pronóstico semi-transparentes estilo Glassmorphism */
+        /* Tarjetas de pronóstico traslúcidas estilo moderno */
         .cuadrado-pronostico {{
             background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(12px);
@@ -270,9 +285,8 @@ else:
         }}
         </style>
 
-        <!-- Video HTML5 directo -->
         <video autoplay muted loop playsinline class="video-fondo-absoluto">
-            <source src="{url_video}" type="video/mp4">
+            <source src="{src_video}" type="video/mp4">
         </video>
         """, unsafe_allow_html=True)
         
