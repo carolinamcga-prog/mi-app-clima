@@ -43,6 +43,16 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
+# --- TITULAR HUMANO ENFOCADO EN LAS PRÓXIMAS HORAS ---
+def generar_titular_pronostico_horas(wcode, lluvia_hoy, viento):
+    if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
+        return "🌧️", "Se esperan desmejoras y probabilidad de precipitaciones en las próximas horas. Conviene estar prevenido."
+    if viento > 28:
+        return "🌬️", "Atención: se prevé un incremento notable de la intensidad del viento hacia la tarde y noche."
+    if wcode == 0 or wcode == 1:
+        return "🌤️", "Condiciones estables que se mantendrán favorables durante el resto de la jornada."
+    return "⛅", "Cielo variable con tendencia a mantenerse sin cambios significativos en las horas siguientes."
+
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
     logo_encontrado = None
@@ -54,7 +64,7 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
 # PANTALLA 1: INICIO (BUSCADOR LIMPIO)
@@ -62,6 +72,13 @@ def mostrar_logo():
 if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
+    /* TIPOGRAFÍA GLOBAL */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    .stApp, html, body, [class*="st-"] {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
     .stApp {
         background-color: #ffffff !important;
     }
@@ -179,8 +196,21 @@ else:
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         
+        lluvia_diaria_hoy = 0.0
+        if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
+            lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
+
+        icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
+        
         st.markdown("""
         <style>
+        /* TIPOGRAFÍA GLOBAL */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        .stApp, html, body, [class*="st-"] {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
         .stApp {
             background-color: #f0f9ff !important;
         }
@@ -192,10 +222,22 @@ else:
             border: 1.5px solid #bae6fd;
             color: #0f172a;
             box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-around;
+        }
+
+        .human-headline {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border-left: 5px solid #0284c7;
+            padding: 18px 22px;
+            border-radius: 0 16px 16px 0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
+            border-top: 1.5px solid #bae6fd;
+            border-right: 1.5px solid #bae6fd;
+            border-bottom: 1.5px solid #bae6fd;
         }
 
         .cuadrado-pronostico {
@@ -212,19 +254,71 @@ else:
             flex-direction: column;
             justify-content: space-between;
         }
+        
+        @keyframes pulsoAzul {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
+            }
+        }
+        .titulo-marca-lugar {
+            text-align: center;
+            color: #0284c7;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        .live-circle-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 14px;
+        }
+        .blue-pulse-circle {
+            width: 12px;
+            height: 12px;
+            background-color: #0284c7;
+            border: 2px solid #bae6fd;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulsoAzul 2s infinite ease-in-out;
+        }
+        .live-text-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0369a1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
         </style>
         """, unsafe_allow_html=True)
         
-        col_top1, col_top2, col_top3 = st.columns([1.5, 3, 1.5])
+        col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
             if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.5rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 8px;'><span style='background: #dc2626; color: white; padding: 5px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;'>LIVE</span></div>", unsafe_allow_html=True)
+            st.markdown("""
+            <div class='live-circle-container'>
+                <span class='blue-pulse-circle'></span>
+                <span class='live-text-label'>En vivo</span>
+            </div>
+            """, unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
@@ -244,6 +338,14 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
+        st.markdown(f"""
+        <div class="human-headline">
+            <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
+                {icono_humano} {frase_humana}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
         st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
@@ -260,20 +362,26 @@ else:
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
             estado_texto = obtener_descripcion_clima(codigo_clima)
             
+            tmax_val = t_max[i] if i < len(t_max) else "--"
+            tmin_val = t_min[i] if i < len(t_min) else "--"
+            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
             with cols[i]:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
                     <div>
                         <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fechas[i]}</p>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
                         <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
                     </div>
                     <div>
                         <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_diario[i]} km/h</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
