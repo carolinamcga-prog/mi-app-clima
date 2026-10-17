@@ -38,10 +38,10 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #222;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #222; font-size: 3rem;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (FONDO BLANCO + LOGO REAL + BARRA)
+# PANTALLA 1: INICIO (FONDO BLANCO, LOGO GRANDE, BARRA REDONDEADA Y BOTONES)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -54,28 +54,92 @@ if not st.session_state.resultado_activo:
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: 10vh;
+        margin-top: 5vh;
+    }
+    /* Estilo de barra redondeada y grande */
+    div[data-baseweb="input"] {
+        border-radius: 35px !important;
+        padding: 6px 16px !important;
+        border: 2px solid #e0e0e0 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+        font-size: 1.15rem !important;
+    }
+    div[data-baseweb="input"]:focus-within {
+        border-color: #4A90E2 !important;
+        box-shadow: 0 4px 20px rgba(74, 144, 226, 0.2) !important;
+    }
+    /* Botón principal redondeado */
+    .stButton > button {
+        border-radius: 30px !important;
+        height: 3.2rem !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        border: None !important;
+        background: linear-gradient(135deg, #2c3e50, #4a90e2) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        transition: all 0.3s ease !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2) !important;
+    }
+    /* Botones de redes sociales/contacto */
+    .social-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 4px;
+        border-radius: 20px;
+        background-color: #f5f7fa;
+        color: #4a5568;
+        border: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .social-btn:hover {
+        background-color: #edf2f7;
+        color: #2d3748;
+        border-color: #cbd5e0;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
-    # Logo centrado
-    col1, col2, col3 = st.columns([1, 3, 1])
+    # Logo más grande en el centro (columna más ancha [1, 5, 1])
+    col1, col2, col3 = st.columns([1, 5, 1])
     with col2:
         mostrar_logo()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Barra de búsqueda limpia debajo del logo
+    # Formulario con barra de búsqueda grande y redondeada
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="",
-            placeholder="Escribe el barrio o departamento (ej: Cordón, Salto, Salinas...)",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Salto, Salinas...)",
             label_visibility="collapsed"
         )
-        submit = st.form_submit_button("Ver Pronóstico", use_container_width=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # Fila horizontal de botones de contacto y redes sociales
+    st.markdown("<p style='text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 10px;'>CONÉCTATE CON NOSOTROS</p>", unsafe_allow_html=True)
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1:
+        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
+    with c2:
+        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
+    with c3:
+        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
+    with c4:
+        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
+    with c5:
+        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -187,4 +251,3 @@ else:
         if st.button("Volver"):
             st.session_state.resultado_activo = False
             st.rerun()
-    
