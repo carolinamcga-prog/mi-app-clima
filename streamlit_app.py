@@ -1,22 +1,19 @@
 import streamlit as st
 import requests
-import pandas as pd
-import numpy as np
-from PIL import Image
 import os
 
 # ---------------------------------------------------------
-# 1. CONFIGURACIÓN DE PÁGINA
+# 1. CONFIGURACIÓN DE PÁGINA (LIMPIA Y CENTRADA)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MeteoUI - Pronóstico Cobertura Nacional Uruguay",
+    page_title="MeteoUI",
     page_icon="🌤️",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# 2. VÍDEO DE FONDO TENUE DINÁMICO
+# 2. VÍDEOS DE FONDO TENUE SEGÚN EL CLIMA
 # ---------------------------------------------------------
 VIDEO_BACKGROUNDS = {
     "clear": "https://assets.mixkit.co/videos/preview/mixkit-sun-shining-through-the-trees-11860-large.mp4",
@@ -37,24 +34,36 @@ def set_dynamic_background(condition_key):
         min-height: 100%;
         z-index: -2;
         object-fit: cover;
-        filter: brightness(0.35) contrast(1.1);
+        filter: brightness(0.38) contrast(1.1);
     }}
     .stApp {{
         background: transparent;
     }}
     .weather-card {{
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border-radius: 16px;
-        padding: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 20px;
+        padding: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
         color: white;
-        margin-bottom: 15px;
-    }}
-    .hero-container {{
         text-align: center;
-        padding: 10px 0px 20px 0px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }}
+    .stButton>button {{
+        width: 100%;
+        border-radius: 12px;
+        height: 3em;
+        background-color: rgba(255, 255, 255, 0.25);
+        color: white;
+        font-weight: bold;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+    }}
+    .stButton>button:hover {{
+        background-color: rgba(255, 255, 255, 0.4);
+        color: white;
+        border-color: white;
     }}
     </style>
     <video autoplay loop muted playsinline id="bg-video">
@@ -63,22 +72,18 @@ def set_dynamic_background(condition_key):
     """
     st.markdown(bg_html, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# 3. BASE GEOESPACIAL COMPLETA URUGUAY
-# ---------------------------------------------------------
-DEPARTAMENTOS_URUGUAY = [
-    "Montevideo", "Canelones", "Maldonado", "Rocha", "Colonia",
-    "San José", "Salto", "Paysandú", "Rivera", "Tacuarembó",
-    "Florida", "Durazno", "Lavalleja", "Treinta y Tres",
-    "Cerro Largo", "Soriano", "Río Negro", "Artigas", "Flores"
-]
+# Fondo neutro tenue por defecto antes de buscar
+set_dynamic_background("clear")
 
+# ---------------------------------------------------------
+# 3. BÚSQUEDA GEOGRÁFICA Y OBTENCIÓN DE DATOS
+# ---------------------------------------------------------
 @st.cache_data(ttl=3600)
 def geocode_uruguay(query):
-    """Garantiza la localización de las 650+ localidades, barrios y parajes de Uruguay."""
+    """Busca barrios, ciudades, departamentos y pueblos en Uruguay."""
     clean_query = f"{query.strip()}, Uruguay"
     url = f"https://nominatim.openstreetmap.org/search?q={clean_query}&format=json&countrycodes=uy&limit=1"
-    headers = {"User-Agent": "MeteoUI-NationalUruguay/3.0"}
+    headers = {"User-Agent": "MeteoUI-App/4.0"}
     try:
         res = requests.get(url, headers=headers).json()
         if res:
@@ -88,7 +93,8 @@ def geocode_uruguay(query):
     return None, None, None
 
 @st.cache_data(ttl=1800)
-def get_multimodel_forecast(lat, lon):
+def get_forecast_3days(lat, lon):
+    """Obtiene el pronóstico multi-modelo para 3 días."""
     url = (
         f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
         f"&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max"
@@ -98,138 +104,83 @@ def get_multimodel_forecast(lat, lon):
     res = requests.get(url)
     return res.json()
 
-@st.cache_data(ttl=300)
-def get_nearby_davis_data(lat, lon, location_name):
-    """Simulación/Conexión a la red de estaciones Davis en el país."""
-    return {
-        "station_name": f"Estación Davis Vantage Pro2 - Zona {location_name}",
-        "temp": 20.1,
-        "humidity": 73,
-        "wind_speed": 18.0,
-        "wind_dir": "SO",
-        "pressure": 1015.0,
-        "rain_today": 0.0,
-        "status": "Online (En tiempo real)"
-    }
+# ---------------------------------------------------------
+# 4. INTERFAZ PRINCIPAL (INICIO LIMPIO)
+# ---------------------------------------------------------
 
-# ---------------------------------------------------------
-# 4. ENCABEZADO CON LOGO Y BÚSQUEDA HERO
-# ---------------------------------------------------------
-st.markdown('<div class="hero-container">', unsafe_allow_html=True)
-col_l1, col_l2, col_l3 = st.columns([2, 1, 2])
+# Logo en el centro
+col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
 with col_l2:
     if os.path.exists("logo.jpg"):
         st.image("logo.jpg", use_container_width=True)
     else:
-        st.title("🌤️ MeteoUI")
+        st.markdown("<h1 style='text-align: center; color: white;'>MeteoUI</h1>", unsafe_allow_html=True)
 
-st.markdown("## 🇺🇾 Sistema Meteorológico Nacional de Uruguay")
-st.caption("Pronóstico de alta precisión para los 19 Departamentos, 650+ Localidades, Barrios y Parajes")
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-# Gran Buscador Principal
-col_search1, col_search2 = st.columns([3, 1])
+# Gran barra de búsqueda
+place_input = st.text_input(
+    label="",
+    placeholder="Escribe el Barrio, Departamento o Pueblo (ej: Cordón, Montevideo, Salto...)",
+    label_visibility="collapsed"
+)
 
-with col_search1:
-    search_input = st.text_input(
-        "🔎 Buscar Barrio, Ciudad, Pueblo, Balneario o Paraje de Uruguay:",
-        placeholder="Ej: Pocitos, Cordón, Buceo, Ismael Cortinas, Termas del Daymán, Pueblo Grecco...",
-        value=""
-    )
-
-with col_search2:
-    selected_dept = st.selectbox(
-        "🏛️ O elegir Departamento:",
-        options=["-- Seleccionar Departamento --"] + DEPARTAMENTOS_URUGUAY
-    )
-
-# Determinar consulta
-if search_input.strip():
-    final_query = search_input.strip()
-elif selected_dept != "-- Seleccionar Departamento --":
-    final_query = selected_dept
-else:
-    final_query = "Montevideo"
+# Botón para buscar
+btn_search = st.button("🔎 VER PRONÓSTICO")
 
 # ---------------------------------------------------------
-# 5. SIDEBAR INFORMATIVO
+# 5. PANTALLA DE RESULTADOS (CUADRITOS DE 3 DÍAS + VÍDEO)
 # ---------------------------------------------------------
-with st.sidebar:
-    st.markdown("### 🏛️ Cobertura Territorial")
-    st.success("✅ Cobertura total: 19 Departamentos, 650+ Localidades INE, Municipios y Barrios.")
-    
-    st.markdown("---")
-    st.markdown("### 🛰️ Modelos Meteorológicos Conectados")
-    st.checkbox("🇪🇺 ECMWF (Europeo - OMM)", value=True, disabled=True)
-    st.checkbox("🇺🇸 GFS (NOAA / EE.UU.)", value=True, disabled=True)
-    st.checkbox("🇩🇪 ICON (DWD / Alemania)", value=True, disabled=True)
-    st.checkbox("📡 Red Estaciones Davis", value=True, disabled=True)
-
-# ---------------------------------------------------------
-# 6. PANEL DE RESULTADOS Y METEOROLOGÍA
-# ---------------------------------------------------------
-lat, lon, display_name = geocode_uruguay(final_query)
-
-if lat and lon:
-    forecast_data = get_multimodel_forecast(lat, lon)
-    davis_data = get_nearby_davis_data(lat, lon, final_query)
-    
-    wcode = forecast_data.get("daily", {}).get("weathercode", [0])[0]
-    if wcode in [0, 1]:
-        weather_key = "clear"
-    elif wcode in [2, 3]:
-        weather_key = "cloudy"
-    elif wcode in [61, 63, 65, 80, 81]:
-        weather_key = "rain"
-    else:
-        weather_key = "thunder"
+if btn_search or place_input:
+    if place_input.strip():
+        lat, lon, display_name = geocode_uruguay(place_input)
         
-    set_dynamic_background(weather_key)
-
-    st.markdown("---")
-    st.markdown(f"# 📍 {final_query.title()}")
-    st.caption(f"📍 Identificación territorial: **{display_name}** | Coordenadas: {lat:.4f}, {lon:.4f}")
-
-    # Datos Estación Davis
-    st.markdown("### 📡 Datos de Superficie en Tiempo Real (Estación Davis)")
-    col_d1, col_d2, col_d3, col_d4, col_d5 = st.columns(5)
-    col_d1.metric("Temperatura", f"{davis_data['temp']} °C")
-    col_d2.metric("Humedad", f"{davis_data['humidity']} %")
-    col_d3.metric("Viento", f"{davis_data['wind_speed']} km/h ({davis_data['wind_dir']})")
-    col_d4.metric("Presión", f"{davis_data['pressure']} hPa")
-    col_d5.metric("Lluvia Hoy", f"{davis_data['rain_today']} mm")
-    
-    st.caption(f"Fuente: **{davis_data['station_name']}** — Estado: {davis_data['status']}")
-
-    # Pronóstico 3 días
-    st.markdown("---")
-    st.markdown("### 📅 Pronóstico Multi-Modelo a 3 Días")
-    
-    daily = forecast_data.get("daily", {})
-    dates = daily.get("time", [])
-    
-    cols = st.columns(3)
-    for i in range(min(3, len(dates))):
-        with cols[i]:
-            st.markdown(f"""
-            <div class="weather-card">
-                <h3>📅 {dates[i]}</h3>
-                <hr style="margin:10px 0; border-color: rgba(255,255,255,0.3);">
-                <p><b>🌡️ Máxima:</b> {daily['temperature_2m_max'][i]} °C</p>
-                <p><b>❄️ Mínima:</b> {daily['temperature_2m_min'][i]} °C</p>
-                <p><b>🌧️ Precipitación:</b> {daily['precipitation_sum'][i]} mm</p>
-                <p><b>💨 Viento máx:</b> {daily['windspeed_10m_max'][i]} km/h</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-    # Satélite
-    st.markdown("---")
-    st.markdown("### 🛰️ Monitoreo Satelital (NOAA / GOES-East)")
-    st.image(
-        "https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/ssa/GEOCOLOR/1000x1000.jpg",
-        caption="Imagen en vivo Satélite GOES-East sobre Uruguay",
-        use_container_width=True
-    )
-
-else:
-    st.error(f"No logramos encontrar la ubicación '{final_query}'. Por favor, verifica el nombre o prueba seleccionando el Departamento en la barra de la derecha.")
+        if lat and lon:
+            data = get_forecast_3days(lat, lon)
+            daily = data.get("daily", {})
+            wcodes = daily.get("weathercode", [0])
+            
+            # Seleccionar condición meteorológica según el primer día
+            wcode = wcodes[0] if len(wcodes) > 0 else 0
+            if wcode in [0, 1]:
+                weather_key = "clear"
+            elif wcode in [2, 3]:
+                weather_key = "cloudy"
+            elif wcode in [61, 63, 65, 80, 81]:
+                weather_key = "rain"
+            else:
+                weather_key = "thunder"
+                
+            # Activar vídeo de fondo según el clima del lugar
+            set_dynamic_background(weather_key)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center; color: white;'>📍 {place_input.title()}</h2>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Los 3 cuadritos para los 3 días
+            dates = daily.get("time", [])
+            cols = st.columns(3)
+            
+            for i in range(min(3, len(dates))):
+                # Formatear día
+                day_label = f"Día {i+1}" if i > 0 else "Hoy"
+                if i == 1: day_label = "Mañana"
+                if i == 2: day_label = "Pasado Mañana"
+                
+                with cols[i]:
+                    st.markdown(f"""
+                    <div class="weather-card">
+                        <h3>📅 {day_label}</h3>
+                        <p style="font-size: 0.9em; opacity: 0.8;">{dates[i]}</p>
+                        <hr style="margin:12px 0; border-color: rgba(255,255,255,0.3);">
+                        <p style="font-size: 1.1em;"><b>🌡️ Máx:</b> {daily['temperature_2m_max'][i]} °C</p>
+                        <p style="font-size: 1.1em;"><b>❄️ Mín:</b> {daily['temperature_2m_min'][i]} °C</p>
+                        <p style="font-size: 1.1em;"><b>🌧️ Lluvia:</b> {daily['precipitation_sum'][i]} mm</p>
+                        <p style="font-size: 1.1em;"><b>💨 Viento:</b> {daily['windspeed_10m_max'][i]} km/h</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.error("No se encontró el lugar. Revisa el nombre e intenta nuevamente.")
+    else:
+        st.warning("Por favor, ingresa un barrio o departamento en la barra arriba.")
