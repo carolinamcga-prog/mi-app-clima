@@ -38,10 +38,10 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #222; font-size: 3rem;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #222; font-size: 3.5rem;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (FONDO BLANCO, LOGO GRANDE, BARRA REDONDEADA Y BOTONES)
+# PANTALLA 1: INICIO (LOGO GIGANTE, BARRA TITILANTE Y BOTONES CELESTES)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -54,81 +54,98 @@ if not st.session_state.resultado_activo:
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: 5vh;
+        margin-top: 2vh;
     }
-    /* Estilo de barra redondeada y grande */
+    
+    /* Animación titilante / resplandor pulsante para la barra */
+    @keyframes pulseGlow {
+        0% {
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            border-color: #38bdf8;
+        }
+        50% {
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.75);
+            border-color: #0284c7;
+        }
+        100% {
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            border-color: #38bdf8;
+        }
+    }
+
+    /* Barra de búsqueda gigante, súper redondeada y titilante */
     div[data-baseweb="input"] {
-        border-radius: 35px !important;
-        padding: 6px 16px !important;
-        border: 2px solid #e0e0e0 !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
-        font-size: 1.15rem !important;
+        border-radius: 45px !important;
+        padding: 10px 22px !important;
+        border: 2.5px solid #38bdf8 !important;
+        animation: pulseGlow 2.5s infinite ease-in-out !important;
+        font-size: 1.25rem !important;
+        background-color: #f8fafc !important;
     }
-    div[data-baseweb="input"]:focus-within {
-        border-color: #4A90E2 !important;
-        box-shadow: 0 4px 20px rgba(74, 144, 226, 0.2) !important;
+    div[data-baseweb="input"] input {
+        font-size: 1.2rem !important;
     }
-    /* Botón principal redondeado */
+
+    /* Botón principal VER PRONÓSTICO */
     .stButton > button {
-        border-radius: 30px !important;
-        height: 3.2rem !important;
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
+        border-radius: 40px !important;
+        height: 3.6rem !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
         border: None !important;
-        background: linear-gradient(135deg, #2c3e50, #4a90e2) !important;
+        background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
         color: white !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
         transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.2) !important;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
-    /* Botones de redes sociales/contacto */
-    .social-btn {
-        display: inline-block;
-        padding: 8px 16px;
-        margin: 4px;
-        border-radius: 20px;
-        background-color: #f5f7fa;
-        color: #4a5568;
-        border: 1px solid #e2e8f0;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.2s ease;
+
+    /* Estilo celeste claro para los 5 botones de redes/contacto */
+    div[data-testid="stColumn"] .stButton > button {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 30px !important;
+        height: 3rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
     }
-    .social-btn:hover {
-        background-color: #edf2f7;
-        color: #2d3748;
-        border-color: #cbd5e0;
+    div[data-testid="stColumn"] .stButton > button:hover {
+        background: #bae6fd !important;
+        color: #0284c7 !important;
+        border-color: #38bdf8 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
-    # Logo más grande en el centro (columna más ancha [1, 5, 1])
-    col1, col2, col3 = st.columns([1, 5, 1])
+    # Logo MÁS GRANDE
+    col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Formulario con barra de búsqueda grande y redondeada
+    # Formulario con barra gigante y titilante
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="",
             placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Salto, Salinas...)",
             label_visibility="collapsed"
         )
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # Fila horizontal de botones de contacto y redes sociales
-    st.markdown("<p style='text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 10px;'>CONÉCTATE CON NOSOTROS</p>", unsafe_allow_html=True)
+    # Fila de botones celestes
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
         st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
