@@ -326,4 +326,28 @@ else:
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
             lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
-            viento_val = viento_diario[i] if i < len(viento_diario) else "--
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
+            with cols[i]:
+                st.markdown(f"""
+                <div class="cuadrado-pronostico">
+                    <div>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
+                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                    </div>
+                    <div>
+                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+    else:
+        st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
+        if st.button("🌧️↩️ Buscar otra localidad", help="Hacé clic para volver al buscador"):
+            st.session_state.resultado_activo = False
+            st.rerun()
