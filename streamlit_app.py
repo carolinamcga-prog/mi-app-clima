@@ -256,7 +256,7 @@ else:
             z-index: -99999;
             pointer-events: none;
             filter: brightness(0.42) contrast(1.08);
-        }
+        }}
 
         @keyframes blinkLive {{
             0% {{ opacity: 1; transform: scale(1); }}
@@ -283,7 +283,7 @@ else:
             height: 8px;
             background-color: white;
             border-radius: 50%;
-        }
+        }}
 
         .panel-actual {{
             background: rgba(255, 255, 255, 0.88);
@@ -321,7 +321,7 @@ else:
         .cuadrado-pronostico:hover {{
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.95);
-        }
+        }}
 
         div[data-testid="stButton"] button[kind="secondary"] {{
             background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
@@ -333,7 +333,7 @@ else:
             padding: 6px 18px !important;
             box-shadow: 0 8px 25px rgba(14, 165, 233, 0.45) !important;
             transition: all 0.3s ease !important;
-        }
+        }}
         div[data-testid="stButton"] button[kind="secondary"]:hover {{
             background: linear-gradient(135deg, #0284c7, #0369a1) !important;
             transform: translateY(-2px) scale(1.03) !important;
