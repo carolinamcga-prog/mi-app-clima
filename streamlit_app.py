@@ -240,7 +240,6 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # 1. Estilos CSS limpios (sin f-string para evitar conflictos de llaves)
         st.markdown("""
         <style>
         .stApp {
@@ -286,4 +285,8 @@ else:
                         background 0.35s ease;
             cursor: pointer;
         }
-        .cu
+        .cuadrado-pronostico:hover {
+            transform: translateY(-8px) scale(1.05) !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+            border-color: #3
