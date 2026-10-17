@@ -108,7 +108,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (BUSCADOR CON SOPORTE ENTER Y CLIC)
+# PANTALLA 1: INICIO (BUSCADOR LIMPIO)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -181,7 +181,6 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # El st.form permite disparar la búsqueda presionando Enter o haciendo clic en el botón
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
@@ -212,7 +211,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO
+# PANTALLA 2: RESULTADOS (FONDO ANIMADO TENUE, PRONÓSTICO ESTÁTICO)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -221,14 +220,14 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # 1. Búsqueda prioritaria en base interna uruguaya
+    # 1. Búsqueda en base local
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
-    # 2. Búsqueda en API con filtro estricto geográfico
+    # 2. Búsqueda en API con filtro
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
@@ -249,14 +248,10 @@ else:
             pass
 
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
-        st.markdown("""
-        <style>
-        .stApp { background-color: #f0f9ff !important; }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown("<style>.stApp { background-color: #f0f9ff !important; }</style>", unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
         st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
-        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
+        if st.button("🌧️↩️ Volver al buscador"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
@@ -284,104 +279,139 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        st.markdown("""
+        # Selección dinámica de imagen atmosférica
+        if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
+            bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop" # Lluvia
+        elif wcode_actual in [2, 3, 45, 48]:
+            bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop" # Nublado / Nubes
+        else:
+            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop" # Despejado / Sol
+
+        st.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        .stApp, html, body, [class*="st-"] {
+        .stApp, html, body, [class*="st-"] {{
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
+        }}
 
-        .stApp {
-            background-color: #f0f9ff !important;
-        }
-        
-        .panel-actual {
-            background: white;
+        /* --- ANIMACIÓN TENUE DE LAS NUBES/LLUVIA EN EL FONDO --- */
+        @keyframes moverNubesTenue {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+
+        .stApp {{
+            background: transparent !important;
+            background-color: #0b1329 !important;
+            position: relative;
+            overflow-x: hidden;
+        }}
+
+        /* Capa exclusiva de fondo animado independiente */
+        .stApp::before {{
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(11, 19, 41, 0.72), rgba(11, 19, 41, 0.62)), url('{bg_url}');
+            background-size: 220% 220%;
+            animation: moverNubesTenue 45s ease infinite;
+            z-index: 0;
+            pointer-events: none;
+        }}
+
+        /* --- CONTENIDO DEL PRONÓSTICO TOTALMENTE ESTÁTICO Y FIRME --- */
+        .block-container {{
+            position: relative !important;
+            z-index: 2 !important;
+        }}
+
+        .panel-actual {{
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 22px 25px;
-            border: 1.5px solid #bae6fd;
+            border: 1.5px solid rgba(255, 255, 255, 0.7);
             color: #0f172a;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-around;
-        }
+        }}
 
-        .human-headline {
-            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        .human-headline {{
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 253, 244, 0.96) 100%);
+            backdrop-filter: blur(12px);
             border-left: 5px solid #0284c7;
             padding: 18px 22px;
             border-radius: 0 16px 16px 0;
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
-            border-top: 1.5px solid #bae6fd;
-            border-right: 1.5px solid #bae6fd;
-            border-bottom: 1.5px solid #bae6fd;
-        }
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.7);
+            border-right: 1.5px solid rgba(255, 255, 255, 0.7);
+            border-bottom: 1.5px solid rgba(255, 255, 255, 0.7);
+        }}
 
-        .cuadrado-pronostico {
-            background: white;
+        .cuadrado-pronostico {{
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 20px 15px;
-            border: 1.5px solid #bae6fd;
+            border: 2px solid #bae6fd;
             color: #0f172a;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
             margin-bottom: 20px;
-            height: 360px;
+            height: 380px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-        }
+        }}
         
-        @keyframes pulsoAzul {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-            }
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
-            }
-        }
-        .titulo-marca-lugar {
+        @keyframes pulsoAzul {{
+            0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }}
+            70% {{ transform: scale(1); box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }}
+            100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }}
+        }}
+        .titulo-marca-lugar {{
             text-align: center;
-            color: #0284c7;
+            color: #ffffff;
             font-size: 2.4rem;
             font-weight: 800;
             margin: 0;
             letter-spacing: -0.5px;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-        .live-circle-container {
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }}
+        .live-circle-container {{
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 8px;
             padding-top: 14px;
-        }
-        .blue-pulse-circle {
+        }}
+        .blue-pulse-circle {{
             width: 12px;
             height: 12px;
-            background-color: #0284c7;
-            border: 2px solid #bae6fd;
+            background-color: #38bdf8;
+            border: 2px solid #ffffff;
             border-radius: 50%;
             display: inline-block;
             animation: pulsoAzul 2s infinite ease-in-out;
-        }
-        .live-text-label {
+        }}
+        .live-text-label {{
             font-size: 0.8rem;
             font-weight: 700;
-            color: #0369a1;
+            color: #ffffff;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-        }
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        }}
         </style>
         """, unsafe_allow_html=True)
         
@@ -427,7 +457,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -453,16 +483,19 @@ else:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
                     <div>
-                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.35rem; text-transform: uppercase;">{etiquetas[i]}</h4>
                         <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
-                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                        <p style="font-size: 0.95rem; color: #0f172a; font-weight: 700; margin-bottom: 10px; line-height: 1.3; background: #e0f2fe; padding: 6px 8px; border-radius: 10px;">{estado_texto}</p>
                     </div>
                     <div>
-                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
+                        <hr style="border-color: #cbd5e1; margin: 4px 0 10px 0;">
+                        <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 8px; border-radius: 12px; margin-bottom: 10px;">
+                            <span style="font-size: 0.81rem; font-weight: 700; color: #166534; display: block;">PRECIPITACIÓN</span>
+                            <span style="font-size: 1.2rem; font-weight: 800; color: #15803d;">🌧️ {lluvia_val} mm</span>
+                        </div>
+                        <div style="font-size: 1.05rem; margin: 4px 0; color: #1e293b;"><b>🌡️ Máx:</b> {tmax_val} °C</div>
+                        <div style="font-size: 1.05rem; margin: 4px 0; color: #475569;"><b>❄️ Mín:</b> {tmin_val} °C</div>
+                        <div style="font-size: 0.9rem; margin: 4px 0; color: #64748b;"><b>💨 Viento:</b> {viento_val} km/h</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
