@@ -202,12 +202,16 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        # Selección dinámica de imagen de fondo según el clima actual
+        # Selección dinámica de imagen de fondo en movimiento según el clima actual
+        # Usamos URLs de alta calidad de Unsplash optimizadas con texturas atmosféricas vivas
         if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
+            # Fondo de lluvia / llovizna atmosférica viva en movimiento suave
             bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop"
         elif wcode_actual in [2, 3, 45, 48]:
+            # Fondo de cielo nublado / neblina dinámica
             bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop"
         else:
+            # Fondo de cielo despejado / sol radiante dinámico
             bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop"
 
         st.markdown(f"""
@@ -215,10 +219,11 @@ else:
         /* TIPOGRAFÍA GLOBAL */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        .stApp, html, body, [class*="st-"] {{
+        .stApp, html, body, [class*="st-"] {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }}
+        }
 
+        /* FONDO DINÁMICO EN MOVIMIENTO SUAVE A PANTALLA COMPLETA */
         @keyframes panBackground {{
             0% {{ background-position: 0% 50%; }}
             50% {{ background-position: 100% 50%; }}
@@ -229,9 +234,9 @@ else:
             background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.65)), url('{bg_url}') !important;
             background-size: 200% 200% !important;
             animation: panBackground 25s ease infinite !important;
-        }}
+        }
         
-        .panel-actual {{
+        .panel-actual {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
             border-radius: 24px;
@@ -245,7 +250,7 @@ else:
             justify-content: space-around;
         }
 
-        .human-headline {{
+        .human-headline {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%);
             backdrop-filter: blur(10px);
             border-left: 5px solid #0284c7;
@@ -258,17 +263,17 @@ else:
             border-bottom: 1.5px solid rgba(255, 255, 255, 0.6);
         }
 
-        .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.94);
+        .cuadrado-pronostico {
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px 15px;
-            border: 2px solid #bae6fd;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
             color: #0f172a;
             text-align: center;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
-            height: 380px;
+            height: 360px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -304,7 +309,7 @@ else:
             justify-content: flex-end;
             gap: 8px;
             padding-top: 14px;
-        }
+        }}
         .blue-pulse-circle {{
             width: 12px;
             height: 12px;
@@ -387,23 +392,22 @@ else:
             tmin_val = t_min[i] if i < len(t_min) else "--"
             lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
             
             with cols[i]:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
                     <div>
-                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.35rem; text-transform: uppercase;">{etiquetas[i]}</h4>
-                        <p style="font-size: 0.95rem; color: #0f172a; font-weight: 700; margin-bottom: 10px; line-height: 1.3; background: #e0f2fe; padding: 6px 8px; border-radius: 10px;">{estado_texto}</p>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
+                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
                     </div>
                     <div>
-                        <hr style="border-color: #cbd5e1; margin: 4px 0 10px 0;">
-                        <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 8px; border-radius: 12px; margin-bottom: 10px;">
-                            <span style="font-size: 0.81rem; font-weight: 700; color: #166534; display: block;">PRECIPITACIÓN</span>
-                            <span style="font-size: 1.2rem; font-weight: 800; color: #15803d;">🌧️ {lluvia_val} mm</span>
-                        </div>
-                        <div style="font-size: 1.05rem; margin: 4px 0; color: #1e293b;"><b>🌡️ Máx:</b> {tmax_val} °C</div>
-                        <div style="font-size: 1.05rem; margin: 4px 0; color: #475569;"><b>❄️ Mín:</b> {tmin_val} °C</div>
-                        <div style="font-size: 0.9rem; margin: 4px 0; color: #64748b;"><b>💨 Viento:</b> {viento_val} km/h</div>
+                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
