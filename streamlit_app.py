@@ -21,32 +21,46 @@ if "resultado_activo" not in st.session_state:
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
-# DICCIONARIO DE RESPALDO PARA URUGUAY
+# BASE DE DATOS LOCAL EXCLUSIVA PARA URUGUAY
 COORDS_URUGUAY = {
     "montevideo": (-34.9011, -56.1645),
     "artigas": (-30.4033, -56.4733),
     "canelones": (-34.5228, -56.2822),
     "cerro largo": (-32.3667, -54.1833),
+    "melo": (-32.3667, -54.1833),
     "colonia": (-34.4625, -57.8397),
+    "colonia del sacramento": (-34.4625, -57.8397),
     "durazno": (-33.4167, -55.5333),
     "flores": (-33.5167, -56.7000),
+    "trinidad": (-33.5167, -56.7000),
     "florida": (-34.1000, -56.2167),
     "lavalleja": (-34.3667, -55.2333),
+    "minas": (-34.3667, -55.2333),
     "maldonado": (-34.9000, -54.9500),
     "paysandú": (-32.3167, -58.0750),
     "río negro": (-32.7333, -58.2833),
+    "fray bentos": (-33.1333, -58.3000),
     "rivera": (-30.9053, -55.5505),
     "rocha": (-34.4833, -54.3333),
     "salto": (-31.3833, -57.9667),
+    "salinas": (-34.7833, -55.8500),
     "san josé": (-34.3375, -56.7136),
     "soriano": (-33.2500, -58.3000),
+    "mercedes": (-33.2500, -58.3000),
     "tacuarembó": (-31.7333, -55.9833),
     "treinta y tres": (-33.2333, -54.3833),
     "punta del este": (-34.9580, -54.9410),
+    "piriápolis": (-34.8628, -55.2747),
+    "atlántida": (-34.7719, -55.7583),
+    "ciudad de la costa": (-34.8231, -55.9525),
     "carrasco": (-34.8760, -56.0520),
     "pocitos": (-34.9120, -56.1470),
     "centro": (-34.9050, -56.1910)
 }
+
+def es_coordenada_uruguay(lat, lon):
+    """Verifica si las coordenadas pertenecen estrictamente al mapa de Uruguay"""
+    return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
 
 def obtener_descripcion_clima(wcode):
     descripciones = {
@@ -71,7 +85,6 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
-# --- TITULAR HUMANO ENFOCADO EN LAS PRÓXIMAS HORAS ---
 def generar_titular_pronostico_horas(wcode, lluvia_hoy, viento):
     if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
         return "🌧️", "Se esperan desmejoras y probabilidad de precipitaciones en las próximas horas. Conviene estar prevenido."
@@ -172,7 +185,7 @@ if not st.session_state.resultado_activo:
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
-            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Salto, Montevideo, Maldonado...)",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento en Uruguay...",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -199,241 +212,261 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO
+# PANTALLA 2: RESULTADOS Y PRONÓSTICO (CON FILTRO EXCLUSIVO URUGUAY)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
     lugar_lower = lugar_ingresado.lower()
     
-    lat, lon = -34.9011, -56.1645  # Por defecto Montevideo
+    lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # 1. Buscar primero en el diccionario local blindado
-    encontrado_en_diccionario = False
+    # PASO 1: Búsqueda prioritaria en base interna de Uruguay
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
-            encontrado_en_diccionario = True
             break
             
-    # 2. Si no está en el diccionario, usar la API de Geocodificación oficial de Open-Meteo (100% JSON nativo, sin errores HTML)
-    if not encontrado_en_diccionario:
+    # PASO 2: Si no está en diccionario, consultar API forzando país Uruguay
+    if lat is None and lon is None:
         try:
-            query_encoded = urllib.parse.quote(lugar_ingresado)
-            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_encoded}&count=1&language=es&format=json"
+            query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
+            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=5&language=es&format=json"
             res_geo = requests.get(url_geo, timeout=8).json()
             
             if "results" in res_geo and len(res_geo["results"]) > 0:
-                lat = float(res_geo["results"][0]["latitude"])
-                lon = float(res_geo["results"][0]["longitude"])
-                lugar_encontrado = res_geo["results"][0].get("name", lugar_ingresado.title())
+                for res in res_geo["results"]:
+                    cand_lat = float(res["latitude"])
+                    cand_lon = float(res["longitude"])
+                    pais = res.get("country", "").lower()
+                    
+                    # Validar estrictamente que sea dentro de Uruguay
+                    if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
+                        lat, lon = cand_lat, cand_lon
+                        lugar_encontrado = res.get("name", lugar_ingresado.title())
+                        break
         except Exception:
-            pass # Si falla la red, mantiene Montevideo por defecto sin crashear
+            pass
 
-    url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
-    
-    try:
-        data = requests.get(url_meteo, timeout=10).json()
-    except Exception:
-        data = {}
-        
-    current = data.get("current", {})
-    daily = data.get("daily", {})
-    
-    temp_actual = current.get("temperature_2m", 0)
-    humedad_actual = current.get("relative_humidity_2m", 0)
-    sensacion_actual = current.get("apparent_temperature", 0)
-    presion_actual = current.get("surface_pressure", 1013)
-    viento_actual = current.get("wind_speed_10m", 0)
-    wcode_actual = current.get("weathercode", 0)
-    
-    lluvia_diaria_hoy = 0.0
-    if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
-        lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
-
-    icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
-    
-    st.markdown("""
-    <style>
-    /* TIPOGRAFÍA GLOBAL */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    .stApp, html, body, [class*="st-"] {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-
-    .stApp {
-        background-color: #f0f9ff !important;
-    }
-    
-    .panel-actual {
-        background: white;
-        border-radius: 24px;
-        padding: 22px 25px;
-        border: 1.5px solid #bae6fd;
-        color: #0f172a;
-        box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-    }
-
-    .human-headline {
-        background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-        border-left: 5px solid #0284c7;
-        padding: 18px 22px;
-        border-radius: 0 16px 16px 0;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
-        border-top: 1.5px solid #bae6fd;
-        border-right: 1.5px solid #bae6fd;
-        border-bottom: 1.5px solid #bae6fd;
-    }
-
-    .cuadrado-pronostico {
-        background: white;
-        border-radius: 20px;
-        padding: 20px 15px;
-        border: 1.5px solid #bae6fd;
-        color: #0f172a;
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
-        margin-bottom: 20px;
-        height: 360px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    
-    @keyframes pulsoAzul {
-        0% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-        }
-        70% {
-            transform: scale(1);
-            box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
-        }
-        100% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
-        }
-    }
-    .titulo-marca-lugar {
-        text-align: center;
-        color: #0284c7;
-        font-size: 2.4rem;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -0.5px;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-    .live-circle-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        padding-top: 14px;
-    }
-    .blue-pulse-circle {
-        width: 12px;
-        height: 12px;
-        background-color: #0284c7;
-        border: 2px solid #bae6fd;
-        border-radius: 50%;
-        display: inline-block;
-        animation: pulsoAzul 2s infinite ease-in-out;
-    }
-    .live-text-label {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #0369a1;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
-    with col_top1:
-        if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
+    # PASO 3: Si se intentó buscar un lugar fuera de Uruguay o que no existe en el país
+    if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
+        st.markdown("""
+        <style>
+        .stApp { background-color: #f0f9ff !important; }
+        </style>
+        """, unsafe_allow_html=True)
+        st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
+        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
+        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
-    with col_top2:
-        st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
-    with col_top3:
+    else:
+        # Petición a la API del Clima
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
+        
+        try:
+            data = requests.get(url_meteo, timeout=10).json()
+        except Exception:
+            data = {}
+            
+        current = data.get("current", {})
+        daily = data.get("daily", {})
+        
+        temp_actual = current.get("temperature_2m", 0)
+        humedad_actual = current.get("relative_humidity_2m", 0)
+        sensacion_actual = current.get("apparent_temperature", 0)
+        presion_actual = current.get("surface_pressure", 1013)
+        viento_actual = current.get("wind_speed_10m", 0)
+        wcode_actual = current.get("weathercode", 0)
+        
+        lluvia_diaria_hoy = 0.0
+        if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
+            lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
+
+        icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
+        
         st.markdown("""
-        <div class='live-circle-container'>
-            <span class='blue-pulse-circle'></span>
-            <span class='live-text-label'>En vivo</span>
+        <style>
+        /* TIPOGRAFÍA GLOBAL */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        .stApp, html, body, [class*="st-"] {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .stApp {
+            background-color: #f0f9ff !important;
+        }
+        
+        .panel-actual {
+            background: white;
+            border-radius: 24px;
+            padding: 22px 25px;
+            border: 1.5px solid #bae6fd;
+            color: #0f172a;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .human-headline {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border-left: 5px solid #0284c7;
+            padding: 18px 22px;
+            border-radius: 0 16px 16px 0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
+            border-top: 1.5px solid #bae6fd;
+            border-right: 1.5px solid #bae6fd;
+            border-bottom: 1.5px solid #bae6fd;
+        }
+
+        .cuadrado-pronostico {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 15px;
+            border: 1.5px solid #bae6fd;
+            color: #0f172a;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
+            margin-bottom: 20px;
+            height: 360px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        @keyframes pulsoAzul {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
+            }
+        }
+        .titulo-marca-lugar {
+            text-align: center;
+            color: #0284c7;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        .live-circle-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 14px;
+        }
+        .blue-pulse-circle {
+            width: 12px;
+            height: 12px;
+            background-color: #0284c7;
+            border: 2px solid #bae6fd;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulsoAzul 2s infinite ease-in-out;
+        }
+        .live-text-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0369a1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
+        with col_top1:
+            if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
+                st.session_state.resultado_activo = False
+                st.session_state.lugar_actual = ""
+                st.rerun()
+        with col_top2:
+            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
+        with col_top3:
+            st.markdown("""
+            <div class='live-circle-container'>
+                <span class='blue-pulse-circle'></span>
+                <span class='live-text-label'>En vivo</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+
+        st.markdown(f"""
+        <div class="panel-actual">
+            <div style="text-align: center;">
+                <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7;">{temp_actual}°C</span>
+                <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 0;">{obtener_descripcion_clima(wcode_actual)}</p>
+            </div>
+            <div style="border-left: 2px solid #cbd5e1; height: 75px; margin: 0 10px;"></div>
+            <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
+                <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
+                <div>💧 Humedad: <b>{humedad_actual}%</b></div>
+                <div>💨 Viento: <b>{viento_actual} km/h</b></div>
+                <div>📊 Presión: <b>{presion_actual} hPa</b></div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div class="panel-actual">
-        <div style="text-align: center;">
-            <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7;">{temp_actual}°C</span>
-            <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 0;">{obtener_descripcion_clima(wcode_actual)}</p>
+        st.markdown(f"""
+        <div class="human-headline">
+            <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
+                {icono_humano} {frase_humana}
+            </p>
         </div>
-        <div style="border-left: 2px solid #cbd5e1; height: 75px; margin: 0 10px;"></div>
-        <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
-            <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
-            <div>💧 Humedad: <b>{humedad_actual}%</b></div>
-            <div>💨 Viento: <b>{viento_actual} km/h</b></div>
-            <div>📊 Presión: <b>{presion_actual} hPa</b></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="human-headline">
-        <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
-            {icono_humano} {frase_humana}
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
-    
-    fechas = daily.get("time", [])
-    t_max = daily.get("temperature_2m_max", [])
-    t_min = daily.get("temperature_2m_min", [])
-    lluvia = daily.get("precipitation_sum", [])
-    viento_diario = daily.get("windspeed_10m_max", [])
-    wcodes_daily = daily.get("weathercode", [])
-    
-    cols = st.columns(3)
-    etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
-    
-    for i in range(min(3, len(fechas))):
-        codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-        estado_texto = obtener_descripcion_clima(codigo_clima)
+        st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
-        tmax_val = t_max[i] if i < len(t_max) else "--"
-        tmin_val = t_min[i] if i < len(t_min) else "--"
-        lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
-        viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-        fecha_val = fechas[i] if i < len(fechas) else ""
+        fechas = daily.get("time", [])
+        t_max = daily.get("temperature_2m_max", [])
+        t_min = daily.get("temperature_2m_min", [])
+        lluvia = daily.get("precipitation_sum", [])
+        viento_diario = daily.get("windspeed_10m_max", [])
+        wcodes_daily = daily.get("weathercode", [])
         
-        with cols[i]:
-            st.markdown(f"""
-            <div class="cuadrado-pronostico">
-                <div>
-                    <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
-                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
-                    <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+        cols = st.columns(3)
+        etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
+        
+        for i in range(min(3, len(fechas))):
+            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
+            estado_texto = obtener_descripcion_clima(codigo_clima)
+            
+            tmax_val = t_max[i] if i < len(t_max) else "--"
+            tmin_val = t_min[i] if i < len(t_min) else "--"
+            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
+            with cols[i]:
+                st.markdown(f"""
+                <div class="cuadrado-pronostico">
+                    <div>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
+                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                    </div>
+                    <div>
+                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
+                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
+                    </div>
                 </div>
-                <div>
-                    <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                    <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
-                    <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
-                    <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
-                    <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
