@@ -152,4 +152,115 @@ if not st.session_state.resultado_activo:
         transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
-        transform:
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
+    }
+
+    div[data-testid="stColumn"] .stButton > button {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 30px !important;
+        height: 3rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
+    }
+    div[data-testid="stColumn"] .stButton > button:hover {
+        background: #bae6fd !important;
+        color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
+    with col2:
+        mostrar_logo()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    with st.form(key="search_form"):
+        lugar_input = st.text_input(
+            label="",
+            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Salto, Salinas...)",
+            label_visibility="collapsed"
+        )
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1:
+        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
+    with c2:
+        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
+    with c3:
+        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
+    with c4:
+        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
+    with c5:
+        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if submit and lugar_input.strip():
+        st.session_state.lugar_actual = lugar_input.strip()
+        st.session_state.resultado_activo = True
+        st.rerun()
+
+# =========================================================
+# PANTALLA 2: RESULTADOS (FONDO DE VIDEO TOTAL Y TARJETAS BLANCAS)
+# =========================================================
+else:
+    lugar = st.session_state.lugar_actual
+    
+    url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
+    try:
+        res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
+    except Exception:
+        res_geo = []
+    
+    if res_geo:
+        lat = float(res_geo[0]["lat"])
+        lon = float(res_geo[0]["lon"])
+        
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=auto"
+        data = requests.get(url_meteo).json()
+        daily = data.get("daily", {})
+        
+        wcodes = daily.get("weathercode", [0])
+        wcode_hoy = wcodes[0] if wcodes else 0
+        
+        tipo_fondo = obtener_clave_video(wcode_hoy)
+        url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
+        
+        st.markdown(f"""
+        <style>
+        .stApp {{
+            background: transparent !important;
+        }}
+        
+        .video-fondo-absoluto {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -99999;
+            pointer-events: none;
+            filter: brightness(0.5);
+        }}
+
+        div[data-testid="stHorizontalBlock"] {{
+            align-items: stretch !important;
+        }}
+
+        div[data-testid="stColumn"] {{
+            display: flex !
