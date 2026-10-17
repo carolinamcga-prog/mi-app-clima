@@ -2,19 +2,20 @@ import streamlit as st
 import requests
 import os
 import base64
+from datetime import datetime
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MeteoUy",
+    page_title="MeteoUy - El tiempo en Uruguay",
     page_icon="🌤️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# RUTAS DE VIDEOS LOCALES Y RESPALDO EN LÍNEA EN VIVO
+# RUTAS DE VIDEOS LOCALES Y RESPALDO EN LÍNEA
 # ---------------------------------------------------------
 VIDEOS_LOCALES = {
     "clear": "assets/videos/despejado.mp4",
@@ -157,28 +158,13 @@ if not st.session_state.resultado_activo:
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
-
-    div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
-    }
     </style>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
+        st.markdown("<p style='text-align: center; color: #64748b; font-size: 1.05rem; margin-top: -10px; margin-bottom: 25px;'>El pronóstico del tiempo meteorológico en tiempo real para todo Uruguay</p>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -191,44 +177,31 @@ if not st.session_state.resultado_activo:
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
-    
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
-    with c2:
-        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
-    with c3:
-        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
-    with c4:
-        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
-    with c5:
-        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
-
     if submit and lugar_input.strip():
         st.session_state.lugar_actual = lugar_input.strip()
         st.session_state.resultado_activo = True
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: EN VIVO CON VIDEO SEGUNDO A SEGUNDO
+# PANTALLA 2: EN VIVO CON VIDEO Y PRONÓSTICO EXTENDIDO + HORA A HORA
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
     
-    url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
-    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
+    with st.spinner("Buscando datos meteorológicos... 🛰️"):
+        url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
+        res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
     
     if res_geo:
         lat = float(res_geo[0]["lat"])
         lon = float(res_geo[0]["lon"])
         
-        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&hourly=temperature_2m,weathercode,relative_humidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
         data = requests.get(url_meteo).json()
         
         current = data.get("current", {})
         daily = data.get("daily", {})
+        hourly = data.get("hourly", {})
         
         temp_actual = current.get("temperature_2m", 0)
         humedad_actual = current.get("relative_humidity_2m", 0)
@@ -255,8 +228,8 @@ else:
             object-fit: cover;
             z-index: -99999;
             pointer-events: none;
-            filter: brightness(0.42) contrast(1.08);
-        }}
+            filter: brightness(0.40) contrast(1.08);
+        }
 
         @keyframes blinkLive {{
             0% {{ opacity: 1; transform: scale(1); }}
@@ -276,21 +249,21 @@ else:
             gap: 6px;
             box-shadow: 0 0 15px rgba(220, 38, 38, 0.7);
             animation: blinkLive 1.4s infinite ease-in-out;
-        }}
+        }
         
         .live-dot {{
             width: 8px;
             height: 8px;
             background-color: white;
             border-radius: 50%;
-        }}
+        }
 
         .panel-actual {{
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: 24px;
-            padding: 22px 25px;
+            padding: 24px 25px;
             border: 1.5px solid rgba(255, 255, 255, 0.95);
             color: #0f172a;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -298,10 +271,10 @@ else:
             display: flex;
             align-items: center;
             justify-content: space-around;
-        }}
+        }
 
         .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.88);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: 20px;
@@ -311,33 +284,22 @@ else:
             text-align: center;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             margin-bottom: 20px;
-            height: 360px;
+            height: 330px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.3s ease;
-        }}
-        
-        .cuadrado-pronostico:hover {{
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.95);
-        }}
+        }
 
-        div[data-testid="stButton"] button[kind="secondary"] {{
-            background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
-            border: 2px solid rgba(255, 255, 255, 0.9) !important;
-            border-radius: 30px !important;
-            color: #ffffff !important;
-            font-weight: 800 !important;
-            font-size: 1rem !important;
-            padding: 6px 18px !important;
-            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.45) !important;
-            transition: all 0.3s ease !important;
-        }}
-        div[data-testid="stButton"] button[kind="secondary"]:hover {{
-            background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-            transform: translateY(-2px) scale(1.03) !important;
-        }}
+        .panel-hora {{
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-top: 10px;
+            color: #0f172a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.9);
+        }
         </style>
 
         <video autoplay muted loop playsinline class="video-fondo-absoluto">
@@ -352,7 +314,7 @@ else:
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.85); font-size: 2.5rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.85); font-size: 2.2rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("<div style='text-align: right; padding-top: 8px;'><span class='live-badge'><span class='live-dot'></span> LIVE</span></div>", unsafe_allow_html=True)
 
@@ -394,21 +356,68 @@ else:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
                     <div>
-                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fechas[i]}</p>
-                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.1rem;">{etiquetas[i]}</h4>
+                        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fechas[i]}</p>
+                        <p style="font-size: 0.82rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
                     </div>
                     <div>
-                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                        <hr style="border-color: #cbd5e1; margin: 4px 0 8px 0;">
+                        <p style="font-size: 0.92em; margin: 4px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
+                        <p style="font-size: 0.92em; margin: 4px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
+                        <p style="font-size: 0.92em; margin: 4px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
+                        <p style="font-size: 0.92em; margin: 4px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+        # ---------------------------------------------------------
+        # SECCIÓN HORA A HORA SENCILLA (SIN LIO)
+        # ---------------------------------------------------------
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: white; text-shadow: 1px 1px 8px rgba(0,0,0,0.8); font-size: 1.3rem; margin-bottom: 10px;'>⏱️ Detalle Hora por Hora</h3>", unsafe_allow_html=True)
+        
+        dia_seleccionado = st.selectbox(
+            "Selecciona el día para ver el detalle por hora:",
+            options=[0, 1, 2],
+            format_func=lambda x: f"{etiquetas[x]} ({fechas[x]})",
+            label_visibility="collapsed"
+        )
+
+        horas_list = hourly.get("time", [])
+        temps_list = hourly.get("temperature_2m", [])
+        wcodes_list = hourly.get("weathercode", [])
+
+        st.markdown('<div class="panel-hora">', unsafe_allow_html=True)
+        st.markdown(f"<h4 style='color: #0284c7; margin-bottom: 12px; font-size: 1.1rem;'>🌡️ Temperaturas hora a hora para: <b>{etiquetas[dia_seleccionado]}</b></h4>", unsafe_allow_html=True)
+
+        # Mostramos en columnas las horas clave de ese día (ej: saltando de 3 en 3 horas para que sea limpio y fácil de leer)
+        inicio_idx = dia_seleccionado * 24
+        fin_idx = inicio_idx + 24
+
+        horas_dia = horas_list[inicio_idx:fin_idx]
+        temps_dia = temps_list[inicio_idx:fin_idx]
+
+        # Creamos una vista en grilla limpia para las horas (mostramos cada 3 horas para no saturar)
+        cols_horas = st.columns(6)
+        contador = 0
+        for h_idx in range(0, 24, 3): # 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00
+            if h_idx < len(horas_dia):
+                hora_str = horas_dia[h_idx].split("T")[1] # Extrae la hora "HH:MM"
+                temp_h = temps_dia[h_idx]
+                
+                with cols_horas[contador % 6]:
+                    st.markdown(f"""
+                    <div style="background: #f0f9ff; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #bae6fd; margin-bottom: 8px;">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #0369a1;">{hora_str}</span><br>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">{temp_h}°C</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                contador += 1
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
     else:
         st.error("No se encontró la ubicación ingresada en Uruguay. Por favor, intenta escribiendo otra zona o departamento.")
-        if st.button("🌧️↩️ Buscar otra localidad", help="Hacé clic para volver al buscador"):
+        if st.button("🌧️↩️ Buscar otra localidad"):
             st.session_state.resultado_activo = False
             st.rerun()
