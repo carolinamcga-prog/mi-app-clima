@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+from datetime import datetime
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -72,6 +73,25 @@ def desc_clima(wcode):
     }
     return codigos.get(wcode, "🌤️ Tiempo variable")
 
+def obtener_nombre_dia(fecha_str, es_primer_dia=False):
+    if es_primer_dia:
+        return "Hoy"
+    dias_semana = {
+        "Monday": "Lunes",
+        "Tuesday": "Martes",
+        "Wednesday": "Miércoles",
+        "Thursday": "Jueves",
+        "Friday": "Viernes",
+        "Saturday": "Sábado",
+        "Sunday": "Domingo"
+    }
+    try:
+        fecha_dt = datetime.strptime(fecha_str, "%Y-%m-%d")
+        dia_ing = fecha_dt.strftime("%A")
+        return dias_semana.get(dia_ing, fecha_str)
+    except Exception:
+        return fecha_str
+
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
     logo_encontrado = None
@@ -132,208 +152,4 @@ if not st.session_state.resultado_activo:
         transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
-    }
-
-    div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="main-container">', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
-    with col2:
-        mostrar_logo()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    with st.form(key="search_form"):
-        lugar_input = st.text_input(
-            label="",
-            placeholder="🔍 Escribe un barrio, pueblo o departamento (ej: Cordón, Salto, Salinas...)",
-            label_visibility="collapsed"
-        )
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-        submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
-    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
-    
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
-    with c2:
-        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
-    with c3:
-        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
-    with c4:
-        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
-    with c5:
-        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    if submit and lugar_input.strip():
-        st.session_state.lugar_actual = lugar_input.strip()
-        st.session_state.resultado_activo = True
-        st.rerun()
-
-# =========================================================
-# PANTALLA 2: RESULTADOS (FONDO DE VIDEO TOTAL Y TARJETAS BLANCAS)
-# =========================================================
-else:
-    lugar = st.session_state.lugar_actual
-    
-    url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
-    try:
-        res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
-    except Exception:
-        res_geo = []
-    
-    if res_geo:
-        lat = float(res_geo[0]["lat"])
-        lon = float(res_geo[0]["lon"])
-        
-        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=auto"
-        data = requests.get(url_meteo).json()
-        daily = data.get("daily", {})
-        
-        wcodes = daily.get("weathercode", [0])
-        wcode_hoy = wcodes[0] if wcodes else 0
-        
-        tipo_fondo = obtener_clave_video(wcode_hoy)
-        url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
-        
-        # Estilos CSS con altura fija estricta para asegurar que los 3 cuadros sean idénticos
-        st.markdown(f"""
-        <style>
-        .stApp {{
-            background: transparent !important;
-        }}
-        
-        .video-fondo-absoluto {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: -99999;
-            pointer-events: none;
-            filter: brightness(0.5);
-        }}
-
-        div[data-testid="stHorizontalBlock"] {{
-            align-items: stretch !important;
-        }}
-
-        div[data-testid="stColumn"] {{
-            display: flex !important;
-            flex-direction: column !important;
-        }}
-
-        /* Tarjetas con altura fija estricta e idéntica */
-        .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 22px;
-            padding: 24px 18px;
-            border: 1.5px solid rgba(255, 255, 255, 0.9);
-            color: #1e293b;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            height: 370px !important;
-            max-height: 370px !important;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                        opacity 0.35s ease, 
-                        box-shadow 0.35s ease, 
-                        background 0.35s ease;
-            cursor: pointer;
-        }}
-
-        /* EFECTO HOVER: Agrandar únicamente la tarjeta seleccionada */
-        .cuadrado-pronostico:hover {{
-            transform: translateY(-8px) scale(1.05) !important;
-            background: rgba(255, 255, 255, 0.98) !important;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
-            border-color: #38bdf8 !important;
-            z-index: 10;
-        }}
-
-        /* ATENUACIÓN: Las otras dos tarjetas se vuelven tenues al pasar el mouse sobre una */
-        div[data-testid="stHorizontalBlock"]:has(.cuadrado-pronostico:hover) .cuadrado-pronostico:not(:hover) {{
-            opacity: 0.45 !important;
-            transform: scale(0.97) !important;
-            filter: blur(0.5px);
-        }}
-
-        /* Altura fija estricta para el texto del clima para que no deforme el cuadro */
-        .estado-clima-txt {{
-            font-size: 0.9em;
-            color: #0284c7;
-            font-weight: 700;
-            margin-bottom: 8px;
-            height: 2.6em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }}
-        </style>
-
-        <video autoplay muted loop playsinline class="video-fondo-absoluto">
-            <source src="{url_video}" type="video/mp4">
-        </video>
-        """, unsafe_allow_html=True)
-        
-        if st.button("⬅️ Buscar otra ubicación"):
-            st.session_state.resultado_activo = False
-            st.session_state.lugar_actual = ""
-            st.rerun()
-            
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
-        
-        fechas = daily.get("time", [])
-        t_max = daily.get("temperature_2m_max", [])
-        t_min = daily.get("temperature_2m_min", [])
-        lluvia = daily.get("precipitation_sum", [])
-        viento = daily.get("wind_speed_10m_max", daily.get("windspeed_10m_max", []))
-        
-        cols = st.columns(3)
-        etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
-        
-        for i in range(min(3, len(fechas))):
-            wc = wcodes[i] if i < len(wcodes) else 0
-            estado_txt = desc_clima(wc)
-            
-            html_tarjeta = f'<div class="cuadrado-pronostico"><div><h2 style="color: #0f172a; margin-bottom: 2px; font-weight: 700;">{etiquetas[i]}</h2><p style="font-size: 0.85em; color: #64748b; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p><div class="estado-clima-txt">{estado_txt}</div><hr style="border-color: #e2e8f0; margin-bottom: 12px;"></div><div><p style="font-size: 1.1em; margin: 6px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p><p style="font-size: 1.1em; margin: 6px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p><p style="font-size: 1.1em; margin: 6px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p></div></div>'
-            
-            with cols[i]:
-                st.markdown(html_tarjeta, unsafe_allow_html=True)
-    else:
-        st.error("No se encontró la ubicación ingresada en Uruguay.")
-        if st.button("Volver"):
-            st.session_state.resultado_activo = False
-            st.rerun()
+        transform:
