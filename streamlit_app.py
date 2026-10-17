@@ -363,4 +363,77 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     with col_top2:
-        st.markdown(f"<h1 class='
+        st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
+    with col_top3:
+        st.markdown("""
+        <div class='live-circle-container'>
+            <span class='blue-pulse-circle'></span>
+            <span class='live-text-label'>En vivo</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="panel-actual">
+        <div style="text-align: center;">
+            <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7;">{temp_actual}°C</span>
+            <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 0;">{obtener_descripcion_clima(wcode_actual)}</p>
+        </div>
+        <div style="border-left: 2px solid #cbd5e1; height: 75px; margin: 0 10px;"></div>
+        <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
+            <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
+            <div>💧 Humedad: <b>{humedad_actual}%</b></div>
+            <div>💨 Viento: <b>{viento_actual} km/h</b></div>
+            <div>📊 Presión: <b>{presion_actual} hPa</b></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="human-headline">
+        <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
+            {icono_humano} {frase_humana}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+    
+    t_max = daily.get("temperature_2m_max", [])
+    t_min = daily.get("temperature_2m_min", [])
+    lluvia = daily.get("precipitation_sum", [])
+    viento_diario = daily.get("windspeed_10m_max", [])
+    wcodes_daily = daily.get("weathercode", [])
+    
+    cols = st.columns(3)
+    etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
+    
+    for i in range(min(3, len(t_max))):
+        codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
+        estado_texto = obtener_descripcion_clima(codigo_clima)
+        
+        tmax_val = t_max[i] if i < len(t_max) else "--"
+        tmin_val = t_min[i] if i < len(t_min) else "--"
+        lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+        viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+        
+        with cols[i]:
+            st.markdown(f"""
+            <div class="cuadrado-pronostico">
+                <div>
+                    <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.35rem; text-transform: uppercase;">{etiquetas[i]}</h4>
+                    <p style="font-size: 0.95rem; color: #0f172a; font-weight: 700; margin-bottom: 10px; line-height: 1.3; background: #e0f2fe; padding: 6px 8px; border-radius: 10px;">{estado_texto}</p>
+                </div>
+                <div>
+                    <hr style="border-color: #cbd5e1; margin: 4px 0 10px 0;">
+                    <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 8px; border-radius: 12px; margin-bottom: 10px;">
+                        <span style="font-size: 0.81rem; font-weight: 700; color: #166534; display: block;">PRECIPITACIÓN</span>
+                        <span style="font-size: 1.2rem; font-weight: 800; color: #15803d;">🌧️ {lluvia_val} mm</span>
+                    </div>
+                    <div style="font-size: 1.05rem; margin: 4px 0; color: #1e293b;"><b>🌡️ Máx:</b> {tmax_val} °C</div>
+                    <div style="font-size: 1.05rem; margin: 4px 0; color: #475569;"><b>❄️ Mín:</b> {tmin_val} °C</div>
+                    <div style="font-size: 0.9rem; margin: 4px 0; color: #64748b;"><b>💨 Viento:</b> {viento_val} km/h</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
