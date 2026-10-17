@@ -220,7 +220,7 @@ else:
         tipo_fondo = obtener_clave_video(wcode_hoy)
         url_video = VIDEOS.get(tipo_fondo, VIDEOS["clear"])
         
-        # Estilos CSS avanzados para el comportamiento hover + atenuación interactiva
+        # Estilos CSS con altura fija estricta para asegurar que los 3 cuadros sean idénticos
         st.markdown(f"""
         <style>
         .stApp {{
@@ -239,7 +239,6 @@ else:
             filter: brightness(0.5);
         }}
 
-        /* Asegurar que el contenedor de las columnas tenga flex para igualar la altura */
         div[data-testid="stHorizontalBlock"] {{
             align-items: stretch !important;
         }}
@@ -249,7 +248,7 @@ else:
             flex-direction: column !important;
         }}
 
-        /* Tarjeta base con diseño responsivo */
+        /* Tarjetas con altura fija estricta e idéntica */
         .cuadrado-pronostico {{
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
@@ -260,8 +259,8 @@ else:
             color: #1e293b;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            min-height: 340px;
-            height: 100%;
+            height: 370px !important;
+            max-height: 370px !important;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -273,7 +272,7 @@ else:
             cursor: pointer;
         }}
 
-        /* EFECTO HOVER: Agrandar la tarjeta en la que te apoyas */
+        /* EFECTO HOVER: Agrandar únicamente la tarjeta seleccionada */
         .cuadrado-pronostico:hover {{
             transform: translateY(-8px) scale(1.05) !important;
             background: rgba(255, 255, 255, 0.98) !important;
@@ -282,22 +281,25 @@ else:
             z-index: 10;
         }}
 
-        /* ATENUACIÓN: Cuando te apoyas en una tarjeta, las otras dos quedan más tenues */
+        /* ATENUACIÓN: Las otras dos tarjetas se vuelven tenues al pasar el mouse sobre una */
         div[data-testid="stHorizontalBlock"]:has(.cuadrado-pronostico:hover) .cuadrado-pronostico:not(:hover) {{
             opacity: 0.45 !important;
             transform: scale(0.97) !important;
             filter: blur(0.5px);
         }}
 
+        /* Altura fija estricta para el texto del clima para que no deforme el cuadro */
         .estado-clima-txt {{
-            font-size: 0.95em;
+            font-size: 0.9em;
             color: #0284c7;
             font-weight: 700;
             margin-bottom: 8px;
-            min-height: 2.8em;
+            height: 2.6em;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }}
         </style>
 
