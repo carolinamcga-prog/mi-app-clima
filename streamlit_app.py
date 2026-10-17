@@ -177,10 +177,7 @@ else:
     lugar = st.session_state.lugar_actual
     
     url_geo = f"https://nominatim.openstreetmap.org/search?q={lugar}, Uruguay&format=json&countrycodes=uy&limit=1"
-    try:
-        res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}, timeout=10).json()
-    except Exception:
-        res_geo = []
+    res_geo = requests.get(url_geo, headers={"User-Agent": "MeteoUy-App"}).json()
     
     if res_geo:
         lat = float(res_geo[0]["lat"])
@@ -205,7 +202,19 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        st.markdown("""
+        # Selección dinámica de imagen de fondo en movimiento según el clima actual
+        # Usamos URLs de alta calidad de Unsplash optimizadas con texturas atmosféricas vivas
+        if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
+            # Fondo de lluvia / llovizna atmosférica viva en movimiento suave
+            bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop"
+        elif wcode_actual in [2, 3, 45, 48]:
+            # Fondo de cielo nublado / neblina dinámica
+            bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop"
+        else:
+            # Fondo de cielo despejado / sol radiante dinámico
+            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop"
+
+        st.markdown(f"""
         <style>
         /* TIPOGRAFÍA GLOBAL */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -214,17 +223,27 @@ else:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
 
-        .stApp {
-            background-color: #f0f9ff !important;
+        /* FONDO DINÁMICO EN MOVIMIENTO SUAVE A PANTALLA COMPLETA */
+        @keyframes panBackground {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+
+        .stApp {{
+            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.65)), url('{bg_url}') !important;
+            background-size: 200% 200% !important;
+            animation: panBackground 25s ease infinite !important;
         }
         
         .panel-actual {
-            background: white;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: 22px 25px;
-            border: 1.5px solid #bae6fd;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
             color: #0f172a;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -232,25 +251,27 @@ else:
         }
 
         .human-headline {
-            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%);
+            backdrop-filter: blur(10px);
             border-left: 5px solid #0284c7;
             padding: 18px 22px;
             border-radius: 0 16px 16px 0;
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
-            border-top: 1.5px solid #bae6fd;
-            border-right: 1.5px solid #bae6fd;
-            border-bottom: 1.5px solid #bae6fd;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+            border-right: 1.5px solid rgba(255, 255, 255, 0.6);
+            border-bottom: 1.5px solid rgba(255, 255, 255, 0.6);
         }
 
         .cuadrado-pronostico {
-            background: white;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px 15px;
-            border: 1.5px solid #bae6fd;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
             color: #0f172a;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
             height: 360px;
             display: flex;
@@ -258,51 +279,53 @@ else:
             justify-content: space-between;
         }
         
-        @keyframes pulsoAzul {
-            0% {
+        @keyframes pulsoAzul {{
+            0% {{
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-            }
-            70% {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+            }}
+            70% {{
                 transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
-            }
-            100% {
+                box-shadow: 0 0 0 8px rgba(56, 189, 248, 0);
+            }}
+            100% {{
                 transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
-            }
-        }
-        .titulo-marca-lugar {
+                box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+            }}
+        }}
+        .titulo-marca-lugar {{
             text-align: center;
-            color: #0284c7;
+            color: #ffffff;
             font-size: 2.4rem;
             font-weight: 800;
             margin: 0;
             letter-spacing: -0.5px;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
         }
-        .live-circle-container {
+        .live-circle-container {{
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 8px;
             padding-top: 14px;
-        }
-        .blue-pulse-circle {
+        }}
+        .blue-pulse-circle {{
             width: 12px;
             height: 12px;
-            background-color: #0284c7;
-            border: 2px solid #bae6fd;
+            background-color: #38bdf8;
+            border: 2px solid #ffffff;
             border-radius: 50%;
             display: inline-block;
             animation: pulsoAzul 2s infinite ease-in-out;
         }
-        .live-text-label {
+        .live-text-label {{
             font-size: 0.8rem;
             font-weight: 700;
-            color: #0369a1;
+            color: #e2e8f0;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
         </style>
         """, unsafe_allow_html=True)
@@ -349,7 +372,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.4);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
