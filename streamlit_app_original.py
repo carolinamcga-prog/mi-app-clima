@@ -108,12 +108,11 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (BUSCADOR LIMPIO)
+# PANTALLA 1: INICIO (BUSCADOR CON SOPORTE ENTER Y CLIC)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
-    /* TIPOGRAFÍA GLOBAL */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     .stApp, html, body, [class*="st-"] {
@@ -182,10 +181,11 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # El st.form permite disparar la búsqueda presionando Enter o haciendo clic en el botón
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
-            placeholder="🔍 Escribe un barrio, pueblo o departamento en Uruguay...",
+            placeholder="🔍 Escribe una localidad o departamento (Presiona Enter o haz clic)...",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -212,7 +212,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO (CON FILTRO EXCLUSIVO URUGUAY)
+# PANTALLA 2: RESULTADOS Y PRONÓSTICO
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -221,14 +221,14 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # PASO 1: Búsqueda prioritaria en base interna de Uruguay
+    # 1. Búsqueda prioritaria en base interna uruguaya
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
-    # PASO 2: Si no está en diccionario, consultar API forzando país Uruguay
+    # 2. Búsqueda en API con filtro estricto geográfico
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
@@ -241,7 +241,6 @@ else:
                     cand_lon = float(res["longitude"])
                     pais = res.get("country", "").lower()
                     
-                    # Validar estrictamente que sea dentro de Uruguay
                     if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
                         lat, lon = cand_lat, cand_lon
                         lugar_encontrado = res.get("name", lugar_ingresado.title())
@@ -249,7 +248,6 @@ else:
         except Exception:
             pass
 
-    # PASO 3: Si se intentó buscar un lugar fuera de Uruguay o que no existe en el país
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
         st.markdown("""
         <style>
@@ -263,7 +261,6 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     else:
-        # Petición a la API del Clima
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
         
         try:
@@ -289,7 +286,6 @@ else:
         
         st.markdown("""
         <style>
-        /* TIPOGRAFÍA GLOBAL */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
         .stApp, html, body, [class*="st-"] {
