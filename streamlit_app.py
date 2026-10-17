@@ -238,7 +238,7 @@ else:
             justify-content: space-between;
         }
         
-        /* ESTILO UX: TIEMPO REAL PROFESIONAL (SIN RAYO) */
+        /* ESTILO MARCA Y TIEMPO REAL */
         @keyframes girarLento {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -248,30 +248,32 @@ else:
             align-items: center;
             background: #e0f2fe;
             border: 1px solid #7dd3fc;
-            padding: 5px 12px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: #0369a1;
             box-shadow: 0 2px 6px rgba(14, 165, 233, 0.12);
+            white-space: nowrap;
         }
         .realtime-icon {
             display: inline-block;
-            margin-right: 6px;
-            font-size: 0.85rem;
+            margin-right: 5px;
+            font-size: 0.8rem;
             animation: girarLento 8s infinite linear;
         }
         </style>
         """, unsafe_allow_html=True)
         
-        col_top1, col_top2, col_top3 = st.columns([1.5, 3, 1.5])
+        # Cabecera optimizada: Botón volver, Título de Marca y Sello en Tiempo Real
+        col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
             if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.5rem; font-weight: 800; margin: 0;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center; color: #0284c7; font-size: 2.2rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("""
             <div style='text-align: right; padding-top: 10px;'>
