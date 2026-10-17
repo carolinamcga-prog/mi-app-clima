@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# RUTAS DE VIDEOS LOCALES Y FUNCIÓN BASE64 CON RESPALDO EN LÍNEA
+# RUTAS DE VIDEOS LOCALES Y RESPALDO EN LÍNEA
 # ---------------------------------------------------------
 VIDEOS_LOCALES = {
     "clear": "assets/videos/despejado.mp4",
@@ -39,10 +39,6 @@ VIDEOS_BACKUP = {
 }
 
 def obtener_fuente_video(tipo_fondo):
-    """
-    Si el video local existe en assets/videos/, lo codifica en base64.
-    Si no existe, utiliza la URL de respaldo en línea.
-    """
     ruta_local = VIDEOS_LOCALES.get(tipo_fondo, "")
     if os.path.exists(ruta_local):
         with open(ruta_local, "rb") as video_file:
@@ -81,7 +77,7 @@ def obtener_clave_video(wcode):
 
 def obtener_descripcion_clima(wcode):
     descripciones = {
-        0: "Cielo Despejado / Soleado ☀️",
+        0: "Cielo Despejado ☀️",
         1: "Poco Nuboso 🌤️",
         2: "Parcialmente Nublado ⛅",
         3: "Nublado / Cubierto ☁️",
@@ -89,7 +85,7 @@ def obtener_descripcion_clima(wcode):
         48: "Neblina Helada 🌫️",
         51: "Llovizna Leve 🌧️",
         53: "Llovizna Moderada 🌧️",
-        55: "Garúa / Llovizna Densa 🌧️",
+        55: "Garúa Densa 🌧️",
         61: "Lluvia Leve 🌧️",
         63: "Lluvia Moderada 🌧️",
         65: "Lluvia Torrencial 🌧️⚡",
@@ -97,8 +93,8 @@ def obtener_descripcion_clima(wcode):
         81: "Chubascos Moderados 🌧️",
         82: "Chubascos Violentos ⛈️",
         95: "Tormenta Eléctrica ⛈️⚡",
-        96: "Tormenta con Granizo Leve 🌩️🧊",
-        99: "Tormenta Eléctrica con Granizo Fuerte 🌩️🧊"
+        96: "Tormenta con Granizo 🌩️🧊",
+        99: "Tormenta con Granizo Fuerte 🌩️🧊"
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
@@ -116,7 +112,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (FONDO BLANCO LIMPIO)
+# PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -224,7 +220,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS CON VIDEO TENUE EN PANTALLA COMPLETA
+# PANTALLA 2: RESULTADOS (DISEÑO ESTÉTICO Y ALTURAS UNIFICADAS)
 # =========================================================
 else:
     lugar = st.session_state.lugar_actual
@@ -252,7 +248,7 @@ else:
             background: transparent !important;
         }}
         
-        /* Video tenue en segundo plano */
+        /* Video tenue elegante de fondo */
         .video-fondo-absoluto {{
             position: fixed;
             top: 0;
@@ -262,26 +258,32 @@ else:
             object-fit: cover;
             z-index: -99999;
             pointer-events: none;
-            filter: brightness(0.45) contrast(1.05);
+            filter: brightness(0.4) contrast(1.1);
         }}
 
-        /* Tarjetas de pronóstico traslúcidas estilo moderno */
+        /* Tarjetas con altura idéntica y diseño glassmorphism superior */
         .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 22px;
-            padding: 25px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 24px 18px;
+            border: 1.5px solid rgba(255, 255, 255, 0.95);
             color: #0f172a;
             text-align: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
-            transition: transform 0.3s ease;
+            height: 385px; /* Altura fija absoluta para que los 3 cuadros sean idénticos */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }}
         
         .cuadrado-pronostico:hover {{
-            transform: translateY(-5px);
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.93);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
         }}
         </style>
 
@@ -295,7 +297,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
             
-        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.85); font-size: 2.8rem; margin-top: 10px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: white; text-shadow: 2px 3px 12px rgba(0,0,0,0.9); font-size: 3rem; font-weight: 800; margin-top: 5px; margin-bottom: 25px;'>📍 {lugar.title()}</h1>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -313,14 +315,18 @@ else:
             with cols[i]:
                 st.markdown(f"""
                 <div class="cuadrado-pronostico">
-                    <h2 style="color: #0369a1; margin-bottom: 2px; font-weight: 800; font-size: 1.5rem;">{etiquetas[i]}</h2>
-                    <p style="font-size: 0.88em; color: #475569; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p>
-                    <p style="font-size: 0.95em; color: #0f172a; font-weight: 700; margin-bottom: 12px; min-height: 40px; display: flex; align-items: center; justify-content: center;">{estado_texto}</p>
-                    <hr style="border-color: #cbd5e1; margin-bottom: 15px;">
-                    <p style="font-size: 1.1em; margin: 8px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
-                    <p style="font-size: 1.1em; margin: 8px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
-                    <p style="font-size: 1.1em; margin: 8px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
-                    <p style="font-size: 1.1em; margin: 8px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                    <div>
+                        <h2 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.4rem;">{etiquetas[i]}</h2>
+                        <p style="font-size: 0.85em; color: #64748b; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p>
+                        <p style="font-size: 0.9rem; color: #1e293b; font-weight: 700; margin-bottom: 10px; line-height: 1.2;">{estado_texto}</p>
+                    </div>
+                    <div>
+                        <hr style="border-color: #cbd5e1; margin: 8px 0 12px 0;">
+                        <p style="font-size: 1.05em; margin: 6px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
+                        <p style="font-size: 1.05em; margin: 6px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
+                        <p style="font-size: 1.05em; margin: 6px 0;"><b>🌧️ Lluvia:</b> {lluvia[i]} mm</p>
+                        <p style="font-size: 1.05em; margin: 6px 0;"><b>💨 Viento:</b> {viento[i]} km/h</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
     else:
