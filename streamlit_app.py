@@ -61,10 +61,13 @@ COORDS_URUGUAY = {
 def es_coordenada_uruguay(lat, lon):
     return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
 
-def obtener_descripcion_clima(wcode):
+def obtener_descripcion_clima(wcode, is_day=1):
+    if wcode == 0:
+        return "Noche Despejada" if is_day == 0 else "Cielo Despejado"
+    if wcode == 1:
+        return "Noche Poco Nubosa" if is_day == 0 else "Poco Nuboso"
+    
     descripciones = {
-        0: "Cielo Despejado",
-        1: "Poco Nuboso",
         2: "Parcialmente Nublado",
         3: "Nublado / Cubierto",
         45: "Niebla",
@@ -94,13 +97,23 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
     if uv_actual and uv_actual >= 8.0:
         return f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
     if wcode in [0, 1]:
-        return "Algo nuboso con períodos de claro. Condiciones estables y agradables."
+        return "C Condiciones estables y agradables para el momento del día."
     return "Cielo variable sin precipitaciones significativas previstas."
 
-# GENERADOR DE DIBUJOS VECTORIALES (SVG) CON ANIMACIONES FLUIDAS
-def obtener_dibujo_animado(wcode, texto_clima):
+# GENERADOR DE DIBUJOS VECTORIALES (ADAPTADO DÍA / NOCHE)
+def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
-    if wcode in [0, 1] or "despejado" in t or "sol" in t:
+    
+    # Si es de noche y está despejado o con pocas nubes
+    if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
+        return """
+        <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/>
+            </svg>
+        </div>
+        """
+    elif wcode in [0, 1] or "despejado" in t or "sol" in t:
         return """
         <div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
@@ -300,7 +313,8 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     else:
-        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
+        # Se incluye is_day en la consulta para detectar si es de día (1) o de noche (0)
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
         
         try:
             data = requests.get(url_meteo, timeout=10).json()
@@ -315,6 +329,7 @@ else:
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         uv_actual = current.get("uv_index", 0.0)
+        is_day_actual = current.get("is_day", 1)  # 1 = Día, 0 = Noche
         
         prob_lluvia_hoy = 0
         if daily.get("precipitation_probability_max") and len(daily["precipitation_probability_max"]) > 0:
@@ -325,8 +340,8 @@ else:
             lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
 
         frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
-        desc_actual = obtener_descripcion_clima(wcode_actual)
-        dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual)
+        desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
+        dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
 
         st.markdown(f"""
         <style>
@@ -346,13 +361,17 @@ else:
             z-index: 10 !important;
         }}
 
-        /* ---------------------------------------------------------
-           ANIMACIONES FLUIDAS Y SUAVES PARA LOS DIBUJOS VECTORIALES
-        --------------------------------------------------------- */
+        /* ANIMACIONES FLUIDAS */
         @keyframes spinGlow {{
             0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
             50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
             100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
+        }}
+
+        @keyframes moonGlow {{
+            0% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
+            50% {{ transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }}
+            100% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
         }}
 
         @keyframes slideRain {{
@@ -374,6 +393,7 @@ else:
         }}
 
         .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
+        .anim-luna svg {{ animation: moonGlow 4s ease-in-out infinite; }}
         .anim-lluvia svg {{ animation: slideRain 2.2s ease-in-out infinite; }}
         .anim-tormenta svg {{ animation: flashStorm 1.6s ease-in-out infinite; }}
         .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
@@ -502,8 +522,8 @@ else:
         
         for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima)
-            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto)
+            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1) # El extendido diario es diurno
+            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
