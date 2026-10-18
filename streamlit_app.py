@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import os
 import urllib.parse
+from datetime import datetime
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -113,7 +114,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
         return """
-        <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
+        <div class="anim-luna" style="width: 42px; height: 42px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
                 <path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/>
             </svg>
@@ -121,7 +122,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         """
     elif wcode in [0, 1] or "despejado" in t or "sol" in t:
         return """
-        <div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;">
+        <div class="anim-sol" style="width: 42px; height: 42px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
                 <circle cx="32" cy="32" r="14" fill="#FBBF24"/>
                 <path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
@@ -130,7 +131,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         """
     elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t or wcode in range(51, 68) or wcode in range(80, 83):
         return """
-        <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
+        <div class="anim-lluvia" style="width: 42px; height: 42px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
                 <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
                 <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
@@ -139,7 +140,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         """
     elif "tormenta" in t or wcode in [95, 96, 99]:
         return """
-        <div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;">
+        <div class="anim-tormenta" style="width: 42px; height: 42px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
                 <path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/>
                 <path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/>
@@ -148,7 +149,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         """
     else:
         return """
-        <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
+        <div class="anim-nube" style="width: 42px; height: 42px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
                 <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
@@ -272,7 +273,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (CON GEOCODIFICACIÓN PRECISA PARA +600 LOCALIDADES)
+# PANTALLA 2: RESULTADOS (CON EVOLUCIÓN HORARIA)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -281,14 +282,12 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # 1. Búsqueda rápida en el diccionario local de referencia
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
-    # 2. Si no está en el diccionario rápido, se consulta la API Geocodificadora (Cubre barrios, balnearios y localidades de todo Uruguay)
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
@@ -300,7 +299,6 @@ else:
                     cand_lat = float(res["latitude"])
                     cand_lon = float(res["longitude"])
                     pais = res.get("country", "").lower()
-                    admin1 = res.get("admin1", "").lower() # Departamento
                     
                     if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
                         lat, lon = cand_lat, cand_lon
@@ -324,7 +322,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     else:
-        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode,is_day&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
         
         try:
             data = requests.get(url_meteo, timeout=10).json()
@@ -333,13 +331,14 @@ else:
             
         current = data.get("current", {})
         daily = data.get("daily", {})
+        hourly = data.get("hourly", {})
         
         temp_actual = current.get("temperature_2m", 0)
         humedad_actual = current.get("relative_humidity_2m", 0)
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         uv_actual = current.get("uv_index", 0.0)
-        is_day_actual = current.get("is_day", 1)  # 1 = Día, 0 = Noche
+        is_day_actual = current.get("is_day", 1)
         
         prob_lluvia_hoy = 0
         if daily.get("precipitation_probability_max") and len(daily["precipitation_probability_max"]) > 0:
@@ -371,7 +370,7 @@ else:
             z-index: 10 !important;
         }}
 
-        /* ANIMACIONES FLUIDAS EN CSS */
+        /* ANIMACIONES FLUIDAS */
         @keyframes spinGlow {{
             0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
             50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
@@ -418,6 +417,36 @@ else:
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
             margin-bottom: 20px !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }}
+
+        /* CONTENEDOR HORARIO HORIZONTAL */
+        .hourly-scroll-container {{
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 4px 2px 16px 2px;
+            margin-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(56,189,248,0.4) transparent;
+        }}
+        .hourly-scroll-container::-webkit-scrollbar {{
+            height: 6px;
+        }}
+        .hourly-scroll-container::-webkit-scrollbar-thumb {{
+            background: rgba(56,189,248,0.4);
+            border-radius: 10px;
+        }}
+        .hourly-card {{
+            background: rgba(15, 32, 56, 0.65) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            min-width: 85px;
+            padding: 14px 10px;
+            text-align: center;
+            color: #ffffff;
+            flex-shrink: 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }}
 
         .card-editorial-semana {{
@@ -477,7 +506,7 @@ else:
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        # TARJETA HOY
+        # TARJETA HOY (CONDICIÓN ACTUAL)
         html_hoy = f"""
         <div class="card-editorial-hoy">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -512,6 +541,49 @@ else:
         </div>
         """
         st.markdown(html_hoy, unsafe_allow_html=True)
+
+        # -----------------------------------------------------
+        # SECCIÓN NUEVA: EVOLUCIÓN HORARIA (PRONÓSTICO POR HORAS)
+        # -----------------------------------------------------
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px;'>⏱️ Evolución Próximas Horas</h3>", unsafe_allow_html=True)
+        
+        h_times = hourly.get("time", [])
+        h_temps = hourly.get("temperature_2m", [])
+        h_probs = hourly.get("precipitation_probability", [])
+        h_wcodes = hourly.get("weathercode", [])
+        h_isdays = hourly.get("is_day", [])
+        
+        # Encontrar el índice de la hora actual para mostrar desde ahora en adelante
+        ahora_str = datetime.now().strftime("%Y-%m-%dT%H:00")
+        start_idx = 0
+        for idx, t in enumerate(h_times):
+            if t >= ahora_str:
+                start_idx = idx
+                break
+        
+        # Generar las tarjetas deslizables para las próximas 24 horas
+        html_hourly = "<div class='hourly-scroll-container'>"
+        for i in range(start_idx, min(start_idx + 24, len(h_times))):
+            t_iso = h_times[i]
+            hora_formateada = t_iso.split("T")[1][:5] if "T" in t_iso else f"{i}:00"
+            temp_h = h_temps[i] if i < len(h_temps) else "--"
+            prob_h = h_probs[i] if i < len(h_probs) else 0
+            wcode_h = h_wcodes[i] if i < len(h_wcodes) else 0
+            isday_h = h_isdays[i] if i < len(h_isdays) else 1
+            
+            desc_h = obtener_descripcion_clima(wcode_h, isday_h)
+            icono_h = obtener_dibujo_animado(wcode_h, desc_h, isday_h)
+            
+            html_hourly += f"""
+            <div class="hourly-card">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">{hora_formateada}</div>
+                <div style="margin: 6px 0; transform: scale(0.75);">{icono_h}</div>
+                <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 4px 0;">{temp_h}°</div>
+                <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">💧 {prob_h}%</div>
+            </div>
+            """
+        html_hourly += "</div>"
+        st.markdown(html_hourly, unsafe_allow_html=True)
 
         # -----------------------------------------------------
         # TARJETA 2: PRONÓSTICO EXTENDIDO
