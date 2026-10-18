@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import os
 import urllib.parse
-from datetime import datetime
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -420,7 +419,7 @@ else:
             background: rgba(255, 255, 255, 0.92) !important;
             border-radius: 16px !important;
             padding: 12px 16px !important;
-            min-width: 80px !important;
+            min-width: 85px !important;
             text-align: center !important;
             border: 1px solid #bae6fd !important;
             color: #0f172a !important;
@@ -487,7 +486,7 @@ else:
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        # MÓDULO DE ALERTA INUMET (Si las condiciones superan umbrales de severidad)
+        # MÓDULO DE ALERTA INUMET
         if wcode_actual in [95, 96, 99] or viento_actual > 35 or lluvia_diaria_hoy > 20:
             st.markdown("""
             <div class="alerta-inumet">
@@ -495,7 +494,7 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-        # PANEL CENTRAL DE DATOS REYES (Con Visibilidad e Índice UV)
+        # PANEL CENTRAL DE DATOS
         txt_uv, _ = obtener_categoria_uv(uv_actual)
         st.markdown(f"""
         <div class="panel-actual">
@@ -524,7 +523,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-        # CARRUSEL HORARIO (Evolución Próximas 12 Horas)
+        # CARRUSEL HORARIO
         st.markdown("<h3 style='color: #ffffff; font-size: 1.2rem; margin-bottom: 10px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);'>⏱️ Tendencia para las Próximas Horas</h3>", unsafe_allow_html=True)
         
         times_h = hourly.get("time", [])
@@ -533,14 +532,78 @@ else:
         codes_h = hourly.get("weathercode", [])
         
         if times_h:
-            cards_html = '<div class="carrusel-horario">'
-            # Tomamos las próximas 12 horas
+            tarjetas_lista = []
             for k in range(min(12, len(times_h))):
                 hora_str = times_h[k].split("T")[-1][:5] if "T" in times_h[k] else str(k)
                 t_h = temps_h[k] if k < len(temps_h) else "--"
                 p_h = probs_h[k] if k < len(probs_h) else 0
-                c_h = codes_h[k] if k < len(codes_h) else 0
-                
-                cards_html += f"""
-                <div class="tarjeta-hora">
-                    <div style="font-weight: 700; font
+                tarjetas_lista.append(
+                    f'<div class="tarjeta-hora">'
+                    f'<div style="font-weight: 700; font-size: 0.85rem; color: #0284c7;">{hora_str}</div>'
+                    f'<div style="font-size: 1.2rem; margin: 4px 0;"><b>{t_h}°C</b></div>'
+                    f'<div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">💧 {p_h}%</div>'
+                    f'</div>'
+                )
+            html_carrusel = f'<div class="carrusel-horario">{"".join(tarjetas_lista)}</div>'
+            st.markdown(html_carrusel, unsafe_allow_html=True)
+
+        # PRONÓSTICO EXTENDIDO
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        
+        fechas = daily.get("time", [])
+        t_max = daily.get("temperature_2m_max", [])
+        t_min = daily.get("temperature_2m_min", [])
+        lluvia = daily.get("precipitation_sum", [])
+        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
+        viento_diario = daily.get("windspeed_10m_max", [])
+        uv_diario = daily.get("uv_index_max", [])
+        wcodes_daily = daily.get("weathercode", [])
+        
+        cols = st.columns(3)
+        etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
+        
+        for i in range(min(3, len(fechas))):
+            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
+            estado_texto = obtener_descripcion_clima(codigo_clima)
+            
+            tmax_val = t_max[i] if i < len(t_max) else "--"
+            tmin_val = t_min[i] if i < len(t_min) else "--"
+            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            uv_val = uv_diario[i] if i < len(uv_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
+            with cols[i]:
+                st.markdown(f"""
+                <div class="cuadrado-pronostico">
+                    <div>
+                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
+                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                    </div>
+                    <div>
+                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>🌧️ Prob. Lluvia:</b> {prob_val}%</p>
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>💧 Acumulado:</b> {lluvia_val} mm</p>
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
+                        <p style="font-size: 0.95em; margin: 4px 0;"><b>☀️ UV Máx:</b> {uv_val}</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # CARTA METODOLÓGICA
+        st.markdown("""
+        <div class="fuentes-card">
+            <p style="margin: 0 0 6px 0; font-weight: 700; color: #0284c7; font-size: 0.9rem;">
+                🛡️ Consolidador Metodológico y Fuentes Integradas
+            </p>
+            <p style="margin: 0; line-height: 1.5; color: #475569;">
+                Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
+                <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
+                oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
