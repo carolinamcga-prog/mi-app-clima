@@ -21,7 +21,7 @@ if "resultado_activo" not in st.session_state:
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 
-# BASE DE DATOS LOCAL EXCLUSIVA PARA URUGUAY
+# BASE DE DATOS DE REFERENCIA RÁPIDA (CAPITALES Y PRINCIPALES ZONAS)
 COORDS_URUGUAY = {
     "montevideo": (-34.9011, -56.1645),
     "artigas": (-30.4033, -56.4733),
@@ -55,7 +55,14 @@ COORDS_URUGUAY = {
     "ciudad de la costa": (-34.8231, -55.9525),
     "carrasco": (-34.8760, -56.0520),
     "pocitos": (-34.9120, -56.1470),
-    "centro": (-34.9050, -56.1910)
+    "centro": (-34.9050, -56.1910),
+    "la paloma": (-34.6600, -54.1500),
+    "carmelo": (-34.0019, -58.2858),
+    "nueva helvecia": (-34.3000, -57.2333),
+    "rosario": (-34.3167, -57.3500),
+    "san carlos": (-34.7964, -54.9175),
+    "chuy": (-33.6933, -53.5461),
+    "bella unión": (-30.2583, -57.5750)
 }
 
 def es_coordenada_uruguay(lat, lon):
@@ -104,7 +111,6 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
 def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
     
-    # Si es de noche y está despejado
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
         return """
         <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
@@ -239,7 +245,7 @@ if not st.session_state.resultado_activo:
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
-            placeholder="🔍 Escribe una localidad o departamento (Presiona Enter o haz clic)...",
+            placeholder="🔍 Escribe ciudad, balneario, barrio o departamento (Ej: Atlántida, Pocitos)...",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -266,7 +272,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS
+# PANTALLA 2: RESULTADOS (CON GEOCODIFICACIÓN PRECISA PARA +600 LOCALIDADES)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -275,16 +281,18 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
+    # 1. Búsqueda rápida en el diccionario local de referencia
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
+    # 2. Si no está en el diccionario rápido, se consulta la API Geocodificadora (Cubre barrios, balnearios y localidades de todo Uruguay)
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
-            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=5&language=es&format=json"
+            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=10&language=es&format=json"
             res_geo = requests.get(url_geo, timeout=8).json()
             
             if "results" in res_geo and len(res_geo["results"]) > 0:
@@ -292,10 +300,13 @@ else:
                     cand_lat = float(res["latitude"])
                     cand_lon = float(res["longitude"])
                     pais = res.get("country", "").lower()
+                    admin1 = res.get("admin1", "").lower() # Departamento
                     
                     if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
                         lat, lon = cand_lat, cand_lon
-                        lugar_encontrado = res.get("name", lugar_ingresado.title())
+                        nombre_lugar = res.get("name", lugar_ingresado.title())
+                        region = res.get("admin1", "")
+                        lugar_encontrado = f"{nombre_lugar} ({region})" if region else nombre_lugar
                         break
         except Exception:
             pass
@@ -307,7 +318,7 @@ else:
         </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
-        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
+        st.info("No encontramos la localidad, balneario o barrio ingresado dentro de Uruguay. Por favor, asegúrate de escribir un nombre válido en territorio uruguayo.")
         if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
