@@ -97,14 +97,14 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
     if uv_actual and uv_actual >= 8.0:
         return f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
     if wcode in [0, 1]:
-        return "C Condiciones estables y agradables para el momento del día."
+        return "Condiciones estables y agradables para el momento del día."
     return "Cielo variable sin precipitaciones significativas previstas."
 
 # GENERADOR DE DIBUJOS VECTORIALES (ADAPTADO DÍA / NOCHE)
 def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
     
-    # Si es de noche y está despejado o con pocas nubes
+    # Si es de noche y está despejado
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
         return """
         <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
@@ -313,7 +313,6 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     else:
-        # Se incluye is_day en la consulta para detectar si es de día (1) o de noche (0)
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
         
         try:
@@ -361,7 +360,7 @@ else:
             z-index: 10 !important;
         }}
 
-        /* ANIMACIONES FLUIDAS */
+        /* ANIMACIONES FLUIDAS EN CSS */
         @keyframes spinGlow {{
             0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
             50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
@@ -420,16 +419,14 @@ else:
             border: 1px solid rgba(255, 255, 255, 0.8) !important;
         }}
 
-        .fuentes-card {{
-            background: rgba(10, 25, 47, 0.85) !important;
-            backdrop-filter: blur(10px);
-            border-radius: 16px !important;
-            padding: 18px 22px !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            margin-top: 25px !important;
-            font-size: 0.85rem !important;
-            color: #cbd5e1 !important;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+        .footer-metodologico {{
+            text-align: center !important;
+            margin-top: 35px !important;
+            padding: 18px 20px !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #94a3b8 !important;
+            font-size: 0.78rem !important;
+            line-height: 1.5 !important;
         }}
         
         .titulo-pantalla {{
@@ -522,7 +519,7 @@ else:
         
         for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1) # El extendido diario es diurno
+            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
             dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
@@ -556,16 +553,9 @@ else:
             """
             st.markdown(html_semana, unsafe_allow_html=True)
 
-        # CARTA METODOLÓGICA PROFESIONAL
+        # PIE DE PÁGINA METODOLÓGICO (UX CLEAN FOOTER)
         st.markdown("""
-        <div class="fuentes-card">
-            <p style="margin: 0 0 6px 0; font-weight: 700; color: #38bdf8; font-size: 0.85rem; letter-spacing: 0.5px;">
-                🛡️ Consolidador Metodológico y Fuentes Integradas
-            </p>
-            <p style="margin: 0; line-height: 1.5; color: #cbd5e1; font-size: 0.8rem;">
-                Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
-                <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
-                oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
-            </p>
+        <div class="footer-metodologico">
+            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
         </div>
         """, unsafe_allow_html=True)
