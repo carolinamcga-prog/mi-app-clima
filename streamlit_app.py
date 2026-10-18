@@ -108,16 +108,8 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
     if uv_actual and uv_actual >= 8.0:
         return "☀️", f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
     if wcode in [0, 1]:
-        return "🌤️", "Condiciones muy estables y agradables. Excelente jornada para actividades al aire libre."
-    return "⛅", "Cielo variable sin precipitaciones significativas previstas para las próximas horas."
-
-def obtener_gradiente_atmosferico(wcode, lluvia_hoy):
-    if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
-        return "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)" # Azul noche / Lluvia
-    elif wcode in [2, 3, 45, 48]:
-        return "linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%)" # Gris / Nublado
-    else:
-        return "linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #7dd3fc 100%)" # Azul despejado brillante
+        return "🌤️", "Algo nuboso con períodos de claro. Condiciones estables y agradables."
+    return "⛅", "Cielo variable sin precipitaciones significativas previstas."
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -145,13 +137,13 @@ if not st.session_state.resultado_activo:
     }
 
     .stApp {
-        background-color: #f8fafc !important;
+        background-color: #f0f4f8 !important;
     }
     
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); border-color: #38bdf8; }
+        0% { box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); border-color: #38bdf8; }
         50% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.5); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); border-color: #38bdf8; }
+        100% { box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); border-color: #38bdf8; }
     }
 
     div[data-baseweb="input"] {
@@ -185,7 +177,7 @@ if not st.session_state.resultado_activo:
     div[data-testid="stColumn"] .stButton > button {
         background: #ffffff !important;
         color: #0369a1 !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 30px !important;
         height: 2.8rem !important;
         font-size: 0.9rem !important;
@@ -193,9 +185,9 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
     }
     div[data-testid="stColumn"] .stButton > button:hover {
-        background: #f0f9ff !important;
+        background: #e0f2fe !important;
         color: #0284c7 !important;
-        border-color: #bae6fd !important;
+        border-color: #38bdf8 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -236,7 +228,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (ESTÉTIKA CLEAN GLASS)
+# PANTALLA 2: RESULTADOS (ESTILO TARJETAS INUMET)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -273,7 +265,7 @@ else:
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
         st.markdown("""
         <style>
-        .stApp { background-color: #f8fafc !important; }
+        .stApp { background-color: #f0f4f8 !important; }
         </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
@@ -314,7 +306,6 @@ else:
             lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
-        bg_gradiente = obtener_gradiente_atmosferico(wcode_actual, lluvia_diaria_hoy)
 
         st.markdown(f"""
         <style>
@@ -325,7 +316,7 @@ else:
         }}
 
         .stApp {{
-            background: {bg_gradiente} !important;
+            background: linear-gradient(180deg, #1d517c 0%, #3a75a4 40%, #0d2b45 100%) !important;
             background-attachment: fixed !important;
         }}
 
@@ -334,122 +325,53 @@ else:
             z-index: 10 !important;
         }}
 
-        /* ESTILO CLEAN GLASS */
-        .glass-card {{
-            background: rgba(255, 255, 255, 0.88) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
-            border-radius: 24px !important;
-            padding: 22px 26px !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
-            color: #0f172a !important;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06) !important;
-            margin-bottom: 20px !important;
-        }}
-
-        .human-headline-glass {{
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-left: 5px solid #0284c7 !important;
-            padding: 16px 20px !important;
-            border-radius: 0 16px 16px 0 !important;
-            margin-bottom: 20px !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
-        }}
-
-        .alerta-inumet {{
-            background: rgba(254, 242, 242, 0.95) !important;
-            border-left: 5px solid #dc2626 !important;
-            padding: 14px 18px !important;
-            border-radius: 0 12px 12px 0 !important;
-            margin-bottom: 20px !important;
-            color: #991b1b !important;
-            font-weight: 700 !important;
-            font-size: 0.95rem !important;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1) !important;
-        }}
-
-        .cuadrado-pronostico {{
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(12px) !important;
+        /* TARJETA HOY - ESTILO INUMET AZUL OSCURO */
+        .card-inumet-hoy {{
+            background: #0f2744 !important;
             border-radius: 20px !important;
-            padding: 18px 14px !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
-            color: #0f172a !important;
-            text-align: center !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04) !important;
+            padding: 24px !important;
+            color: #ffffff !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
             margin-bottom: 20px !important;
-            height: 330px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }}
+
+        /* TARJETA MAÑANA - ESTILO INUMET BLANCA */
+        .card-inumet-semana {{
+            background: #ffffff !important;
+            border-radius: 20px !important;
+            padding: 20px !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18) !important;
+            margin-bottom: 20px !important;
         }}
 
         .fuentes-card {{
-            background: rgba(255, 255, 255, 0.92) !important;
+            background: rgba(15, 39, 68, 0.85) !important;
             border-radius: 16px !important;
             padding: 16px 20px !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
             margin-top: 25px !important;
             font-size: 0.85rem !important;
-            color: #334155 !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
         }}
         
-        .carrusel-horario {{
-            display: flex !important;
-            overflow-x: auto !important;
-            gap: 12px !important;
-            padding: 5px 0 15px 0 !important;
-            margin-bottom: 20px !important;
-        }}
-        .tarjeta-hora {{
-            background: rgba(255, 255, 255, 0.9) !important;
-            border-radius: 18px !important;
-            padding: 12px 16px !important;
-            min-width: 82px !important;
-            text-align: center !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
-            color: #0f172a !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
-        }}
-        
-        @keyframes pulsoAzul {{
-            0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }}
-            70% {{ transform: scale(1); box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }}
-            100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }}
-        }}
-        .titulo-marca-lugar {{
+        .titulo-pantalla {{
             text-align: center !important;
             color: #ffffff !important;
-            font-size: 2.3rem !important;
+            font-size: 2.2rem !important;
             font-weight: 800 !important;
             margin: 0 !important;
-            letter-spacing: -0.5px !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
         }}
-        .live-circle-container {{
-            display: flex !important;
-            align-items: center !important;
-            justify-content: flex-end !important;
-            gap: 8px !important;
-            padding-top: 14px !important;
-        }}
-        .blue-pulse-circle {{
-            width: 10px !important;
-            height: 10px !important;
-            background-color: #ffffff !important;
-            border-radius: 50% !important;
-            display: inline-block !important;
-            animation: pulsoAzul 2s infinite ease-in-out !important;
-        }}
-        .live-text-label {{
-            font-size: 0.8rem !important;
+        
+        .subtitulo-pantalla {{
+            text-align: center !important;
+            color: #fbbf24 !important;
+            font-size: 1.1rem !important;
             font-weight: 700 !important;
-            color: #ffffff !important;
-            letter-spacing: 0.5px !important;
-            text-transform: uppercase !important;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+            margin-top: -5px !important;
         }}
         </style>
         """, unsafe_allow_html=True)
@@ -461,81 +383,47 @@ else:
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 class='titulo-pantalla'>Tiempo según MeteoUy</h1>", unsafe_allow_html=True)
+            st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("""
-            <div class='live-circle-container'>
-                <span class='blue-pulse-circle'></span>
-                <span class='live-text-label'>En vivo</span>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem;'>EN VIVO</span></div>", unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        # ALERTA INUMET INTELIGENTE (Solo si hay tormenta o viento muy fuerte)
-        if wcode_actual in [95, 96, 99] or viento_actual > 38 or lluvia_diaria_hoy > 25:
-            st.markdown("""
-            <div class="alerta-inumet">
-                ⚠️ <b>MONITOREO DE ALERTA METEOROLÓGICA (INUMET):</b> Condiciones de inestabilidad activa en la zona. Manténgase informado ante eventuales actualizaciones de advertencia.
-            </div>
-            """, unsafe_allow_html=True)
-
-        # TITULAR HUMANO (Destacado Arriba)
+        # -----------------------------------------------------
+        # TARJETA 1: HOY (PLACA AZUL OSCURA ESTILO INUMET)
+        # -----------------------------------------------------
+        t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
+        t_min_hoy = daily.get("temperature_2m_min", [temp_actual])[0]
+        
         st.markdown(f"""
-        <div class="human-headline-glass">
-            <p style="margin: 0; color: #0f172a; font-size: 1.05rem; font-weight: 700; line-height: 1.4;">
-                {icono_humano} {frase_humana}
+        <div class="card-inumet-hoy">
+            <div style="font-size: 0.9rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">
+                HOY:
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <span style="font-size: 2.8rem; font-weight: 800; color: #ffffff;">{temp_actual}°C</span>
+                    <span style="font-size: 1.5rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°C</span>
+                </div>
+                <div style="font-size: 2.2rem;">{icono_humano}</div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.15); margin: 12px 0;">
+            <p style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; margin-bottom: 10px; line-height: 1.4;">
+                {frase_humana}
             </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # PANEL GLASS DE TEMPERATURA DERECHA/IZQUIERDA
-        txt_uv, _ = obtener_categoria_uv(uv_actual)
-        st.markdown(f"""
-        <div class="glass-card">
-            <div style="display: flex; align-items: center; justify-content: space-around;">
-                <div style="text-align: center;">
-                    <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7; line-height: 1;">{temp_actual}°C</span>
-                    <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 6px 0 0 0;">{obtener_descripcion_clima(wcode_actual)}</p>
-                </div>
-                <div style="border-left: 1.5px solid #cbd5e1; height: 95px; margin: 0 10px;"></div>
-                <div style="font-size: 0.88rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
-                    <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
-                    <div>💧 Humedad: <b>{humedad_actual}%</b></div>
-                    <div>💨 Viento: <b>{viento_actual} km/h</b></div>
-                    <div>📊 Presión: <b>{presion_actual} hPa</b></div>
-                    <div>👁️ Visibilidad: <b>{visibilidad_km} km</b></div>
-                    <div>☀️ Índice UV: <b>{txt_uv}</b></div>
-                </div>
+            <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
+                <div>💨 <b>Viento:</b> {viento_actual} km/h</div>
+                <div>💧 <b>Humedad:</b> {humedad_actual}% &nbsp;|&nbsp; 📊 <b>Presión:</b> {presion_actual} hPa</div>
+                <div>🌧️ <b>Probabilidad de lluvia:</b> {prob_lluvia_hoy}% ({lluvia_diaria_hoy} mm)</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # CARRUSEL HORARIO
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.15rem; margin-bottom: 8px; text-shadow: 0 2px 6px rgba(0,0,0,0.2);'>⏱️ Tendencia para las Próximas Horas</h3>", unsafe_allow_html=True)
-        
-        times_h = hourly.get("time", [])
-        temps_h = hourly.get("temperature_2m", [])
-        probs_h = hourly.get("precipitation_probability", [])
-        
-        if times_h:
-            tarjetas_lista = []
-            for k in range(min(12, len(times_h))):
-                hora_str = times_h[k].split("T")[-1][:5] if "T" in times_h[k] else str(k)
-                t_h = temps_h[k] if k < len(temps_h) else "--"
-                p_h = probs_h[k] if k < len(probs_h) else 0
-                tarjetas_lista.append(
-                    f'<div class="tarjeta-hora">'
-                    f'<div style="font-weight: 700; font-size: 0.85rem; color: #0284c7;">{hora_str}</div>'
-                    f'<div style="font-size: 1.15rem; margin: 4px 0;"><b>{t_h}°C</b></div>'
-                    f'<div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">💧 {p_h}%</div>'
-                    f'</div>'
-                )
-            html_carrusel = f'<div class="carrusel-horario">{"".join(tarjetas_lista)}</div>'
-            st.markdown(html_carrusel, unsafe_allow_html=True)
-
-        # PRONÓSTICO EXTENDIDO
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.25rem; margin-bottom: 12px; text-shadow: 0 2px 6px rgba(0,0,0,0.2);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        # -----------------------------------------------------
+        # TARJETA 2: EXTENDIDO (PLACAS BLANCAS)
+        # -----------------------------------------------------
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.2rem; margin-bottom: 12px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -543,13 +431,11 @@ else:
         lluvia = daily.get("precipitation_sum", [])
         prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
         viento_diario = daily.get("windspeed_10m_max", [])
-        uv_diario = daily.get("uv_index_max", [])
         wcodes_daily = daily.get("weathercode", [])
         
-        cols = st.columns(3)
-        etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
+        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
         
-        for i in range(min(3, len(fechas))):
+        for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
             estado_texto = obtener_descripcion_clima(codigo_clima)
             
@@ -558,36 +444,28 @@ else:
             lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
             prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-            uv_val = uv_diario[i] if i < len(uv_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            with cols[i]:
-                st.markdown(f"""
-                <div class="cuadrado-pronostico">
-                    <div>
-                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.15rem;">{etiquetas[i]}</h4>
-                        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
-                        <p style="font-size: 0.82rem; color: #1e293b; font-weight: 700; margin-bottom: 6px; line-height: 1.2;">{estado_texto}</p>
-                    </div>
-                    <div>
-                        <hr style="border-color: #cbd5e1; margin: 4px 0 8px 0;">
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>🌧️ Prob:</b> {prob_val}%</p>
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>💧 Lluvia:</b> {lluvia_val} mm</p>
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
-                        <p style="font-size: 0.9em; margin: 3px 0;"><b>☀️ UV:</b> {uv_val}</p>
-                    </div>
+            st.markdown(f"""
+            <div class="card-inumet-semana">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.9rem; font-weight: 800; color: #0284c7;">{etiquetas[i-1]} ({fecha_val})</span>
+                    <span style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">{tmin_val}°C / {tmax_val}°C</span>
                 </div>
-                """, unsafe_allow_html=True)
+                <p style="font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 6px;">{estado_texto}</p>
+                <div style="font-size: 0.85rem; color: #64748b; line-height: 1.5;">
+                    🌧️ Prob. de lluvia: <b>{prob_val}%</b> ({lluvia_val} mm) &nbsp;|&nbsp; 💨 Viento máx: <b>{viento_val} km/h</b>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # CARTA METODOLÓGICA
+        # CARTA METODOLÓGICA PROFESIONAL
         st.markdown("""
         <div class="fuentes-card">
-            <p style="margin: 0 0 4px 0; font-weight: 700; color: #0284c7; font-size: 0.88rem;">
+            <p style="margin: 0 0 4px 0; font-weight: 700; color: #38bdf8; font-size: 0.88rem;">
                 🛡️ Consolidador Metodológico y Fuentes Integradas
             </p>
-            <p style="margin: 0; line-height: 1.4; color: #475569; font-size: 0.82rem;">
+            <p style="margin: 0; line-height: 1.4; color: #cbd5e1; font-size: 0.82rem;">
                 Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
                 <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
                 oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
