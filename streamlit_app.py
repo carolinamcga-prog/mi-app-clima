@@ -97,7 +97,6 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
         return "Algo nuboso con períodos de claro. Condiciones estables y agradables."
     return "Cielo variable sin precipitaciones significativas previstas."
 
-# SISTEMA DE ETIQUETAS ESTÉTICAS (BADGES EDITORIALES SIN DIBUJOS)
 def obtener_badge_clima(texto_clima):
     t = texto_clima.lower()
     if "despejado" in t or "sol" in t:
@@ -125,7 +124,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (PANTALLA ORIGINAL Y LIMPIA EN BLANCO)
+# PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -228,7 +227,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (DISEÑO EDITORIAL & UX PREMIUM)
+# PANTALLA 2: RESULTADOS
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -284,18 +283,12 @@ else:
             
         current = data.get("current", {})
         daily = data.get("daily", {})
-        hourly = data.get("hourly", {})
         
         temp_actual = current.get("temperature_2m", 0)
         humedad_actual = current.get("relative_humidity_2m", 0)
-        sensacion_actual = current.get("apparent_temperature", 0)
-        presion_actual = current.get("surface_pressure", 1013)
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
         uv_actual = current.get("uv_index", 0.0)
-        
-        visibilidad_m = current.get("visibility", 10000)
-        visibilidad_km = round(visibilidad_m / 1000, 1) if visibilidad_m is not None else 10.0
         
         prob_lluvia_hoy = 0
         if daily.get("precipitation_probability_max") and len(daily["precipitation_probability_max"]) > 0:
@@ -327,7 +320,6 @@ else:
             z-index: 10 !important;
         }}
 
-        /* TARJETA EDITORIAL HOY */
         .card-editorial-hoy {{
             background: rgba(15, 32, 56, 0.75) !important;
             backdrop-filter: blur(16px);
@@ -338,13 +330,8 @@ else:
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
             margin-bottom: 20px !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            transition: transform 0.3s ease;
-        }}
-        .card-editorial-hoy:hover {{
-            border-color: rgba(56, 189, 248, 0.4) !important;
         }}
 
-        /* TARJETA EDITORIAL EXTENDIDO */
         .card-editorial-semana {{
             background: rgba(255, 255, 255, 0.96) !important;
             border-radius: 20px !important;
@@ -395,20 +382,17 @@ else:
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
             st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
             st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        # -----------------------------------------------------
-        # TARJETA 1: HOY (ESTILO EDITORIAL MINIMALISTA)
-        # -----------------------------------------------------
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
-        t_min_hoy = daily.get("temperature_2m_min", [temp_actual])[0]
         
-        st.markdown(f"""
+        # TARJETA HOY CORREGIDA (HTML EN LÍNEA SEGURA)
+        html_hoy = f"""
         <div class="card-editorial-hoy">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
                 <div>
@@ -420,13 +404,8 @@ else:
                     <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
                 </div>
             </div>
-            
-            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0 16px 0; line-height: 1.5;">
-                {frase_humana}
-            </p>
-            
+            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>
             <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>
-            
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
                 <div>
                     <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div>
@@ -442,7 +421,8 @@ else:
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(html_hoy, unsafe_allow_html=True)
 
         # -----------------------------------------------------
         # TARJETA 2: PRONÓSTICO EXTENDIDO
@@ -471,7 +451,7 @@ else:
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            st.markdown(f"""
+            html_semana = f"""
             <div class="card-editorial-semana">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
@@ -482,7 +462,6 @@ else:
                         <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
                     </div>
                 </div>
-                
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <div>{badge_ext}</div>
                     <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
@@ -490,7 +469,8 @@ else:
                     </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """
+            st.markdown(html_semana, unsafe_allow_html=True)
 
         # CARTA METODOLÓGICA PROFESIONAL
         st.markdown("""
