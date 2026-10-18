@@ -181,7 +181,6 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # El st.form permite disparar la búsqueda presionando Enter o haciendo clic en el botón
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
@@ -284,104 +283,130 @@ else:
 
         icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
         
-        st.markdown("""
+        # Selección dinámica de la imagen atmosférica de fondo
+        if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
+            bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop" # Lluvia
+        elif wcode_actual in [2, 3, 45, 48]:
+            bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop" # Nubes / Nublado
+        else:
+            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop" # Sol / Despejado
+
+        st.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        .stApp, html, body, [class*="st-"] {
+        .stApp, html, body, [class*="st-"] {{
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
+        }}
 
-        .stApp {
-            background-color: #f0f9ff !important;
-        }
+        /* --- CAPA 0: FONDO CON MOVIMIENTO SUAVE Y TENUE --- */
+        @keyframes deslizarFondoTenue {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+
+        .stApp {{
+            background: linear-gradient(rgba(11, 19, 41, 0.65), rgba(11, 19, 41, 0.55)), url('{bg_url}') !important;
+            background-size: 180% 180% !important;
+            background-attachment: fixed !important;
+            animation: deslizarFondoTenue 45s ease infinite !important;
+        }}
+
+        /* --- CAPA 10: CONTENIDO DEL PRONÓSTICO (ESTÁTICO Y CRISALINO) --- */
+        .block-container {{
+            position: relative !important;
+            z-index: 10 !important;
+        }}
+
+        .panel-actual {{
+            background: white !important;
+            border-radius: 24px !important;
+            padding: 22px 25px !important;
+            border: 1.5px solid #bae6fd !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15) !important;
+            margin-bottom: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-around !important;
+        }}
+
+        .human-headline {{
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+            border-left: 5px solid #0284c7 !important;
+            padding: 18px 22px !important;
+            border-radius: 0 16px 16px 0 !important;
+            margin-bottom: 25px !important;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1) !important;
+            border-top: 1.5px solid #bae6fd !important;
+            border-right: 1.5px solid #bae6fd !important;
+            border-bottom: 1.5px solid #bae6fd !important;
+        }}
+
+        .cuadrado-pronostico {{
+            background: white !important;
+            border-radius: 20px !important;
+            padding: 20px 15px !important;
+            border: 1.5px solid #bae6fd !important;
+            color: #0f172a !important;
+            text-align: center !important;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1) !important;
+            margin-bottom: 20px !important;
+            height: 360px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+        }}
         
-        .panel-actual {
-            background: white;
-            border-radius: 24px;
-            padding: 22px 25px;
-            border: 1.5px solid #bae6fd;
-            color: #0f172a;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-        }
-
-        .human-headline {
-            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-            border-left: 5px solid #0284c7;
-            padding: 18px 22px;
-            border-radius: 0 16px 16px 0;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1);
-            border-top: 1.5px solid #bae6fd;
-            border-right: 1.5px solid #bae6fd;
-            border-bottom: 1.5px solid #bae6fd;
-        }
-
-        .cuadrado-pronostico {
-            background: white;
-            border-radius: 20px;
-            padding: 20px 15px;
-            border: 1.5px solid #bae6fd;
-            color: #0f172a;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
-            margin-bottom: 20px;
-            height: 360px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        @keyframes pulsoAzul {
-            0% {
+        @keyframes pulsoAzul {{
+            0% {{
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-            }
-            70% {
+            }}
+            70% {{
                 transform: scale(1);
                 box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
-            }
-            100% {
+            }}
+            100% {{
                 transform: scale(0.95);
                 box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
-            }
-        }
-        .titulo-marca-lugar {
-            text-align: center;
-            color: #0284c7;
-            font-size: 2.4rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
+            }}
+        }}
+        .titulo-marca-lugar {{
+            text-align: center !important;
+            color: #ffffff !important;
+            font-size: 2.4rem !important;
+            font-weight: 800 !important;
+            margin: 0 !important;
+            letter-spacing: -0.5px !important;
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-        .live-circle-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            padding-top: 14px;
-        }
-        .blue-pulse-circle {
-            width: 12px;
-            height: 12px;
-            background-color: #0284c7;
-            border: 2px solid #bae6fd;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulsoAzul 2s infinite ease-in-out;
-        }
-        .live-text-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #0369a1;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+        }}
+        .live-circle-container {{
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 8px !important;
+            padding-top: 14px !important;
+        }}
+        .blue-pulse-circle {{
+            width: 12px !important;
+            height: 12px !important;
+            background-color: #38bdf8 !important;
+            border: 2px solid #ffffff !important;
+            border-radius: 50% !important;
+            display: inline-block !important;
+            animation: pulsoAzul 2s infinite ease-in-out !important;
+        }}
+        .live-text-label {{
+            font-size: 0.8rem !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+        }}
         </style>
         """, unsafe_allow_html=True)
         
@@ -427,7 +452,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h3 style='color: #0284c7; font-size: 1.3rem; margin-bottom: 15px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
