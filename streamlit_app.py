@@ -84,20 +84,6 @@ def obtener_descripcion_clima(wcode):
     }
     return descripciones.get(wcode, "Tiempo Variable 🌤️")
 
-def obtener_categoria_uv(uv):
-    if uv is None:
-        return "Bajo", "#16a34a"
-    if uv < 3:
-        return f"{uv:.1f} (Bajo)", "#16a34a"
-    elif uv < 6:
-        return f"{uv:.1f} (Moderado)", "#ca8a04"
-    elif uv < 8:
-        return f"{uv:.1f} (Alto)", "#ea580c"
-    elif uv < 11:
-        return f"{uv:.1f} (Muy Alto)", "#dc2626"
-    else:
-        return f"{uv:.1f} (Extremo)", "#7c3aed"
-
 def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_actual):
     if wcode in [95, 96, 99]:
         return "⛈️", "Alerta por tormentas eléctricas. Evitá permanecer en espacios abiertos y resguardá vehículos."
@@ -125,7 +111,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (BUSCADOR LIMPIO)
+# PANTALLA 1: INICIO (PANTALLA ORIGINAL Y LIMPIA EN BLANCO)
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -137,55 +123,55 @@ if not st.session_state.resultado_activo:
     }
 
     .stApp {
-        background-color: #f0f4f8 !important;
+        background-color: #ffffff !important;
     }
     
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); border-color: #38bdf8; }
-        50% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.5); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); border-color: #38bdf8; }
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
 
     div[data-baseweb="input"] {
         border-radius: 45px !important;
         padding: 8px 20px !important;
-        border: 2px solid #38bdf8 !important;
+        border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
-        font-size: 1.15rem !important;
-        background-color: #ffffff !important;
+        font-size: 1.25rem !important;
+        background-color: #f8fafc !important;
     }
     div[data-baseweb="input"] input {
-        font-size: 1.1rem !important;
+        font-size: 1.15rem !important;
     }
 
     .stButton > button {
         border-radius: 40px !important;
-        height: 3.5rem !important;
-        font-size: 1.15rem !important;
+        height: 3.6rem !important;
+        font-size: 1.25rem !important;
         font-weight: 700 !important;
         border: None !important;
         background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
         color: white !important;
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.25) !important;
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
         transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4) !important;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
 
     div[data-testid="stColumn"] .stButton > button {
-        background: #ffffff !important;
+        background: #e0f2fe !important;
         color: #0369a1 !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1.5px solid #bae6fd !important;
         border-radius: 30px !important;
-        height: 2.8rem !important;
-        font-size: 0.9rem !important;
+        height: 3rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
     }
     div[data-testid="stColumn"] .stButton > button:hover {
-        background: #e0f2fe !important;
+        background: #bae6fd !important;
         color: #0284c7 !important;
         border-color: #38bdf8 !important;
     }
@@ -201,14 +187,14 @@ if not st.session_state.resultado_activo:
     with st.form(key="search_form"):
         lugar_input = st.text_input(
             label="Ubicación",
-            placeholder="🔍 Escribe un barrio, localidad o departamento de Uruguay...",
+            placeholder="🔍 Escribe una localidad o departamento (Presiona Enter o haz clic)...",
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
