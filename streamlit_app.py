@@ -311,6 +311,79 @@ else:
             z-index: 10 !important;
         }}
 
+        /* ---------------------------------------------------------
+           ANIMACIONES ESPECÍFICAS PARA CADA TIPO DE CLIMA
+        --------------------------------------------------------- */
+        
+        /* 1. Sol: Tintineo y destello de rayos */
+        @keyframes sunTwinkle {{
+            0% {{ transform: scale(1) rotate(0deg); filter: brightness(1) drop-shadow(0 0 2px rgba(255,215,0,0.5)); }}
+            25% {{ transform: scale(1.15) rotate(6deg); filter: brightness(1.4) drop-shadow(0 0 10px rgba(255,223,0,0.9)); }}
+            50% {{ transform: scale(1.05) rotate(0deg); filter: brightness(1.1) drop-shadow(0 0 4px rgba(255,215,0,0.6)); }}
+            75% {{ transform: scale(1.18) rotate(-6deg); filter: brightness(1.5) drop-shadow(0 0 12px rgba(255,223,0,1)); }}
+            100% {{ transform: scale(1) rotate(0deg); filter: brightness(1) drop-shadow(0 0 2px rgba(255,215,0,0.5)); }}
+        }}
+
+        /* 2. Lluvia: Vibración vertical simulando caída de agua */
+        @keyframes rainDrop {{
+            0% {{ transform: translateY(0px); }}
+            25% {{ transform: translateY(4px); }}
+            50% {{ transform: translateY(-2px); }}
+            75% {{ transform: translateY(5px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        /* 3. Viento: Movimiento horizontal simulando ráfagas */
+        @keyframes windBlow {{
+            0% {{ transform: translateX(0px) skewX(0deg); }}
+            25% {{ transform: translateX(8px) skewX(-5deg); }}
+            50% {{ transform: translateX(-4px) skewX(3deg); }}
+            75% {{ transform: translateX(6px) skewX(-3deg); }}
+            100% {{ transform: translateX(0px) skewX(0deg); }}
+        }}
+
+        /* 4. Tormentas: Sacudida eléctrica con destellos */
+        @keyframes stormIcon {{
+            0% {{ transform: translateX(0) scale(1); filter: brightness(1); }}
+            20% {{ transform: translateX(-4px) scale(1.06); filter: brightness(1.4); }}
+            40% {{ transform: translateX(4px) scale(1.06); filter: brightness(0.8); }}
+            60% {{ transform: translateX(-3px) scale(1.02); filter: brightness(1.5); }}
+            80% {{ transform: translateX(3px) scale(1.02); filter: brightness(1); }}
+            100% {{ transform: translateX(0) scale(1); filter: brightness(1); }}
+        }}
+
+        /* 5. Nublado: Flotación suave y lenta */
+        @keyframes floatCloud {{
+            0% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-6px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        .animated-sun {{
+            display: inline-block;
+            animation: sunTwinkle 2s ease-in-out infinite;
+        }}
+
+        .animated-rain {{
+            display: inline-block;
+            animation: rainDrop 0.8s ease-in-out infinite;
+        }}
+
+        .animated-wind {{
+            display: inline-block;
+            animation: windBlow 1.8s ease-in-out infinite;
+        }}
+
+        .animated-storm {{
+            display: inline-block;
+            animation: stormIcon 1.2s ease-in-out infinite;
+        }}
+
+        .animated-cloud {{
+            display: inline-block;
+            animation: floatCloud 3s ease-in-out infinite;
+        }}
+
         /* TARJETA HOY - ESTILO INUMET AZUL OSCURO */
         .card-inumet-hoy {{
             background: #0f2744 !important;
@@ -377,11 +450,28 @@ else:
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
         # -----------------------------------------------------
+        # FUNCIÓN AUXILIAR PARA SELECCIONAR LA ANIMACIÓN CORRECTA
+        # -----------------------------------------------------
+        def obtener_clase_animacion(icono):
+            if "☀️" in icono or "🌤️" in icono:
+                return "animated-sun"
+            elif "🌧️" in icono or "🌦️" in icono:
+                return "animated-rain"
+            elif "🌬️" in icono or "💨" in icono:
+                return "animated-wind"
+            elif "⛈️" in icono or "🌩️" in icono or "⚡" in icono:
+                return "animated-storm"
+            else:
+                return "animated-cloud"
+
+        # -----------------------------------------------------
         # TARJETA 1: HOY (PLACA AZUL OSCURA ESTILO INUMET)
         # -----------------------------------------------------
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         t_min_hoy = daily.get("temperature_2m_min", [temp_actual])[0]
         
+        clase_animacion_hoy = obtener_clase_animacion(icono_humano)
+
         st.markdown(f"""
         <div class="card-inumet-hoy">
             <div style="font-size: 0.9rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">
@@ -392,7 +482,7 @@ else:
                     <span style="font-size: 2.8rem; font-weight: 800; color: #ffffff;">{temp_actual}°C</span>
                     <span style="font-size: 1.5rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°C</span>
                 </div>
-                <div style="font-size: 2.2rem;">{icono_humano}</div>
+                <div style="font-size: 2.6rem;" class="{clase_animacion_hoy}">{icono_humano}</div>
             </div>
             <hr style="border-color: rgba(255,255,255,0.15); margin: 12px 0;">
             <p style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; margin-bottom: 10px; line-height: 1.4;">
@@ -432,29 +522,12 @@ else:
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
+            emoji_clima = estado_texto.split()[-1] if estado_texto else "🌤️"
+            texto_sin_emoji = " ".join(estado_texto.split()[:-1]) if len(estado_texto.split()) > 1 else estado_texto
+            
+            clase_anim_ext = obtener_clase_animacion(emoji_clima)
+            
             st.markdown(f"""
             <div class="card-inumet-semana">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.9rem; font-weight: 800; color: #0284c7;">{etiquetas[i-1]} ({fecha_val})</span>
-                    <span style="font-size: 1.3rem; font-weight: 800; color: #0f172a;">{tmin_val}°C / {tmax_val}°C</span>
-                </div>
-                <p style="font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 6px;">{estado_texto}</p>
-                <div style="font-size: 0.85rem; color: #64748b; line-height: 1.5;">
-                    🌧️ Prob. de lluvia: <b>{prob_val}%</b> ({lluvia_val} mm) &nbsp;|&nbsp; 💨 Viento máx: <b>{viento_val} km/h</b>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # CARTA METODOLÓGICA PROFESIONAL
-        st.markdown("""
-        <div class="fuentes-card">
-            <p style="margin: 0 0 4px 0; font-weight: 700; color: #38bdf8; font-size: 0.88rem;">
-                🛡️ Consolidador Metodológico y Fuentes Integradas
-            </p>
-            <p style="margin: 0; line-height: 1.4; color: #cbd5e1; font-size: 0.82rem;">
-                Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
-                <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
-                oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+                    <span style="font-size: 0.9rem; font-weight: 800;
