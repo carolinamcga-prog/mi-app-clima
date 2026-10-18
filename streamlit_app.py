@@ -63,94 +63,53 @@ def es_coordenada_uruguay(lat, lon):
 
 def obtener_descripcion_clima(wcode):
     descripciones = {
-        0: "Cielo Despejado ☀️",
-        1: "Poco Nuboso 🌤️",
-        2: "Parcialmente Nublado ⛅",
-        3: "Nublado / Cubierto ☁️",
-        45: "Niebla 🌫️",
-        48: "Neblina Helada 🌫️",
-        51: "Llovizna Leve 🌧️",
-        53: "Llovizna Moderada 🌧️",
-        55: "Garúa Densa 🌧️",
-        61: "Lluvia Leve 🌧️",
-        63: "Lluvia Moderada 🌧️",
-        65: "Lluvia Torrencial 🌧️⚡",
-        80: "Chubascos Leves 🌦️",
-        81: "Chubascos Moderados 🌧️",
-        82: "Chubascos Violentos ⛈️",
-        95: "Tormenta Eléctrica ⛈️⚡",
-        96: "Tormenta con Granizo 🌩️🧊",
-        99: "Tormenta con Granizo Fuerte 🌩️🧊"
+        0: "Cielo Despejado",
+        1: "Poco Nuboso",
+        2: "Parcialmente Nublado",
+        3: "Nublado / Cubierto",
+        45: "Niebla",
+        48: "Neblina Helada",
+        51: "Llovizna Leve",
+        53: "Llovizna Moderada",
+        55: "Garúa Densa",
+        61: "Lluvia Leve",
+        63: "Lluvia Moderada",
+        65: "Lluvia Torrencial",
+        80: "Chubascos Leves",
+        81: "Chubascos Moderados",
+        82: "Chubascos Violentos",
+        95: "Tormenta Eléctrica",
+        96: "Tormenta con Granizo",
+        99: "Tormenta con Granizo Fuerte"
     }
-    return descripciones.get(wcode, "Tiempo Variable 🌤️")
+    return descripciones.get(wcode, "Tiempo Variable")
 
 def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_actual):
     if wcode in [95, 96, 99]:
-        return "⛈️", "Alerta por tormentas eléctricas. Evitá permanecer en espacios abiertos y resguardá vehículos."
+        return "Alerta por tormentas eléctricas. Evitá permanecer en espacios abiertos y resguardá vehículos."
     if lluvia_hoy > 1.5 or prob_lluvia > 60 or wcode in range(51, 68) or wcode in range(80, 100):
-        return "🌧️", f"Inestabilidad alta ({prob_lluvia}% prob. de lluvia). Llevá paraguas o piloto si salís."
+        return f"Inestabilidad alta ({prob_lluvia}% prob. de lluvia). Llevá paraguas o piloto si salís."
     if viento > 28:
-        return "🌬️", "Viento fuerte en la zona. Precaución al conducir en rutas y objetos sueltos en balcones."
+        return "Viento fuerte en la zona. Precaución al conducir en rutas y objetos sueltos en balcones."
     if uv_actual and uv_actual >= 8.0:
-        return "☀️", f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
+        return f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
     if wcode in [0, 1]:
-        return "🌤️", "Algo nuboso con períodos de claro. Condiciones estables y agradables."
-    return "⛅", "Cielo variable sin precipitaciones significativas previstas."
+        return "Algo nuboso con períodos de claro. Condiciones estables y agradables."
+    return "Cielo variable sin precipitaciones significativas previstas."
 
-# ---------------------------------------------------------
-# GENERADOR DE ILUSTRACIONES SVG (GRANDES Y DELICADAS)
-# ---------------------------------------------------------
-def obtener_svg_clima(icono_texto):
-    if "☀️" in icono_texto or "🌤️" in icono_texto:
-        # Sol radiante y elegante con animación de brillo rotativo suave
-        return """
-        <div class="svg-sol-animado" style="display:inline-block; width: 68px; height: 68px;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <circle cx="32" cy="32" r="14" fill="#FBBF24" opacity="0.9"/>
-                <path d="M32 8V4M32 60V56M56 32H60M4 32H8M49 15L52 12M12 52L15 49M49 49L52 52M12 12L15 15" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
-    elif "🌧️" in icono_texto or "🌦️" in icono_texto:
-        # Nube con lluvia fluida
-        return """
-        <div class="svg-lluvia-animado" style="display:inline-block; width: 68px; height: 68px;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#E2E8F0"/>
-                <path d="M24 54L22 60M32 54L30 60M40 54L38 60" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
-    elif "🌬️" in icono_texto or "💨" in icono_texto:
-        # Ráfagas de viento elegantes
-        return """
-        <div class="svg-viento-animado" style="display:inline-block; width: 68px; height: 68px;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M14 24H44C47.3 24 50 21.3 50 18C50 14.7 47.3 12 44 12C41.8 12 39.9 13.2 38.9 15" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"/>
-                <path d="M10 38H34C37.3 38 40 35.3 40 32C40 28.7 37.3 26 34 26C32.9 26 31.8 26.3 31 26.8" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
-                <path d="M18 52H28C30.2 52 32 50.2 32 48C32 45.8 30.2 44 28 44" stroke="#94A3B8" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
-    elif "⛈️" in icono_texto or "🌩️" in icono_texto or "⚡" in icono_texto:
-        # Tormenta con rayo eléctrico
-        return """
-        <div class="svg-tormenta-animado" style="display:inline-block; width: 68px; height: 68px;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 24H44.7C43.3 17.6 37.6 13 31 13C24.1 13 18.5 18.4 18.1 25.3C13.6 26.1 10 30 10 34.8C10 40 14.2 44.2 19.4 44.2H46C51 44.2 55 40.2 55 35.2C55 30.2 51 26.2 46 24Z" fill="#64748B"/>
-                <path d="M34 44L24 54H34L30 62L42 49H34L34 44Z" fill="#FBBF24"/>
-            </svg>
-        </div>
-        """
+# SISTEMA DE ETIQUETAS ESTÉTICAS (BADGES EDITORIALES SIN DIBUJOS)
+def obtener_badge_clima(texto_clima):
+    t = texto_clima.lower()
+    if "despejado" in t or "sol" in t:
+        return "<span style='background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>☀️ Despejado</span>"
+    elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t:
+        return "<span style='background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>🌧️ Precipitaciones</span>"
+    elif "tormenta" in t:
+        return "<span style='background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>⚡ Alerta Tormenta</span>"
+    elif "nuboso" in t or "nublado" in t or "cubierto" in t:
+        return "<span style='background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>☁️ Nubosidad</span>"
     else:
-        # Nube nublada / parcial flotando suave
-        return """
-        <div class="svg-nube-animado" style="display:inline-block; width: 68px; height: 68px;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
-            </svg>
-        </div>
-        """
+        return f"<span style='background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>{texto_clima}</span>"
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -269,7 +228,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (ESTILO TARJETAS INUMET)
+# PANTALLA 2: RESULTADOS (DISEÑO EDITORIAL & UX PREMIUM)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -346,7 +305,9 @@ else:
         if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
             lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
 
-        icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
+        frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
+        desc_actual = obtener_descripcion_clima(wcode_actual)
+        badge_hoy = obtener_badge_clima(desc_actual)
 
         st.markdown(f"""
         <style>
@@ -357,7 +318,7 @@ else:
         }}
 
         .stApp {{
-            background: linear-gradient(180deg, #1d517c 0%, #3a75a4 40%, #0d2b45 100%) !important;
+            background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
             background-attachment: fixed !important;
         }}
 
@@ -366,152 +327,127 @@ else:
             z-index: 10 !important;
         }}
 
-        /* ---------------------------------------------------------
-           ANIMACIONES FLUIDAS, DELICADAS Y SIN EFECTO SALTÓN
-        --------------------------------------------------------- */
-        
-        /* Brillo y rotación suave para el sol */
-        @keyframes sunGlow {{
-            0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-            50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
-            100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-        }}
-
-        /* Desplazamiento sutil de gotas de lluvia */
-        @keyframes rainSlide {{
-            0% {{ transform: translateY(0px); opacity: 0.8; }}
-            50% {{ transform: translateY(3px); opacity: 1; }}
-            100% {{ transform: translateY(0px); opacity: 0.8; }}
-        }}
-
-        /* Balanceo suave horizontal para el viento */
-        @keyframes windSway {{
-            0% {{ transform: translateX(0px); }}
-            50% {{ transform: translateX(4px); }}
-            100% {{ transform: translateX(0px); }}
-        }}
-
-        /* Parpadeo delicado para tormentas */
-        @keyframes stormFlash {{
-            0% {{ opacity: 1; filter: brightness(1); }}
-            50% {{ opacity: 0.85; filter: brightness(1.3); }}
-            100% {{ opacity: 1; filter: brightness(1); }}
-        }}
-
-        /* Flotación muy leve para nubes */
-        @keyframes cloudFloat {{
-            0% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(-3px); }}
-            100% {{ transform: translateY(0px); }}
-        }}
-
-        .svg-sol-animado svg {{ animation: sunGlow 12s linear infinite; }}
-        .svg-lluvia-animado svg {{ animation: rainSlide 2s ease-in-out infinite; }}
-        .svg-viento-animado svg {{ animation: windSway 3s ease-in-out infinite; }}
-        .svg-tormenta-animado svg {{ animation: stormFlash 1.8s ease-in-out infinite; }}
-        .svg-nube-animado svg {{ animation: cloudFloat 4s ease-in-out infinite; }}
-
-        /* TARJETA HOY - ESTILO INUMET AZUL OSCURO */
-        .card-inumet-hoy {{
-            background: #0f2744 !important;
-            border-radius: 20px !important;
-            padding: 24px !important;
+        /* TARJETA EDITORIAL HOY */
+        .card-editorial-hoy {{
+            background: rgba(15, 32, 56, 0.75) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px !important;
+            padding: 28px !important;
             color: #ffffff !important;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
             margin-bottom: 20px !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            transition: transform 0.3s ease;
+        }}
+        .card-editorial-hoy:hover {{
+            border-color: rgba(56, 189, 248, 0.4) !important;
         }}
 
-        /* TARJETA MAÑANA - ESTILO INUMET BLANCA */
-        .card-inumet-semana {{
-            background: #ffffff !important;
+        /* TARJETA EDITORIAL EXTENDIDO */
+        .card-editorial-semana {{
+            background: rgba(255, 255, 255, 0.96) !important;
             border-radius: 20px !important;
-            padding: 20px !important;
+            padding: 20px 24px !important;
             color: #0f172a !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18) !important;
-            margin-bottom: 20px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+            margin-bottom: 16px !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
         }}
 
         .fuentes-card {{
-            background: rgba(15, 39, 68, 0.85) !important;
+            background: rgba(10, 25, 47, 0.85) !important;
+            backdrop-filter: blur(10px);
             border-radius: 16px !important;
-            padding: 16px 20px !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            padding: 18px 22px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
             margin-top: 25px !important;
             font-size: 0.85rem !important;
-            color: #e2e8f0 !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+            color: #cbd5e1 !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
         }}
         
         .titulo-pantalla {{
             text-align: center !important;
             color: #ffffff !important;
-            font-size: 2.2rem !important;
+            font-size: 2rem !important;
             font-weight: 800 !important;
+            letter-spacing: -0.5px;
             margin: 0 !important;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
         }}
         
         .subtitulo-pantalla {{
             text-align: center !important;
-            color: #fbbf24 !important;
-            font-size: 1.1rem !important;
+            color: #38bdf8 !important;
+            font-size: 1.05rem !important;
             font-weight: 700 !important;
-            margin-top: -5px !important;
+            letter-spacing: 0.5px;
+            margin-top: 2px !important;
         }}
         </style>
         """, unsafe_allow_html=True)
         
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
-            if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
+            if st.button("← Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 class='titulo-pantalla'>Tiempo según MeteoUy</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
             st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.8rem;'>EN VIVO</span></div>", unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # TARJETA 1: HOY (PLACA AZUL OSCURA ESTILO INUMET)
+        # TARJETA 1: HOY (ESTILO EDITORIAL MINIMALISTA)
         # -----------------------------------------------------
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         t_min_hoy = daily.get("temperature_2m_min", [temp_actual])[0]
         
-        svg_hoy_html = obtener_svg_clima(icono_humano)
-
         st.markdown(f"""
-        <div class="card-inumet-hoy">
-            <div style="font-size: 0.9rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px; margin-bottom: 8px;">
-                HOY:
-            </div>
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div class="card-editorial-hoy">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
                 <div>
-                    <span style="font-size: 2.8rem; font-weight: 800; color: #ffffff;">{temp_actual}°C</span>
-                    <span style="font-size: 1.5rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°C</span>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>
+                    <div style="margin-top: 6px;">{badge_hoy}</div>
                 </div>
-                <div>{svg_hoy_html}</div>
+                <div style="text-align: right;">
+                    <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
+                    <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
+                </div>
             </div>
-            <hr style="border-color: rgba(255,255,255,0.15); margin: 12px 0;">
-            <p style="font-size: 1.05rem; font-weight: 700; color: #f8fafc; margin-bottom: 10px; line-height: 1.4;">
+            
+            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0 16px 0; line-height: 1.5;">
                 {frase_humana}
             </p>
-            <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
-                <div>💨 <b>Viento:</b> {viento_actual} km/h</div>
-                <div>💧 <b>Humedad:</b> {humedad_actual}% &nbsp;|&nbsp; 📊 <b>Presión:</b> {presion_actual} hPa</div>
-                <div>🌧️ <b>Probabilidad de lluvia:</b> {prob_lluvia_hoy}% ({lluvia_diaria_hoy} mm)</div>
+            
+            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div>
+                </div>
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div>
+                </div>
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # TARJETA 2: EXTENDIDO (PLACAS BLANCAS)
+        # TARJETA 2: PRONÓSTICO EXTENDIDO
         # -----------------------------------------------------
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.2rem; margin-bottom: 12px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -526,6 +462,7 @@ else:
         for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
             estado_texto = obtener_descripcion_clima(codigo_clima)
+            badge_ext = obtener_badge_clima(estado_texto)
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
@@ -534,22 +471,23 @@ else:
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            svg_ext_html = obtener_svg_clima(estado_texto)
-            
             st.markdown(f"""
-            <div class="card-inumet-semana">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <div class="card-editorial-semana">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
-                        <span style="font-size: 0.9rem; font-weight: 800; color: #0284c7;">{etiquetas[i-1]} ({fecha_val})</span>
-                        <p style="font-size: 0.95rem; font-weight: 700; color: #334155; margin: 4px 0 0 0;">{estado_texto}</p>
+                        <span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}°C / {tmax_val}°C</span>
-                        <div style="transform: scale(0.65); margin: -10px -15px;">{svg_ext_html}</div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
                     </div>
                 </div>
-                <div style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-top: 6px;">
-                    🌧️ Prob. de lluvia: <b>{prob_val}%</b> ({lluvia_val} mm) &nbsp;|&nbsp; 💨 Viento máx: <b>{viento_val} km/h</b>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div>{badge_ext}</div>
+                    <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
+                        Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b>
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -557,10 +495,10 @@ else:
         # CARTA METODOLÓGICA PROFESIONAL
         st.markdown("""
         <div class="fuentes-card">
-            <p style="margin: 0 0 4px 0; font-weight: 700; color: #38bdf8; font-size: 0.88rem;">
+            <p style="margin: 0 0 6px 0; font-weight: 700; color: #38bdf8; font-size: 0.85rem; letter-spacing: 0.5px;">
                 🛡️ Consolidador Metodológico y Fuentes Integradas
             </p>
-            <p style="margin: 0; line-height: 1.4; color: #cbd5e1; font-size: 0.82rem;">
+            <p style="margin: 0; line-height: 1.5; color: #cbd5e1; font-size: 0.8rem;">
                 Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
                 <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
                 oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
