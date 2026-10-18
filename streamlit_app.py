@@ -97,18 +97,44 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
         return "Algo nuboso con períodos de claro. Condiciones estables y agradables."
     return "Cielo variable sin precipitaciones significativas previstas."
 
-def obtener_badge_clima(texto_clima):
+# GENERADOR DE DIBUJOS VECTORIALES (SVG) CON ANIMACIONES FLUIDAS
+def obtener_dibujo_animado(wcode, texto_clima):
     t = texto_clima.lower()
-    if "despejado" in t or "sol" in t:
-        return "<span style='background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>☀️ Despejado</span>"
-    elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t:
-        return "<span style='background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>🌧️ Precipitaciones</span>"
-    elif "tormenta" in t:
-        return "<span style='background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>⚡ Alerta Tormenta</span>"
-    elif "nuboso" in t or "nublado" in t or "cubierto" in t:
-        return "<span style='background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>☁️ Nubosidad</span>"
+    if wcode in [0, 1] or "despejado" in t or "sol" in t:
+        return """
+        <div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <circle cx="32" cy="32" r="14" fill="#FBBF24"/>
+                <path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """
+    elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t or wcode in range(51, 68) or wcode in range(80, 83):
+        return """
+        <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
+                <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """
+    elif "tormenta" in t or wcode in [95, 96, 99]:
+        return """
+        <div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/>
+                <path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/>
+            </svg>
+        </div>
+        """
     else:
-        return f"<span style='background: rgba(255, 255, 255, 0.1); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px;'>{texto_clima}</span>"
+        return """
+        <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
+            </svg>
+        </div>
+        """
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -300,7 +326,7 @@ else:
 
         frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
         desc_actual = obtener_descripcion_clima(wcode_actual)
-        badge_hoy = obtener_badge_clima(desc_actual)
+        dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual)
 
         st.markdown(f"""
         <style>
@@ -319,6 +345,38 @@ else:
             position: relative !important;
             z-index: 10 !important;
         }}
+
+        /* ---------------------------------------------------------
+           ANIMACIONES FLUIDAS Y SUAVES PARA LOS DIBUJOS VECTORIALES
+        --------------------------------------------------------- */
+        @keyframes spinGlow {{
+            0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
+            50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
+            100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
+        }}
+
+        @keyframes slideRain {{
+            0% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(3px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        @keyframes flashStorm {{
+            0% {{ filter: brightness(1); }}
+            50% {{ filter: brightness(1.35); }}
+            100% {{ filter: brightness(1); }}
+        }}
+
+        @keyframes floatCloud {{
+            0% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-4px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
+        .anim-lluvia svg {{ animation: slideRain 2.2s ease-in-out infinite; }}
+        .anim-tormenta svg {{ animation: flashStorm 1.6s ease-in-out infinite; }}
+        .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
 
         .card-editorial-hoy {{
             background: rgba(15, 32, 56, 0.75) !important;
@@ -391,17 +449,20 @@ else:
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        # TARJETA HOY CORREGIDA (HTML EN LÍNEA SEGURA)
+        # TARJETA HOY
         html_hoy = f"""
         <div class="card-editorial-hoy">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                 <div>
                     <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>
-                    <div style="margin-top: 6px;">{badge_hoy}</div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div>
                 </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
-                    <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div>{dibujo_hoy}</div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
+                        <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
+                    </div>
                 </div>
             </div>
             <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>
@@ -442,7 +503,7 @@ else:
         for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
             estado_texto = obtener_descripcion_clima(codigo_clima)
-            badge_ext = obtener_badge_clima(estado_texto)
+            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto)
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
@@ -458,12 +519,15 @@ else:
                         <span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>
                         <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div>
                     </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div>{dibujo_ext}</div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
+                        </div>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <div>{badge_ext}</div>
+                    <div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>
                     <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
                         Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b>
                     </div>
