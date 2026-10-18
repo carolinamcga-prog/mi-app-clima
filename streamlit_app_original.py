@@ -489,3 +489,5 @@ else:
                         <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
                         <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
                     </div>
+                </div>
+                """, unsafe_allow_html=True)
