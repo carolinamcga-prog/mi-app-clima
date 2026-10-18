@@ -7,7 +7,7 @@ import urllib.parse
 # CONFIGURACIÓN DE PÁGINA
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="MeteoUy",
+    page_title="MeteoUy - Pronóstico Profesional",
     page_icon="🌤️",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -59,40 +59,95 @@ COORDS_URUGUAY = {
 }
 
 def es_coordenada_uruguay(lat, lon):
-    """Verifica si las coordenadas pertenecen estrictamente al mapa de Uruguay"""
     return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
 
-def obtener_descripcion_clima(wcode):
+def obtener_descripcion_clima(wcode, is_day=1):
+    if wcode == 0:
+        return "Noche Despejada" if is_day == 0 else "Cielo Despejado"
+    if wcode == 1:
+        return "Noche Poco Nubosa" if is_day == 0 else "Poco Nuboso"
+    
     descripciones = {
-        0: "Cielo Despejado ☀️",
-        1: "Poco Nuboso 🌤️",
-        2: "Parcialmente Nublado ⛅",
-        3: "Nublado / Cubierto ☁️",
-        45: "Niebla 🌫️",
-        48: "Neblina Helada 🌫️",
-        51: "Llovizna Leve 🌧️",
-        53: "Llovizna Moderada 🌧️",
-        55: "Garúa Densa 🌧️",
-        61: "Lluvia Leve 🌧️",
-        63: "Lluvia Moderada 🌧️",
-        65: "Lluvia Torrencial 🌧️⚡",
-        80: "Chubascos Leves 🌦️",
-        81: "Chubascos Moderados 🌧️",
-        82: "Chubascos Violentos ⛈️",
-        95: "Tormenta Eléctrica ⛈️⚡",
-        96: "Tormenta con Granizo 🌩️🧊",
-        99: "Tormenta con Granizo Fuerte 🌩️🧊"
+        2: "Parcialmente Nublado",
+        3: "Nublado / Cubierto",
+        45: "Niebla",
+        48: "Neblina Helada",
+        51: "Llovizna Leve",
+        53: "Llovizna Moderada",
+        55: "Garúa Densa",
+        61: "Lluvia Leve",
+        63: "Lluvia Moderada",
+        65: "Lluvia Torrencial",
+        80: "Chubascos Leves",
+        81: "Chubascos Moderados",
+        82: "Chubascos Violentos",
+        95: "Tormenta Eléctrica",
+        96: "Tormenta con Granizo",
+        99: "Tormenta con Granizo Fuerte"
     }
-    return descripciones.get(wcode, "Tiempo Variable 🌤️")
+    return descripciones.get(wcode, "Tiempo Variable")
 
-def generar_titular_pronostico_horas(wcode, lluvia_hoy, viento):
-    if lluvia_hoy > 1.5 or wcode in range(51, 68) or wcode in range(80, 100):
-        return "🌧️", "Se esperan desmejoras y probabilidad de precipitaciones en las próximas horas. Conviene estar prevenido."
+def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_actual):
+    if wcode in [95, 96, 99]:
+        return "Alerta por tormentas eléctricas. Evitá permanecer en espacios abiertos y resguardá vehículos."
+    if lluvia_hoy > 1.5 or prob_lluvia > 60 or wcode in range(51, 68) or wcode in range(80, 100):
+        return f"Inestabilidad alta ({prob_lluvia}% prob. de lluvia). Llevá paraguas o piloto si salís."
     if viento > 28:
-        return "🌬️", "Atención: se prevé un incremento notable de la intensidad del viento hacia la tarde y noche."
-    if wcode == 0 or wcode == 1:
-        return "🌤️", "Condiciones estables que se mantendrán favorables durante el resto de la jornada."
-    return "⛅", "Cielo variable con tendencia a mantenerse sin cambios significativos en las horas siguientes."
+        return "Viento fuerte en la zona. Precaución al conducir en rutas y objetos sueltos en balcones."
+    if uv_actual and uv_actual >= 8.0:
+        return f"Radiación UV en nivel {uv_actual:.1f} (Muy Alto). Usá protector solar SPF 50+ y lentes de sol."
+    if wcode in [0, 1]:
+        return "Condiciones estables y agradables para el momento del día."
+    return "Cielo variable sin precipitaciones significativas previstas."
+
+# GENERADOR DE DIBUJOS VECTORIALES (ADAPTADO DÍA / NOCHE)
+def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
+    t = texto_clima.lower()
+    
+    # Si es de noche y está despejado
+    if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
+        return """
+        <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/>
+            </svg>
+        </div>
+        """
+    elif wcode in [0, 1] or "despejado" in t or "sol" in t:
+        return """
+        <div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <circle cx="32" cy="32" r="14" fill="#FBBF24"/>
+                <path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """
+    elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t or wcode in range(51, 68) or wcode in range(80, 83):
+        return """
+        <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
+                <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        """
+    elif "tormenta" in t or wcode in [95, 96, 99]:
+        return """
+        <div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/>
+                <path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/>
+            </svg>
+        </div>
+        """
+    else:
+        return """
+        <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
+            </svg>
+        </div>
+        """
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -108,7 +163,7 @@ def mostrar_logo():
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 # =========================================================
-# PANTALLA 1: INICIO (BUSCADOR CON SOPORTE ENTER Y CLIC)
+# PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -211,7 +266,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS Y PRONÓSTICO
+# PANTALLA 2: RESULTADOS
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -220,14 +275,12 @@ else:
     lat, lon = None, None
     lugar_encontrado = lugar_ingresado.title()
     
-    # 1. Búsqueda prioritaria en base interna uruguaya
     for clave, coords in COORDS_URUGUAY.items():
         if clave in lugar_lower or lugar_lower in clave:
             lat, lon = coords
             lugar_encontrado = clave.title()
             break
             
-    # 2. Búsqueda en API con filtro estricto geográfico
     if lat is None and lon is None:
         try:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
@@ -250,7 +303,7 @@ else:
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
         st.markdown("""
         <style>
-        .stApp { background-color: #f0f9ff !important; }
+        .stApp { background-color: #f0f4f8 !important; }
         </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
@@ -260,7 +313,7 @@ else:
             st.session_state.lugar_actual = ""
             st.rerun()
     else:
-        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&forecast_days=3&timezone=auto"
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
         
         try:
             data = requests.get(url_meteo, timeout=10).json()
@@ -272,24 +325,22 @@ else:
         
         temp_actual = current.get("temperature_2m", 0)
         humedad_actual = current.get("relative_humidity_2m", 0)
-        sensacion_actual = current.get("apparent_temperature", 0)
-        presion_actual = current.get("surface_pressure", 1013)
         viento_actual = current.get("wind_speed_10m", 0)
         wcode_actual = current.get("weathercode", 0)
+        uv_actual = current.get("uv_index", 0.0)
+        is_day_actual = current.get("is_day", 1)  # 1 = Día, 0 = Noche
         
+        prob_lluvia_hoy = 0
+        if daily.get("precipitation_probability_max") and len(daily["precipitation_probability_max"]) > 0:
+            prob_lluvia_hoy = daily["precipitation_probability_max"][0] or 0
+
         lluvia_diaria_hoy = 0.0
         if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
             lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
 
-        icono_humano, frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, viento_actual)
-        
-        # Selección dinámica de la imagen atmosférica de fondo
-        if lluvia_diaria_hoy > 1.5 or wcode_actual in range(51, 68) or wcode_actual in range(80, 100):
-            bg_url = "https://images.unsplash.com/photo-1519692933481-e162a57d6721?q=80&w=1920&auto=format&fit=crop" # Lluvia
-        elif wcode_actual in [2, 3, 45, 48]:
-            bg_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920&auto=format&fit=crop" # Nubes / Nublado
-        else:
-            bg_url = "https://images.unsplash.com/photo-1601297183305-6df142704ea2?q=80&w=1920&auto=format&fit=crop" # Sol / Despejado
+        frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
+        desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
+        dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
 
         st.markdown(f"""
         <style>
@@ -299,195 +350,212 @@ else:
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }}
 
-        /* --- CAPA 0: FONDO CON MOVIMIENTO SUAVE Y TENUE --- */
-        @keyframes deslizarFondoTenue {{
-            0% {{ background-position: 0% 50%; }}
-            50% {{ background-position: 100% 50%; }}
-            100% {{ background-position: 0% 50%; }}
-        }}
-
         .stApp {{
-            background: linear-gradient(rgba(11, 19, 41, 0.65), rgba(11, 19, 41, 0.55)), url('{bg_url}') !important;
-            background-size: 180% 180% !important;
+            background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
             background-attachment: fixed !important;
-            animation: deslizarFondoTenue 45s ease infinite !important;
         }}
 
-        /* --- CAPA 10: CONTENIDO DEL PRONÓSTICO (ESTÁTICO Y CRISALINO) --- */
         .block-container {{
             position: relative !important;
             z-index: 10 !important;
         }}
 
-        .panel-actual {{
-            background: white !important;
+        /* ANIMACIONES FLUIDAS EN CSS */
+        @keyframes spinGlow {{
+            0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
+            50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
+            100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
+        }}
+
+        @keyframes moonGlow {{
+            0% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
+            50% {{ transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }}
+            100% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
+        }}
+
+        @keyframes slideRain {{
+            0% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(3px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        @keyframes flashStorm {{
+            0% {{ filter: brightness(1); }}
+            50% {{ filter: brightness(1.35); }}
+            100% {{ filter: brightness(1); }}
+        }}
+
+        @keyframes floatCloud {{
+            0% {{ transform: translateY(0px); }}
+            50% {{ transform: translateY(-4px); }}
+            100% {{ transform: translateY(0px); }}
+        }}
+
+        .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
+        .anim-luna svg {{ animation: moonGlow 4s ease-in-out infinite; }}
+        .anim-lluvia svg {{ animation: slideRain 2.2s ease-in-out infinite; }}
+        .anim-tormenta svg {{ animation: flashStorm 1.6s ease-in-out infinite; }}
+        .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
+
+        .card-editorial-hoy {{
+            background: rgba(15, 32, 56, 0.75) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: 24px !important;
-            padding: 22px 25px !important;
-            border: 1.5px solid #bae6fd !important;
-            color: #0f172a !important;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.15) !important;
+            padding: 28px !important;
+            color: #ffffff !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
             margin-bottom: 20px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-around !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
         }}
 
-        .human-headline {{
-            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
-            border-left: 5px solid #0284c7 !important;
-            padding: 18px 22px !important;
-            border-radius: 0 16px 16px 0 !important;
-            margin-bottom: 25px !important;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.1) !important;
-            border-top: 1.5px solid #bae6fd !important;
-            border-right: 1.5px solid #bae6fd !important;
-            border-bottom: 1.5px solid #bae6fd !important;
-        }}
-
-        .cuadrado-pronostico {{
-            background: white !important;
+        .card-editorial-semana {{
+            background: rgba(255, 255, 255, 0.96) !important;
             border-radius: 20px !important;
-            padding: 20px 15px !important;
-            border: 1.5px solid #bae6fd !important;
+            padding: 20px 24px !important;
             color: #0f172a !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+            margin-bottom: 16px !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        }}
+
+        .footer-metodologico {{
             text-align: center !important;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1) !important;
-            margin-bottom: 20px !important;
-            height: 360px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
+            margin-top: 35px !important;
+            padding: 18px 20px !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #94a3b8 !important;
+            font-size: 0.78rem !important;
+            line-height: 1.5 !important;
         }}
         
-        @keyframes pulsoAzul {{
-            0% {{
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
-            }}
-            70% {{
-                transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(2, 132, 199, 0);
-            }}
-            100% {{
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
-            }}
-        }}
-        .titulo-marca-lugar {{
+        .titulo-pantalla {{
             text-align: center !important;
             color: #ffffff !important;
-            font-size: 2.4rem !important;
+            font-size: 2rem !important;
             font-weight: 800 !important;
+            letter-spacing: -0.5px;
             margin: 0 !important;
-            letter-spacing: -0.5px !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
         }}
-        .live-circle-container {{
-            display: flex !important;
-            align-items: center !important;
-            justify-content: flex-end !important;
-            gap: 8px !important;
-            padding-top: 14px !important;
-        }}
-        .blue-pulse-circle {{
-            width: 12px !important;
-            height: 12px !important;
-            background-color: #38bdf8 !important;
-            border: 2px solid #ffffff !important;
-            border-radius: 50% !important;
-            display: inline-block !important;
-            animation: pulsoAzul 2s infinite ease-in-out !important;
-        }}
-        .live-text-label {{
-            font-size: 0.8rem !important;
+        
+        .subtitulo-pantalla {{
+            text-align: center !important;
+            color: #38bdf8 !important;
+            font-size: 1.05rem !important;
             font-weight: 700 !important;
-            color: #ffffff !important;
-            letter-spacing: 0.5px !important;
-            text-transform: uppercase !important;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+            letter-spacing: 0.5px;
+            margin-top: 2px !important;
         }}
         </style>
         """, unsafe_allow_html=True)
         
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
-            if st.button("🌧️↩️ Volver", help="Buscar otra localidad"):
+            if st.button("← Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h1 class='titulo-marca-lugar'>{lugar_encontrado}</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
+            st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("""
-            <div class='live-circle-container'>
-                <span class='blue-pulse-circle'></span>
-                <span class='live-text-label'>En vivo</span>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="panel-actual">
-            <div style="text-align: center;">
-                <span style="font-size: 3.8rem; font-weight: 800; color: #0284c7;">{temp_actual}°C</span>
-                <p style="font-size: 0.9rem; font-weight: 700; color: #475569; margin: 0;">{obtener_descripcion_clima(wcode_actual)}</p>
+        t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
+        
+        # TARJETA HOY
+        html_hoy = f"""
+        <div class="card-editorial-hoy">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div>{dibujo_hoy}</div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
+                        <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
+                    </div>
+                </div>
             </div>
-            <div style="border-left: 2px solid #cbd5e1; height: 75px; margin: 0 10px;"></div>
-            <div style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.6;">
-                <div>🌡️ Sensación: <b>{sensacion_actual}°C</b></div>
-                <div>💧 Humedad: <b>{humedad_actual}%</b></div>
-                <div>💨 Viento: <b>{viento_actual} km/h</b></div>
-                <div>📊 Presión: <b>{presion_actual} hPa</b></div>
+            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>
+            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div>
+                </div>
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div>
+                </div>
+                <div>
+                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div>
+                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div>
+                </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(html_hoy, unsafe_allow_html=True)
 
-        st.markdown(f"""
-        <div class="human-headline">
-            <p style="margin: 0; color: #0f172a; font-size: 1.1rem; font-weight: 700; line-height: 1.4;">
-                {icono_humano} {frase_humana}
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        # -----------------------------------------------------
+        # TARJETA 2: PRONÓSTICO EXTENDIDO
+        # -----------------------------------------------------
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
         t_min = daily.get("temperature_2m_min", [])
         lluvia = daily.get("precipitation_sum", [])
+        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
         viento_diario = daily.get("windspeed_10m_max", [])
         wcodes_daily = daily.get("weathercode", [])
         
-        cols = st.columns(3)
-        etiquetas = ["Hoy", "Mañana", "Pasado Mañana"]
+        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
         
-        for i in range(min(3, len(fechas))):
+        for i in range(1, min(3, len(fechas))):
             codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima)
+            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
+            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
             lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            with cols[i]:
-                st.markdown(f"""
-                <div class="cuadrado-pronostico">
+            html_semana = f"""
+            <div class="card-editorial-semana">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
-                        <h4 style="color: #0284c7; margin-bottom: 2px; font-weight: 800; font-size: 1.2rem;">{etiquetas[i]}</h4>
-                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 600;">{fecha_val}</p>
-                        <p style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; line-height: 1.2;">{estado_texto}</p>
+                        <span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div>
                     </div>
-                    <div>
-                        <hr style="border-color: #cbd5e1; margin: 6px 0 10px 0;">
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌡️ Máx:</b> {tmax_val} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>❄️ Mín:</b> {tmin_val} °C</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>🌧️ Lluvia:</b> {lluvia_val} mm</p>
-                        <p style="font-size: 0.98em; margin: 5px 0;"><b>💨 Viento:</b> {viento_val} km/h</p>
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div>{dibujo_ext}</div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
+                        </div>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>
+                    <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
+                        Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b>
+                    </div>
+                </div>
+            </div>
+            """
+            st.markdown(html_semana, unsafe_allow_html=True)
+
+        # PIE DE PÁGINA METODOLÓGICO (UX CLEAN FOOTER)
+        st.markdown("""
+        <div class="footer-metodologico">
+            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
+        </div>
+        """, unsafe_allow_html=True)
