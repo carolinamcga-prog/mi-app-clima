@@ -545,4 +545,25 @@ else:
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}°C / {tmax_val}°C</span>
-                        <div style="transform: scale(0.65);
+                        <div style="transform: scale(0.65); margin: -10px -15px;">{svg_ext_html}</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-top: 6px;">
+                    🌧️ Prob. de lluvia: <b>{prob_val}%</b> ({lluvia_val} mm) &nbsp;|&nbsp; 💨 Viento máx: <b>{viento_val} km/h</b>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # CARTA METODOLÓGICA PROFESIONAL
+        st.markdown("""
+        <div class="fuentes-card">
+            <p style="margin: 0 0 4px 0; font-weight: 700; color: #38bdf8; font-size: 0.88rem;">
+                🛡️ Consolidador Metodológico y Fuentes Integradas
+            </p>
+            <p style="margin: 0; line-height: 1.4; color: #cbd5e1; font-size: 0.82rem;">
+                Pronóstico procesado mediante ensamble dinámico de modelos numéricos globales de alta resolución 
+                <b>(ECMWF / IFS, GFS, ICON, WRF)</b>, telemetría satelital <b>GOES-16 (NOAA)</b>, monitoreo de alertas 
+                oficiales de <b>INUMET / MetSul</b>, y validación de superficie con la red de estaciones meteorológicas automáticas <b>(Davis / Wunderground)</b>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
