@@ -273,7 +273,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (CON EVOLUCIÓN HORARIA)
+# PANTALLA 2: RESULTADOS (CORREGIDO Y OPTIMIZADO)
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -543,7 +543,7 @@ else:
         st.markdown(html_hoy, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # SECCIÓN NUEVA: EVOLUCIÓN HORARIA (PRONÓSTICO POR HORAS)
+        # SECCIÓN DE EVOLUCIÓN HORARIA (CORREGIDA Y SEGURA)
         # -----------------------------------------------------
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px;'>⏱️ Evolución Próximas Horas</h3>", unsafe_allow_html=True)
         
@@ -553,15 +553,14 @@ else:
         h_wcodes = hourly.get("weathercode", [])
         h_isdays = hourly.get("is_day", [])
         
-        # Encontrar el índice de la hora actual para mostrar desde ahora en adelante
-        ahora_str = datetime.now().strftime("%Y-%m-%dT%H:00")
+        # Búsqueda segura del índice horario actual (evita fallos por formato de texto)
         start_idx = 0
+        ahora_actual_str = datetime.now().strftime("%Y-%m-%dT%H")
         for idx, t in enumerate(h_times):
-            if t >= ahora_str:
-                start_idx = idx
+            if t.startswith(ahora_actual_str) or t > datetime.now().strftime("%Y-%m-%dT%H:%M"):
+                start_idx = max(0, idx - 1)  # Empieza desde la hora actual o la inmediatamente anterior
                 break
         
-        # Generar las tarjetas deslizables para las próximas 24 horas
         html_hourly = "<div class='hourly-scroll-container'>"
         for i in range(start_idx, min(start_idx + 24, len(h_times))):
             t_iso = h_times[i]
@@ -636,7 +635,7 @@ else:
             """
             st.markdown(html_semana, unsafe_allow_html=True)
 
-        # PIE DE PÁGINA METODOLÓGICO (UX CLEAN FOOTER)
+        # PIE DE PÁGINA METODOLÓGICO
         st.markdown("""
         <div class="footer-metodologico">
             <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
