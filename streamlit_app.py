@@ -267,72 +267,73 @@ else:
         desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
         dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
 
-        st.markdown(f"""
+        # CSS GLOBAL DE RESULTADOS FUERA DE F-STRING
+        st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        .stApp, html, body, [class*="st-"] {{ font-family: 'Plus Jakarta Sans', sans-serif !important; }}
-        .stApp {{ background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important; background-attachment: fixed !important; }}
-        .block-container {{ position: relative !important; z-index: 10 !important; }}
+        .stApp, html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        .stApp { background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important; background-attachment: fixed !important; }
+        .block-container { position: relative !important; z-index: 10 !important; }
         
-        @keyframes spinGlow {{
-            0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-            50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
-            100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-        }}
-        @keyframes moonGlow {{
-            0% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
-            50% {{ transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }}
-            100% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
-        }}
-        @keyframes slideRain {{
-            0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(3px); }} 100% {{ transform: translateY(0px); }}
-        }}
-        @keyframes flashStorm {{
-            0% {{ filter: brightness(1); }} 50% {{ filter: brightness(1.35); }} 100% {{ filter: brightness(1); }}
-        }}
-        @keyframes floatCloud {{
-            0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-4px); }} 100% {{ transform: translateY(0px); }}
-        }}
+        @keyframes spinGlow {
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+            50% { transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
+            100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+        }
+        @keyframes moonGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+        }
+        @keyframes slideRain {
+            0% { transform: translateY(0px); } 50% { transform: translateY(3px); } 100% { transform: translateY(0px); }
+        }
+        @keyframes flashStorm {
+            0% { filter: brightness(1); } 50% { filter: brightness(1.35); } 100% { filter: brightness(1); }
+        }
+        @keyframes floatCloud {
+            0% { transform: translateY(0px); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0px); }
+        }
 
-        .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
-        .anim-luna svg {{ animation: moonGlow 4s ease-in-out infinite; }}
-        .anim-lluvia svg {{ animation: slideRain 2.2s ease-in-out infinite; }}
-        .anim-tormenta svg {{ animation: flashStorm 1.6s ease-in-out infinite; }}
-        .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
+        .anim-sol svg { animation: spinGlow 14s linear infinite; }
+        .anim-luna svg { animation: moonGlow 4s ease-in-out infinite; }
+        .anim-lluvia svg { animation: slideRain 2.2s ease-in-out infinite; }
+        .anim-tormenta svg { animation: flashStorm 1.6s ease-in-out infinite; }
+        .anim-nube svg { animation: floatCloud 3.5s ease-in-out infinite; }
 
-        .card-editorial-hoy {{
+        .card-editorial-hoy {
             background: rgba(15, 32, 56, 0.75) !important; backdrop-filter: blur(16px);
             border-radius: 24px !important; padding: 28px !important; color: #ffffff !important;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important; margin-bottom: 20px !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
         }
 
-        .hourly-scroll-container {{
+        .hourly-scroll-container {
             display: flex; overflow-x: auto; gap: 12px; padding: 4px 2px 16px 2px; margin-bottom: 20px;
             scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.4) transparent;
-        }}
-        .hourly-scroll-container::-webkit-scrollbar {{ height: 6px; }}
-        .hourly-scroll-container::-webkit-scrollbar-thumb {{ background: rgba(56,189,248,0.4); border-radius: 10px; }}
+        }
+        .hourly-scroll-container::-webkit-scrollbar { height: 6px; }
+        .hourly-scroll-container::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.4); border-radius: 10px; }
         
-        .hourly-card {{
+        .hourly-card {
             background: rgba(15, 32, 56, 0.65) !important; backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
             min-width: 85px; padding: 14px 10px; text-align: center; color: #ffffff; flex-shrink: 0;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }}
+        }
 
-        .card-editorial-semana {{
+        .card-editorial-semana {
             background: rgba(255, 255, 255, 0.96) !important; border-radius: 20px !important;
             padding: 20px 24px !important; color: #0f172a !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
             margin-bottom: 16px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important;
-        }}
+        }
 
-        .footer-metodologico {{
+        .footer-metodologico {
             text-align: center !important; margin-top: 35px !important; padding: 18px 20px !important;
             border-top: 1px solid rgba(255, 255, 255, 0.1) !important; color: #94a3b8 !important; font-size: 0.78rem !important; line-height: 1.5 !important;
-        }}
-        .titulo-pantalla {{ text-align: center !important; color: #ffffff !important; font-size: 2rem !important; font-weight: 800 !important; margin: 0 !important; }}
-        .subtitulo-pantalla {{ text-align: center !important; color: #38bdf8 !important; font-size: 1.05rem !important; font-weight: 700 !important; margin-top: 2px !important; }}
+        }
+        .titulo-pantalla { text-align: center !important; color: #ffffff !important; font-size: 2rem !important; font-weight: 800 !important; margin: 0 !important; }
+        .subtitulo-pantalla { text-align: center !important; color: #38bdf8 !important; font-size: 1.05rem !important; font-weight: 700 !important; margin-top: 2px !important; }
         </style>
         """, unsafe_allow_html=True)
         
@@ -389,7 +390,7 @@ else:
         st.markdown(html_hoy, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # SECCIÓN DE EVOLUCIÓN HORARIA (RENDERIZADO SEGURO)
+        # SECCIÓN DE EVOLUCIÓN HORARIA
         # -----------------------------------------------------
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px;'>⏱️ Evolución Próximas Horas</h3>", unsafe_allow_html=True)
         
@@ -406,7 +407,6 @@ else:
                 start_idx = idx
                 break
         
-        # Construimos un único bloque HTML compacto para evitar que Streamlit rompa las etiquetas
         html_hourly = '<div class="hourly-scroll-container">'
         for i in range(start_idx, min(start_idx + 24, len(h_times))):
             t_iso = h_times[i]
