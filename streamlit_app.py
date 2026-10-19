@@ -108,53 +108,18 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
         return "Condiciones estables y agradables para el momento del día."
     return "Cielo variable sin precipitaciones significativas previstas."
 
-# GENERADOR DE DIBUJOS VECTORIALES (ADAPTADO DÍA / NOCHE)
 def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
-    
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
-        return """
-        <div class="anim-luna" style="width: 42px; height: 42px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-luna" style="width:36px; height:36px; display:inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/></svg></div>'
     elif wcode in [0, 1] or "despejado" in t or "sol" in t:
-        return """
-        <div class="anim-sol" style="width: 42px; height: 42px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <circle cx="32" cy="32" r="14" fill="#FBBF24"/>
-                <path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-sol" style="width:36px; height:36px; display:inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><circle cx="32" cy="32" r="14" fill="#FBBF24"/><path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/></svg></div>'
     elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t or wcode in range(51, 68) or wcode in range(80, 83):
-        return """
-        <div class="anim-lluvia" style="width: 42px; height: 42px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
-                <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-lluvia" style="width:36px; height:36px; display:inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/><path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/></svg></div>'
     elif "tormenta" in t or wcode in [95, 96, 99]:
-        return """
-        <div class="anim-tormenta" style="width: 42px; height: 42px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/>
-                <path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-tormenta" style="width:36px; height:36px; display:inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/><path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/></svg></div>'
     else:
-        return """
-        <div class="anim-nube" style="width: 42px; height: 42px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-nube" style="width:36px; height:36px; display:inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
 
 def mostrar_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -176,63 +141,28 @@ if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    .stApp, html, body, [class*="st-"] {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-
-    .stApp {
-        background-color: #ffffff !important;
-    }
-    
+    .stApp, html, body, [class*="st-"] { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    .stApp { background-color: #ffffff !important; }
     @keyframes pulseGlow {
         0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
         50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
         100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
-
     div[data-baseweb="input"] {
-        border-radius: 45px !important;
-        padding: 8px 20px !important;
-        border: 2.5px solid #38bdf8 !important;
-        animation: pulseGlow 2.5s infinite ease-in-out !important;
-        font-size: 1.25rem !important;
-        background-color: #f8fafc !important;
+        border-radius: 45px !important; padding: 8px 20px !important;
+        border: 2.5px solid #38bdf8 !important; animation: pulseGlow 2.5s infinite ease-in-out !important;
+        font-size: 1.25rem !important; background-color: #f8fafc !important;
     }
-    div[data-baseweb="input"] input {
-        font-size: 1.15rem !important;
-    }
-
+    div[data-baseweb="input"] input { font-size: 1.15rem !important; }
     .stButton > button {
-        border-radius: 40px !important;
-        height: 3.6rem !important;
-        font-size: 1.25rem !important;
-        font-weight: 700 !important;
-        border: None !important;
-        background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
-        color: white !important;
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
-        transition: all 0.3s ease !important;
+        border-radius: 40px !important; height: 3.6rem !important; font-size: 1.25rem !important;
+        font-weight: 700 !important; border: None !important; background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+        color: white !important; box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important; transition: all 0.3s ease !important;
     }
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
-    }
-
+    .stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important; }
     div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
+        background: #e0f2fe !important; color: #0369a1 !important; border: 1.5px solid #bae6fd !important;
+        border-radius: 30px !important; height: 3rem !important; font-size: 0.95rem !important; font-weight: 600 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -244,11 +174,7 @@ if not st.session_state.resultado_activo:
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form(key="search_form"):
-        lugar_input = st.text_input(
-            label="Ubicación",
-            placeholder="🔍 Escribe ciudad, balneario, barrio o departamento (Ej: Atlántida, Pocitos)...",
-            label_visibility="collapsed"
-        )
+        lugar_input = st.text_input(label="Ubicación", placeholder="🔍 Escribe ciudad, balneario, barrio o departamento (Ej: Atlántida, Pocitos)...", label_visibility="collapsed")
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
         submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
 
@@ -256,16 +182,11 @@ if not st.session_state.resultado_activo:
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
-    with c2:
-        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
-    with c3:
-        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
-    with c4:
-        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
-    with c5:
-        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
+    with c1: st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
+    with c2: st.button("📸 Instagram", key="btn_ig", use_container_width=True)
+    with c3: st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
+    with c4: st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
+    with c5: st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
 
     if submit and lugar_input.strip():
         st.session_state.lugar_actual = lugar_input.strip()
@@ -293,13 +214,11 @@ else:
             query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
             url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=10&language=es&format=json"
             res_geo = requests.get(url_geo, timeout=8).json()
-            
             if "results" in res_geo and len(res_geo["results"]) > 0:
                 for res in res_geo["results"]:
                     cand_lat = float(res["latitude"])
                     cand_lon = float(res["longitude"])
                     pais = res.get("country", "").lower()
-                    
                     if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
                         lat, lon = cand_lat, cand_lon
                         nombre_lugar = res.get("name", lugar_ingresado.title())
@@ -310,14 +229,10 @@ else:
             pass
 
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
-        st.markdown("""
-        <style>
-        .stApp { background-color: #f0f4f8 !important; }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown("<style>.stApp { background-color: #f0f4f8 !important; }</style>", unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
-        st.info("No encontramos la localidad, balneario o barrio ingresado dentro de Uruguay. Por favor, asegúrate de escribir un nombre válido en territorio uruguayo.")
-        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
+        st.info("No encontramos la localidad, balneario o barrio ingresado dentro de Uruguay.")
+        if st.button("🌧️↩️ Volver al buscador"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.rerun()
@@ -355,50 +270,28 @@ else:
         st.markdown(f"""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        .stApp, html, body, [class*="st-"] {{ font-family: 'Plus Jakarta Sans', sans-serif !important; }}
+        .stApp {{ background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important; background-attachment: fixed !important; }}
+        .block-container {{ position: relative !important; z-index: 10 !important; }}
         
-        .stApp, html, body, [class*="st-"] {{
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }}
-
-        .stApp {{
-            background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
-            background-attachment: fixed !important;
-        }}
-
-        .block-container {{
-            position: relative !important;
-            z-index: 10 !important;
-        }}
-
-        /* ANIMACIONES FLUIDAS */
         @keyframes spinGlow {{
             0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
             50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
             100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
         }}
-
         @keyframes moonGlow {{
             0% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
             50% {{ transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }}
             100% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
         }}
-
         @keyframes slideRain {{
-            0% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(3px); }}
-            100% {{ transform: translateY(0px); }}
+            0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(3px); }} 100% {{ transform: translateY(0px); }}
         }}
-
         @keyframes flashStorm {{
-            0% {{ filter: brightness(1); }}
-            50% {{ filter: brightness(1.35); }}
-            100% {{ filter: brightness(1); }}
+            0% {{ filter: brightness(1); }} 50% {{ filter: brightness(1.35); }} 100% {{ filter: brightness(1); }}
         }}
-
         @keyframes floatCloud {{
-            0% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(-4px); }}
-            100% {{ transform: translateY(0px); }}
+            0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-4px); }} 100% {{ transform: translateY(0px); }}
         }}
 
         .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
@@ -408,91 +301,44 @@ else:
         .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
 
         .card-editorial-hoy {{
-            background: rgba(15, 32, 56, 0.75) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px !important;
-            padding: 28px !important;
-            color: #ffffff !important;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
-            margin-bottom: 20px !important;
+            background: rgba(15, 32, 56, 0.75) !important; backdrop-filter: blur(16px);
+            border-radius: 24px !important; padding: 28px !important; color: #ffffff !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important; margin-bottom: 20px !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        }}
+        }
 
-        /* CONTENEDOR HORARIO HORIZONTAL */
         .hourly-scroll-container {{
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 4px 2px 16px 2px;
-            margin-bottom: 20px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(56,189,248,0.4) transparent;
+            display: flex; overflow-x: auto; gap: 12px; padding: 4px 2px 16px 2px; margin-bottom: 20px;
+            scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.4) transparent;
         }}
-        .hourly-scroll-container::-webkit-scrollbar {{
-            height: 6px;
-        }}
-        .hourly-scroll-container::-webkit-scrollbar-thumb {{
-            background: rgba(56,189,248,0.4);
-            border-radius: 10px;
-        }}
+        .hourly-scroll-container::-webkit-scrollbar {{ height: 6px; }}
+        .hourly-scroll-container::-webkit-scrollbar-thumb {{ background: rgba(56,189,248,0.4); border-radius: 10px; }}
+        
         .hourly-card {{
-            background: rgba(15, 32, 56, 0.65) !important;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            min-width: 85px;
-            padding: 14px 10px;
-            text-align: center;
-            color: #ffffff;
-            flex-shrink: 0;
+            background: rgba(15, 32, 56, 0.65) !important; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
+            min-width: 85px; padding: 14px 10px; text-align: center; color: #ffffff; flex-shrink: 0;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }}
 
         .card-editorial-semana {{
-            background: rgba(255, 255, 255, 0.96) !important;
-            border-radius: 20px !important;
-            padding: 20px 24px !important;
-            color: #0f172a !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-            margin-bottom: 16px !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            background: rgba(255, 255, 255, 0.96) !important; border-radius: 20px !important;
+            padding: 20px 24px !important; color: #0f172a !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+            margin-bottom: 16px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important;
         }}
 
         .footer-metodologico {{
-            text-align: center !important;
-            margin-top: 35px !important;
-            padding: 18px 20px !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #94a3b8 !important;
-            font-size: 0.78rem !important;
-            line-height: 1.5 !important;
+            text-align: center !important; margin-top: 35px !important; padding: 18px 20px !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important; color: #94a3b8 !important; font-size: 0.78rem !important; line-height: 1.5 !important;
         }}
-        
-        .titulo-pantalla {{
-            text-align: center !important;
-            color: #ffffff !important;
-            font-size: 2rem !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.5px;
-            margin: 0 !important;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-        }}
-        
-        .subtitulo-pantalla {{
-            text-align: center !important;
-            color: #38bdf8 !important;
-            font-size: 1.05rem !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.5px;
-            margin-top: 2px !important;
-        }}
+        .titulo-pantalla {{ text-align: center !important; color: #ffffff !important; font-size: 2rem !important; font-weight: 800 !important; margin: 0 !important; }}
+        .subtitulo-pantalla {{ text-align: center !important; color: #38bdf8 !important; font-size: 1.05rem !important; font-weight: 700 !important; margin-top: 2px !important; }}
         </style>
         """, unsafe_allow_html=True)
         
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
-            if st.button("← Volver", help="Buscar otra localidad"):
+            if st.button("← Volver"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.rerun()
@@ -500,13 +346,13 @@ else:
             st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
             st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem;'>LIVE</span></div>", unsafe_allow_html=True)
 
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        # TARJETA HOY (CONDICIÓN ACTUAL)
+        # TARJETA HOY
         html_hoy = f"""
         <div class="card-editorial-hoy">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -543,7 +389,7 @@ else:
         st.markdown(html_hoy, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # SECCIÓN DE EVOLUCIÓN HORARIA (CORREGIDA PARA EMPEZAR DESDE LA HORA ACTUAL EXACTA)
+        # SECCIÓN DE EVOLUCIÓN HORARIA (RENDERIZADO SEGURO)
         # -----------------------------------------------------
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px;'>⏱️ Evolución Próximas Horas</h3>", unsafe_allow_html=True)
         
@@ -553,7 +399,6 @@ else:
         h_wcodes = hourly.get("weathercode", [])
         h_isdays = hourly.get("is_day", [])
         
-        # Búsqueda precisa utilizando la fecha y hora actual local de Uruguay
         ahora_formato = datetime.now().strftime("%Y-%m-%dT%H:00")
         start_idx = 0
         for idx, t in enumerate(h_times):
@@ -561,7 +406,8 @@ else:
                 start_idx = idx
                 break
         
-        html_hourly = "<div class='hourly-scroll-container'>"
+        # Construimos un único bloque HTML compacto para evitar que Streamlit rompa las etiquetas
+        html_hourly = '<div class="hourly-scroll-container">'
         for i in range(start_idx, min(start_idx + 24, len(h_times))):
             t_iso = h_times[i]
             hora_formateada = t_iso.split("T")[1][:5] if "T" in t_iso else f"{i}:00"
@@ -573,30 +419,28 @@ else:
             desc_h = obtener_descripcion_clima(wcode_h, isday_h)
             icono_h = obtener_dibujo_animado(wcode_h, desc_h, isday_h)
             
-            html_hourly += f"""
+            html_hourly += f'''
             <div class="hourly-card">
                 <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">{hora_formateada}</div>
-                <div style="margin: 6px 0; transform: scale(0.75);">{icono_h}</div>
+                <div style="margin: 6px 0;">{icono_h}</div>
                 <div style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 4px 0;">{temp_h}°</div>
                 <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">💧 {prob_h}%</div>
             </div>
-            """
-        html_hourly += "</div>"
+            '''
+        html_hourly += '</div>'
         st.markdown(html_hourly, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # TARJETA 2: PRONÓSTICO EXTENDIDO
+        # PRONÓSTICO EXTENDIDO
         # -----------------------------------------------------
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
         t_min = daily.get("temperature_2m_min", [])
-        lluvia = daily.get("precipitation_sum", [])
         prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
         viento_diario = daily.get("windspeed_10m_max", [])
         wcodes_daily = daily.get("weathercode", [])
-        
         etiquetas = ["MAÑANA", "PASADO MAÑANA"]
         
         for i in range(1, min(3, len(fechas))):
@@ -606,7 +450,6 @@ else:
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
-            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
             prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
