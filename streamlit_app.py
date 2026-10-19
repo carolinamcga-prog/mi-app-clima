@@ -273,7 +273,7 @@ if not st.session_state.resultado_activo:
         st.rerun()
 
 # =========================================================
-# PANTALLA 2: RESULTADOS (CORREGIDO Y OPTIMIZADO)
+# PANTALLA 2: RESULTADOS
 # =========================================================
 else:
     lugar_ingresado = st.session_state.lugar_actual.strip()
@@ -543,7 +543,7 @@ else:
         st.markdown(html_hoy, unsafe_allow_html=True)
 
         # -----------------------------------------------------
-        # SECCIÓN DE EVOLUCIÓN HORARIA (CORREGIDA Y SEGURA)
+        # SECCIÓN DE EVOLUCIÓN HORARIA (CORREGIDA PARA EMPEZAR DESDE LA HORA ACTUAL EXACTA)
         # -----------------------------------------------------
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px;'>⏱️ Evolución Próximas Horas</h3>", unsafe_allow_html=True)
         
@@ -553,12 +553,12 @@ else:
         h_wcodes = hourly.get("weathercode", [])
         h_isdays = hourly.get("is_day", [])
         
-        # Búsqueda segura del índice horario actual (evita fallos por formato de texto)
+        # Búsqueda precisa utilizando la fecha y hora actual local de Uruguay
+        ahora_formato = datetime.now().strftime("%Y-%m-%dT%H:00")
         start_idx = 0
-        ahora_actual_str = datetime.now().strftime("%Y-%m-%dT%H")
         for idx, t in enumerate(h_times):
-            if t.startswith(ahora_actual_str) or t > datetime.now().strftime("%Y-%m-%dT%H:%M"):
-                start_idx = max(0, idx - 1)  # Empieza desde la hora actual o la inmediatamente anterior
+            if t >= ahora_formato:
+                start_idx = idx
                 break
         
         html_hourly = "<div class='hourly-scroll-container'>"
