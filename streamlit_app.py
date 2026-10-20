@@ -191,6 +191,12 @@ if not st.session_state.resultado_activo:
         background-color: #f8fafc !important;
     }
 
+    /* Estilo tenue para el texto por defecto */
+    div[data-baseweb="select"] div[role="combobox"] {
+        color: #94a3b8 !important;
+        font-size: 1.1rem !important;
+    }
+
     .stButton > button {
         border-radius: 40px !important;
         height: 3.6rem !important;
@@ -235,7 +241,7 @@ if not st.session_state.resultado_activo:
         localidad_seleccionada = st.selectbox(
             label="Ubicación",
             options=[""] + sorted(LOCALIDADES_URUGUAY),
-            format_func=lambda x: "📍 Escribe una letra (ej: M para Montevideo, Mercedes, Melo...)" if x == "" else x,
+            format_func=lambda x: "Escriba localidad" if x == "" else x,
             index=0,
             label_visibility="collapsed"
         )
