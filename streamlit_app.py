@@ -21,8 +21,8 @@ if "resultado_activo" not in st.session_state:
     st.session_state.resultado_activo = False
 if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
-if "vista_actual" not in st.session_state:
-    st.session_state.vista_actual = "inicio"  # "inicio", "meteo_uy", "tienda", "resultado"
+if "seccion_activa" not in st.session_state:
+    st.session_state.seccion_activa = "inicio"
 
 # BASE DE DATOS LOCAL EXCLUSIVA PARA URUGUAY
 COORDS_URUGUAY = {
@@ -160,140 +160,13 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 
 # =========================================================
-# VISTA: METEO UY (INSTITUCIONAL & TECNOLOGÍA COMPLETA)
+# PANTALLA 1: INICIO (APP STYLE)
 # =========================================================
-if st.session_state.vista_actual == "meteo_uy":
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    .stApp { background-color: #ffffff !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    .card-info {
-        background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 28px; color: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px;
-    }
-    .card-tech {
-        background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 16px; padding: 20px; margin-bottom: 15px; color: #0c4a6e;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    if st.button("← Volver al inicio"):
-        st.session_state.vista_actual = "inicio"
-        st.rerun()
-        
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<h2 style='color: #0284c7; font-weight: 800; text-align: center;'>🌤️ MeteoUy - Sistema e Información</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748b; font-size: 1.05rem;'>Centro de información técnica, fuentes de datos y servicios de MeteoUy.</p>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="card-info">
-        <h3 style="color: #0369a1; margin-top:0;">🏢 Quiénes Somos</h3>
-        <p style="line-height: 1.6;"><b>MeteoUy</b> es la plataforma privada de monitoreo meteorológico de precisión para Uruguay. Procesamos millones de variables atmosféricas diariamente para entregar datos confiables en tiempo real a más de 600 localidades, pueblos, balnearios y departamentos del país.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col_info1, col_info2 = st.columns(2)
-    with col_info1:
-        st.markdown("""
-        <div class="card-tech">
-            <h4 style="margin-top:0; color: #0284c7;">🛰️ Telemetría Satelital & Radar</h4>
-            <p style="font-size: 0.9rem; line-height: 1.5; color: #334155;">Procesamos imágenes en bandas visibles e infrarrojas del satélite geostacionario <b>GOES-19 (GOES-East)</b>, junto con la red de radares meteorológicos Doppler regionales para la detección temprana de celdas de tormenta y granizo.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_info2:
-        st.markdown("""
-        <div class="card-tech">
-            <h4 style="margin-top:0; color: #0284c7;">🌡️ Red de Estaciones de Superficie</h4>
-            <p style="font-size: 0.9rem; line-height: 1.5; color: #334155;">Integramos datos de estaciones automáticas de alta precisión (Davis Vantage Pro2, Netatmo y sensores IoT) distribuidas en puntos estratégicos del interior y costas del país.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="card-info">
-        <h3 style="color: #0369a1; margin-top:0;">💼 Servicios B2B / Consultoría Profesional</h3>
-        <p style="line-height: 1.6;">Ofrecemos asesoría climática a medida para los sectores productivos clave de Uruguay:</p>
-        <ul style="line-height: 1.6; padding-left: 20px; color: #334155;">
-            <li><b>Agro & Ganadería:</b> Modelos de evapotranspiración, pronósticos de heladas y acumulación de precipitación por parcela.</li>
-            <li><b>Construcción & Logística:</b> Alertas de viento severo e inestabilidad operativa para obras y puertos.</li>
-            <li><b>Eventos & Turismo:</b> Monitoreo dedicado para la planificación segura de eventos al aire libre.</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# =========================================================
-# VISTA: TIENDA / PRODUCTOS
-# =========================================================
-elif st.session_state.vista_actual == "tienda":
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    .stApp { background-color: #ffffff !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    .card-tienda {
-        background: #f8fafc; border: 1.5px solid #bae6fd; border-radius: 20px; padding: 24px; text-align: center; color: #0f172a; box-shadow: 0 8px 20px rgba(56,189,248,0.1);
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    if st.button("← Volver al inicio"):
-        st.session_state.vista_actual = "inicio"
-        st.rerun()
-        
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<h2 style='color: #0284c7; font-weight: 800; text-align: center;'>🛍️ Tienda Oficial MeteoUy</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748b; font-size: 1.05rem;'>Equipamiento climático, estaciones y accesorios recomendados.</p>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    col_t1, col_t2 = st.columns(2)
-    with col_t1:
-        st.markdown("""
-        <div class="card-tienda">
-            <span style="font-size: 3rem;">📡</span>
-            <h4 style="color: #0369a1; margin: 10px 0;">Estación Meteorológica Doméstica</h4>
-            <p style="font-size: 0.9rem; color: #475569;">Medí temperatura, humedad, presión y lluvia en el patio de tu casa con conectividad WiFi.</p>
-            <b style="color: #0284c7; font-size: 1.1rem;">Consultar Stock</b>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_t2:
-        st.markdown("""
-        <div class="card-tienda">
-            <span style="font-size: 3rem;">🧴</span>
-            <h4 style="color: #0369a1; margin: 10px 0;">Protector Solar SPF 50+ MeteoUy</h4>
-            <p style="font-size: 0.9rem; color: #475569;">Especial para los días con índice UV Muy Alto en las costas y campos de Uruguay.</p>
-            <b style="color: #0284c7; font-size: 1.1rem;">Ver Detalles</b>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    st.markdown("<br>", unsafe_allow_html=True)
-    col_t3, col_t4 = st.columns(2)
-    with col_t3:
-        st.markdown("""
-        <div class="card-tienda">
-            <span style="font-size: 3rem;">☂️</span>
-            <h4 style="color: #0369a1; margin: 10px 0;">Paraguas Antiviento Reforzado</h4>
-            <p style="font-size: 0.9rem; color: #475569;">Diseñado para soportar las ráfagas fuertes típicas de los temporales en la región.</p>
-            <b style="color: #0284c7; font-size: 1.1rem;">Consultar Stock</b>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_t4:
-        st.markdown("""
-        <div class="card-tienda">
-            <span style="font-size: 3rem;">🌾</span>
-            <h4 style="color: #0369a1; margin: 10px 0;">Reporte Climático Agro B2B</h4>
-            <p style="font-size: 0.9rem; color: #475569;">Informes satelitales avanzados por hectárea y proyecciones de precipitaciones a 14 días.</p>
-            <b style="color: #0284c7; font-size: 1.1rem;">Contratar Servicio</b>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# =========================================================
-# PANTALLA 1: INICIO (CON MENÚ SUPERIOR Y BUSCADOR)
-# =========================================================
-elif not st.session_state.resultado_activo:
+if not st.session_state.resultado_activo:
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -305,94 +178,189 @@ elif not st.session_state.resultado_activo:
     .stApp {
         background-color: #ffffff !important;
     }
-    
+
+    /* TOP BAR ULTRA CLEAN */
+    .top-bar-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+        margin-bottom: 20px;
+    }
+
+    .top-brand {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #0284c7;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* SEGMENTED CONTROL / SELECTOR DE PESTAÑAS SUAVE */
+    div[data-testid="stHorizontalBlock"] .stButton > button {
+        background: transparent !important;
+        color: #64748b !important;
+        border: none !important;
+        border-bottom: 2px solid transparent !important;
+        border-radius: 0px !important;
+        height: 2rem !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        padding: 0 8px !important;
+        box-shadow: none !important;
+    }
+    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
+        color: #0284c7 !important;
+        border-bottom: 2px solid #38bdf8 !important;
+    }
+
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
-        50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.55); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
     }
 
     div[data-baseweb="select"] {
-        border-radius: 45px !important;
-        border: 2.5px solid #38bdf8 !important;
+        border-radius: 40px !important;
+        border: 2px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
         background-color: #f8fafc !important;
     }
 
     div[data-baseweb="select"] div[role="combobox"] {
         color: #94a3b8 !important;
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
     }
 
     .stButton > button {
-        border-radius: 40px !important;
-        height: 3.6rem !important;
-        font-size: 1.25rem !important;
+        border-radius: 35px !important;
+        height: 3.4rem !important;
+        font-size: 1.15rem !important;
         font-weight: 700 !important;
         border: None !important;
         background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
         color: white !important;
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 6px 18px rgba(14, 165, 233, 0.3) !important;
+        transition: all 0.25s ease !important;
     }
     .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 8px 22px rgba(14, 165, 233, 0.45) !important;
     }
 
-    /* Botones de la barra superior */
-    div[data-testid="stHorizontalBlock"] .stButton > button {
-        background: #f0f9ff !important;
+    /* REDES SOCIALES CLEAN FOOTER */
+    div[data-testid="stColumn"] .stButton > button {
+        background: #f8fafc !important;
         color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 20px !important;
-        height: 2.4rem !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 25px !important;
+        height: 2.6rem !important;
         font-size: 0.85rem !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         box-shadow: none !important;
     }
-    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
-        background: #bae6fd !important;
+    div[data-testid="stColumn"] .stButton > button:hover {
+        background: #e0f2fe !important;
         color: #0284c7 !important;
+        border-color: #bae6fd !important;
     }
 
-    div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
+    /* TARJETAS DE TIENDA Y TECNOLOGÍA EN APP STYLE */
+    .app-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
     }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
+    .app-card-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0369a1;
+        margin-bottom: 4px;
+    }
+    .app-card-desc {
+        font-size: 0.82rem;
+        color: #475569;
+        line-height: 1.4;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # BARRA SUPERIOR (METEO UY / TIENDA)
-    nav1, nav2, nav3 = st.columns([2.5, 2.5, 3])
-    with nav1:
-        if st.button("🏢 MeteoUy", key="btn_mu", use_container_width=True):
-            st.session_state.vista_actual = "meteo_uy"
+    # 1. TOP BAR MINIMALISTA (MENÚ SUPERIOR TIPO APP)
+    tcol1, tcol2, tcol3 = st.columns([3, 2.5, 2.5])
+    with tcol1:
+        st.markdown("<div class='top-brand'>MeteoUy Engine</div>", unsafe_allow_html=True)
+    with tcol2:
+        if st.button("MeteoUy", key="nav_mu", use_container_width=True):
+            st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
-    with nav2:
-        if st.button("🛍️ Tienda & Productos", key="btn_tienda", use_container_width=True):
-            st.session_state.vista_actual = "tienda"
+    with tcol3:
+        if st.button("Tienda", key="nav_tienda", use_container_width=True):
+            st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "tienda" else "tienda"
             st.rerun()
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
+    # LOGO PRINCIPAL
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # VISTA COMPACTA: METEO UY (SISTEMA & TECNOLOGÍA)
+    if st.session_state.seccion_activa == "meteo_uy":
+        st.markdown("""
+        <div class="app-card">
+            <div class="app-card-title">📡 Red de Datos & Modelos Atmosféricos</div>
+            <div class="app-card-desc">Procesamiento multimodelo (ECMWF, GFS, ICON) integrado con telemetría satelital <b>GOES-19</b>, radares Doppler y estaciones de superficie en Uruguay.</div>
+        </div>
+        <div class="app-card">
+            <div class="app-card-title">💼 Servicios Profesionales para Empresas (B2B)</div>
+            <div class="app-card-desc">Asesoría meteorológica de precisión para Agro, Construcción, Logística y Eventos. Informes de riesgo operativo e inestabilidad a medida.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # VISTA COMPACTA: TIENDA
+    elif st.session_state.seccion_activa == "tienda":
+        st.markdown("<p style='font-size: 0.85rem; font-weight: 700; color: #0284c7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>Tienda Oficial & Equipamiento</p>", unsafe_allow_html=True)
+        pcol1, pcol2 = st.columns(2)
+        with pcol1:
+            st.markdown("""
+            <div class="app-card">
+                <div style="font-size: 1.5rem;">📡</div>
+                <div class="app-card-title">Estación WiFi</div>
+                <div class="app-card-desc">Monitoreo doméstico de temperatura, viento y lluvia.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="app-card">
+                <div style="font-size: 1.5rem;">☂️</div>
+                <div class="app-card-title">Paraguas Reforzado</div>
+                <div class="app-card-desc">Especial para ráfagas de viento y temporales.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with pcol2:
+            st.markdown("""
+            <div class="app-card">
+                <div style="font-size: 1.5rem;">🧴</div>
+                <div class="app-card-title">Protección UV50+</div>
+                <div class="app-card-desc">Protector solar para radiación extrema en costas/campo.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="app-card">
+                <div style="font-size: 1.5rem;">🌾</div>
+                <div class="app-card-title">Reporte Agro 14 días</div>
+                <div class="app-card-desc">Informes satelitales avanzados por hectárea.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # BUSCADOR PRINCIPAL DE LOCALIDADES
     def al_seleccionar_localidad():
         if st.session_state.localidad_input and st.session_state.localidad_input.strip():
             st.session_state.lugar_actual = st.session_state.localidad_input.strip()
@@ -408,7 +376,7 @@ elif not st.session_state.resultado_activo:
         label_visibility="collapsed"
     )
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     if st.button("VER PRONÓSTICO", use_container_width=True):
         if localidad_seleccionada and localidad_seleccionada.strip():
             st.session_state.lugar_actual = localidad_seleccionada.strip()
@@ -416,7 +384,7 @@ elif not st.session_state.resultado_activo:
             st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
@@ -476,7 +444,7 @@ else:
         if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
-            st.session_state.vista_actual = "inicio"
+            st.session_state.seccion_activa = "inicio"
             st.rerun()
     else:
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
@@ -616,7 +584,7 @@ else:
             if st.button("← Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
-                st.session_state.vista_actual = "inicio"
+                st.session_state.seccion_activa = "inicio"
                 st.rerun()
         with col_top2:
             st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
