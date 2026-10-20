@@ -176,7 +176,7 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 
 # =========================================================
@@ -195,7 +195,7 @@ if not st.session_state.resultado_activo:
         background-color: #ffffff !important;
     }
 
-    /* BUSCADOR ESTILO ORIGINAL */
+    /* BUSCADOR ESTILO ORIGINAL CON ANIMACIÓN PULSANTE */
     @keyframes pulseGlow {
         0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
         50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
@@ -263,18 +263,17 @@ if not st.session_state.resultado_activo:
         border-color: #38bdf8 !important;
     }
 
-    /* ESTILO FRASE DEL DÍA */
+    /* FRASE DEL DÍA CHICA Y ELEGANTE */
     .frase-dia {
         text-align: center;
         font-style: italic;
-        color: #0284c7;
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin: 10px 0 20px 0;
-        padding: 0 10px;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin: 6px 0 18px 0;
     }
 
-    /* TEXTO LIMPIO SIN CUADROS PARA METEO UY */
+    /* TEXTO LIMPIO SIN RECUADROS PARA METEO UY */
     .texto-meteo-limpio {
         color: #334155;
         font-size: 0.95rem;
@@ -287,6 +286,15 @@ if not st.session_state.resultado_activo:
         font-weight: 700;
         margin-top: 15px;
         margin-bottom: 5px;
+    }
+
+    /* DISEÑO PULIDO Y PROFESIONAL PARA EL FORMULARIO B2B */
+    div[data-testid="stForm"] {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 20px !important;
+        padding: 24px !important;
+        background-color: #f8fafc !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -304,16 +312,16 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # LOGO
+    # LOGO PRINCIPAL
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
 
-    # FRASE DEL DÍA
+    # FRASE CHICA DEL DÍA DEBAJO DEL LOGO
     frase_hoy = obtener_frase_del_dia()
     st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # SECCIÓN METEO UY (TEXTO PLANO LIMPIO SIN RECUADROS NI DIBUJOS)
+    # SECCIÓN METEO UY (SOLO APARECE SI APRETAN EL BOTÓN ARRIBA)
     if st.session_state.seccion_activa == "meteo_uy":
         st.markdown("""
         <div class="texto-meteo-limpio">
@@ -340,7 +348,7 @@ if not st.session_state.resultado_activo:
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h4 style='color: #0284c7; margin-bottom: 10px;'>📬 Formulario de Contacto Profesional</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #0284c7; margin-bottom: 12px; font-weight: 800;'>📬 Solicitud de Asesoramiento / Cotización</h4>", unsafe_allow_html=True)
         
         with st.form(key="form_servicios_profesionales"):
             nombre_empresa = st.text_input("Nombre / Empresa *", placeholder="Ej: AgroSur S.A. / Juan Pérez")
@@ -349,13 +357,13 @@ if not st.session_state.resultado_activo:
             sector_rubro = st.text_input("Rubro o Sector", placeholder="Ej: Agro, Construcción, Eventos, Logística...")
             mensaje_detalle = st.text_area("Detalle de la necesidad o consulta *", placeholder="Describinos en qué consiste tu consulta...")
             
-            submit_button = st.form_submit_button(label="ENVIAR CONSULTA PROFESIONAL", use_container_width=True)
+            submit_button = st.form_submit_button(label="ENVIAR SOLICITUD A METEO UY", use_container_width=True)
             
             if submit_button:
                 if nombre_empresa and email_contacto and mensaje_detalle:
-                    st.success("✅ ¡Gracias por comunicarte! Tu mensaje fue registrado con éxito. Nos pondremos en contacto a la brevedad.")
+                    st.success("✅ ¡Gracias por comunicarte! Hemos recibido tu solicitud. Nos contactaremos a la brevedad.")
                 else:
-                    st.error("⚠️ Por favor completa los campos obligatorios (*) para enviar la solicitud.")
+                    st.error("⚠️ Por favor completa los campos obligatorios (*) para procesar tu consulta.")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
