@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import datetime
 import urllib.parse
 from data.localidades import LOCALIDADES_URUGUAY
 
@@ -60,6 +61,21 @@ COORDS_URUGUAY = {
     "pocitos": (-34.9120, -56.1470),
     "centro": (-34.9050, -56.1910)
 }
+
+# FRASES DIARIAS SOBRE EL TIEMPO
+FRASES_TIEMPO = [
+    "«El tiempo y las mareas no esperan a nadie.» — Proverbio",
+    "«No hay tal cosa como mal tiempo, solo ropa inadecuada.» — Alfred Wainwright",
+    "«Para apreciar la belleza del cielo, primero hay que observar la tormenta.»",
+    "«El clima es lo que esperamos, el tiempo es lo que tenemos.» — Mark Twain",
+    "«La lluvia de hoy es la abundancia de mañana.»",
+    "«Cualquiera que diga que la luz del sol trae felicidad nunca ha bailado bajo la lluvia.»",
+    "«Tras las nubes más oscuras, el sol siempre vuelve a brillar.»"
+]
+
+def obtener_frase_del_dia():
+    dia_del_ano = datetime.datetime.now().timetuple().tm_yday
+    return FRASES_TIEMPO[dia_del_ano % len(FRASES_TIEMPO)]
 
 def es_coordenada_uruguay(lat, lon):
     return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
@@ -160,11 +176,11 @@ def mostrar_logo():
     if logo_encontrado:
         st.image(logo_encontrado, use_container_width=True)
     else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 
 # =========================================================
-# PANTALLA 1: INICIO (APP STYLE CON MENÚ SUPERIOR)
+# PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
     st.markdown("""
@@ -179,221 +195,171 @@ if not st.session_state.resultado_activo:
         background-color: #ffffff !important;
     }
 
-    /* TOP BAR ULTRA CLEAN */
-    .top-brand {
-        font-size: 0.85rem;
-        font-weight: 800;
-        color: #0284c7;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        padding-top: 6px;
-    }
-
-    /* SEGMENTED CONTROL DE LA BARRA SUPERIOR */
-    div[data-testid="stHorizontalBlock"] .stButton > button {
-        background: transparent !important;
-        color: #64748b !important;
-        border: none !important;
-        border-bottom: 2px solid transparent !important;
-        border-radius: 0px !important;
-        height: 2.2rem !important;
-        font-size: 0.82rem !important;
-        font-weight: 700 !important;
-        padding: 0 4px !important;
-        box-shadow: none !important;
-    }
-    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
-        color: #0284c7 !important;
-        border-bottom: 2px solid #38bdf8 !important;
-    }
-
+    /* BUSCADOR ESTILO ORIGINAL */
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
-        50% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.55); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.25); border-color: #38bdf8; }
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 25px rgba(14, 165, 233, 0.75); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
 
     div[data-baseweb="select"] {
-        border-radius: 40px !important;
-        border: 2px solid #38bdf8 !important;
+        border-radius: 45px !important;
+        border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
         background-color: #f8fafc !important;
     }
 
     div[data-baseweb="select"] div[role="combobox"] {
         color: #94a3b8 !important;
-        font-size: 1.05rem !important;
+        font-size: 1.1rem !important;
     }
 
     .stButton > button {
-        border-radius: 35px !important;
-        height: 3.4rem !important;
-        font-size: 1.15rem !important;
+        border-radius: 40px !important;
+        height: 3.6rem !important;
+        font-size: 1.25rem !important;
         font-weight: 700 !important;
         border: None !important;
         background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
         color: white !important;
-        box-shadow: 0 6px 18px rgba(14, 165, 233, 0.3) !important;
-        transition: all 0.25s ease !important;
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
+        transition: all 0.3s ease !important;
     }
     .stButton > button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 8px 22px rgba(14, 165, 233, 0.45) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
     }
 
-    /* REDES SOCIALES CLEAN FOOTER */
-    div[data-testid="stColumn"] .stButton > button {
-        background: #f8fafc !important;
+    /* BOTONES DE LA BARRA NAVEGACIÓN SUPERIOR */
+    div[data-testid="stHorizontalBlock"] .stButton > button {
+        background: #f0f9ff !important;
         color: #0369a1 !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 25px !important;
-        height: 2.6rem !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 20px !important;
+        height: 2.5rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
         box-shadow: none !important;
     }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #e0f2fe !important;
+    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
+        background: #bae6fd !important;
         color: #0284c7 !important;
-        border-color: #bae6fd !important;
     }
 
-    /* TARJETAS PROFESIONALES Y FORMULARIO */
-    .app-card {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 18px;
-        margin-bottom: 12px;
+    /* BOTONES SOCIALES FOOTER */
+    div[data-testid="stColumn"] .stButton > button {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 30px !important;
+        height: 3rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
     }
-    .app-card-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #0369a1;
-        margin-bottom: 4px;
-    }
-    .app-card-desc {
-        font-size: 0.84rem;
-        color: #475569;
-        line-height: 1.5;
+    div[data-testid="stColumn"] .stButton > button:hover {
+        background: #bae6fd !important;
+        color: #0284c7 !important;
+        border-color: #38bdf8 !important;
     }
 
-    /* ESTILO PARA CAMPOS DEL FORMULARIO B2B */
-    input[type="text"], input[type="email"], textarea {
-        width: 100%;
-        padding: 10px 14px;
-        border-radius: 12px;
-        border: 1.5px solid #cbd5e1;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.9rem;
-        margin-bottom: 10px;
-        outline: none;
-    }
-    input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
-        border-color: #0284c7;
-    }
-    .btn-form-submit {
-        background: #0284c7;
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 30px;
-        font-weight: 700;
+    /* ESTILO FRASE DEL DÍA */
+    .frase-dia {
+        text-align: center;
+        font-style: italic;
+        color: #0284c7;
         font-size: 0.95rem;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.3s ease;
+        font-weight: 600;
+        margin: 10px 0 20px 0;
+        padding: 0 10px;
     }
-    .btn-form-submit:hover {
-        background: #0369a1;
+
+    /* TEXTO LIMPIO SIN CUADROS PARA METEO UY */
+    .texto-meteo-limpio {
+        color: #334155;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    .texto-meteo-limpio h4 {
+        color: #0284c7;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-top: 15px;
+        margin-bottom: 5px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # 1. TOP BAR MINIMALISTA CON MENÚ DIRECTO
-    tcol1, tcol2, tcol3 = st.columns([2.5, 2.5, 3.5])
-    with tcol1:
-        st.markdown("<div class='top-brand'>MeteoUy</div>", unsafe_allow_html=True)
-    with tcol2:
-        if st.button("MeteoUy", key="nav_mu", use_container_width=True):
+    # BARRA SUPERIOR DE NAVEGACIÓN
+    nav1, nav2 = st.columns(2)
+    with nav1:
+        if st.button("🏢 MeteoUy", key="btn_mu", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
-    with tcol3:
-        if st.button("Servicios Profesionales", key="nav_serv", use_container_width=True):
+    with nav2:
+        if st.button("💼 Servicios Profesionales", key="btn_serv", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
             st.rerun()
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # LOGO PRINCIPAL
+    # LOGO
     col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
     with col2:
         mostrar_logo()
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    # FRASE DEL DÍA
+    frase_hoy = obtener_frase_del_dia()
+    st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # VISTA 1: METEO UY (DESCRIPCIÓN INSTITUCIONAL TÉCNICA)
+    # SECCIÓN METEO UY (TEXTO PLANO LIMPIO SIN RECUADROS NI DIBUJOS)
     if st.session_state.seccion_activa == "meteo_uy":
         st.markdown("""
-        <div class="app-card">
-            <div class="app-card-title">🌐 ¿Qué es MeteoUy?</div>
-            <div class="app-card-desc"><b>MeteoUy</b> es la plataforma privada de monitoreo atmosférico de alta resolución en Uruguay. Unificamos telemetría satelital, radares meteorológicos y estaciones automáticas de superficie para ofrecer datos en tiempo real con máxima precisión geográfica en más de 600 localidades del país.</div>
-        </div>
-        <div class="app-card">
-            <div class="app-card-title">📡 Tecnología & Modelado Multimodelo</div>
-            <div class="app-card-desc">Procesamos ensembles atmosféricos de vanguardia (<b>ECMWF, GFS, ICON, WRF</b>) combinados con imágenes infrarrojas del satélite geostacionario <b>GOES-19</b> para la detección anticipada de tormentas, frentes fríos y ráfagas severas.</div>
+        <div class="texto-meteo-limpio">
+            <h4>¿Qué es MeteoUy?</h4>
+            MeteoUy es la plataforma privada de monitoreo atmosférico de alta resolución en Uruguay. Unificamos telemetría satelital, radares meteorológicos y estaciones automáticas de superficie para ofrecer datos en tiempo real con máxima precisión geográfica en más de 600 localidades del país.
+            
+            <h4>Tecnología & Modelado Multimodelo</h4>
+            Procesamos ensembles atmosféricos de vanguardia (ECMWF, GFS, ICON, WRF) combinados con imágenes infrarrojas del satélite geostacionario GOES-19 para la detección anticipada de tormentas, frentes fríos y ráfagas severas.
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
 
-    # VISTA 2: SERVICIOS PROFESIONALES B2B + FORMULARIO A TU MAIL
+    # SECCIÓN SERVICIOS PROFESIONALES + FORMULARIO
     elif st.session_state.seccion_activa == "servicios":
         st.markdown("""
-        <div class="app-card">
-            <div class="app-card-title">💼 Asesoramiento Meteorológico para Empresas</div>
-            <div class="app-card-desc">Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para empresas y profesionales en Uruguay:
-                <ul style="margin: 6px 0 0 16px; padding: 0;">
-                    <li><b>Agro & Ganadería:</b> Modelado de precipitaciones por parcela, heladas y balance hídrico.</li>
-                    <li><b>Construcción & Obras:</b> Alertas tempranas de viento y lluvias para seguridad operativa.</li>
-                    <li><b>Logística & Transporte:</b> Monitoreo de rutas, puertos y condiciones adversas.</li>
-                    <li><b>Eventos al Aire Libre:</b> Cobertura en tiempo real con meteorólogo asignado.</li>
-                </ul>
-            </div>
+        <div class="texto-meteo-limpio">
+            <h4>Asesoramiento Meteorológico para Empresas y Profesionales</h4>
+            Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:
+            <ul>
+                <li><b>Agro & Ganadería:</b> Modelado de precipitaciones por parcela, heladas y balance hídrico.</li>
+                <li><b>Construcción & Obras:</b> Alertas tempranas de viento y lluvias para seguridad operativa.</li>
+                <li><b>Logística & Transporte:</b> Monitoreo de rutas, puertos y condiciones adversas.</li>
+                <li><b>Eventos al Aire Libre:</b> Cobertura meteorológica en tiempo real.</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
+
+        st.markdown("<h4 style='color: #0284c7; margin-bottom: 10px;'>📬 Formulario de Contacto Profesional</h4>", unsafe_allow_html=True)
         
-        st.markdown("<p style='font-size: 0.9rem; font-weight: 800; color: #0284c7; margin: 15px 0 8px 0; letter-spacing: 0.5px;'>📬 Solicitud de Cotización / Asesoramiento</p>", unsafe_allow_html=True)
+        with st.form(key="form_servicios_profesionales"):
+            nombre_empresa = st.text_input("Nombre / Empresa *", placeholder="Ej: AgroSur S.A. / Juan Pérez")
+            email_contacto = st.text_input("Correo Electrónico de Contacto *", placeholder="ejemplo@empresa.com.uy")
+            telefono_whatsapp = st.text_input("Teléfono / WhatsApp *", placeholder="099 123 456")
+            sector_rubro = st.text_input("Rubro o Sector", placeholder="Ej: Agro, Construcción, Eventos, Logística...")
+            mensaje_detalle = st.text_area("Detalle de la necesidad o consulta *", placeholder="Describinos en qué consiste tu consulta...")
+            
+            submit_button = st.form_submit_button(label="ENVIAR CONSULTA PROFESIONAL", use_container_width=True)
+            
+            if submit_button:
+                if nombre_empresa and email_contacto and mensaje_detalle:
+                    st.success("✅ ¡Gracias por comunicarte! Tu mensaje fue registrado con éxito. Nos pondremos en contacto a la brevedad.")
+                else:
+                    st.error("⚠️ Por favor completa los campos obligatorios (*) para enviar la solicitud.")
 
-        # ⚠️ IMPORTANTE: Reemplaza "tu_email@correo.com" por tu dirección de correo real
-        EMAIL_DESTINO = "tu_email@correo.com"  
-
-        formulario_html = f"""
-        <form action="https://formsubmit.co/{EMAIL_DESTINO}" method="POST" style="background: #f8fafc; padding: 18px; border-radius: 16px; border: 1px solid #e2e8f0;">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_subject" value="NUEVA CONSULTA METEOUY - SERVICIOS EMPRESAS">
-            
-            <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Nombre o Empresa *</label>
-            <input type="text" name="Nombre_o_Empresa" placeholder="Ej: AgroSur S.A. / Juan Pérez" required>
-            
-            <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Correo Electrónico de Contacto *</label>
-            <input type="email" name="Email" placeholder="ejemplo@empresa.com.uy" required>
-            
-            <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Teléfono / WhatsApp *</label>
-            <input type="text" name="Telefono" placeholder="099 123 456" required>
-            
-            <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Rubro / Sector</label>
-            <input type="text" name="Sector" placeholder="Ej: Agro, Construcción, Eventos, Particular...">
-            
-            <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Detalle de la consulta o necesidad *</label>
-            <textarea name="Mensaje" rows="3" placeholder="Contanos qué tipo de pronóstico o asesoramiento precisan..." required></textarea>
-            
-            <button type="submit" class="btn-form-submit">ENVIAR SOLICITUD A METEOUY</button>
-        </form>
-        """
-        st.markdown(formulario_html, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # BUSCADOR PRINCIPAL DE LOCALIDADES
+    # BUSCADOR ORIGINAL DE LOCALIDADES
     def al_seleccionar_localidad():
         if st.session_state.localidad_input and st.session_state.localidad_input.strip():
             st.session_state.lugar_actual = st.session_state.localidad_input.strip()
@@ -409,7 +375,7 @@ if not st.session_state.resultado_activo:
         label_visibility="collapsed"
     )
 
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     if st.button("VER PRONÓSTICO", use_container_width=True):
         if localidad_seleccionada and localidad_seleccionada.strip():
             st.session_state.lugar_actual = localidad_seleccionada.strip()
@@ -417,7 +383,7 @@ if not st.session_state.resultado_activo:
             st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
