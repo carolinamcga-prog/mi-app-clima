@@ -237,16 +237,28 @@ if not st.session_state.resultado_activo:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    with st.form(key="search_form"):
-        localidad_seleccionada = st.selectbox(
-            label="Ubicación",
-            options=[""] + sorted(LOCALIDADES_URUGUAY),
-            format_func=lambda x: "Escriba localidad" if x == "" else x,
-            index=0,
-            label_visibility="collapsed"
-        )
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-        submit = st.form_submit_button("VER PRONÓSTICO", use_container_width=True)
+    # Función al seleccionar o presionar Enter
+    def al_seleccionar_localidad():
+        if st.session_state.localidad_input and st.session_state.localidad_input.strip():
+            st.session_state.lugar_actual = st.session_state.localidad_input.strip()
+            st.session_state.resultado_activo = True
+
+    localidad_seleccionada = st.selectbox(
+        label="Ubicación",
+        options=[""] + sorted(LOCALIDADES_URUGUAY),
+        format_func=lambda x: "Escriba localidad" if x == "" else x,
+        index=0,
+        key="localidad_input",
+        on_change=al_seleccionar_localidad,
+        label_visibility="collapsed"
+    )
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    if st.button("VER PRONÓSTICO", use_container_width=True):
+        if localidad_seleccionada and localidad_seleccionada.strip():
+            st.session_state.lugar_actual = localidad_seleccionada.strip()
+            st.session_state.resultado_activo = True
+            st.rerun()
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
@@ -262,11 +274,6 @@ if not st.session_state.resultado_activo:
         st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
     with c5:
         st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
-
-    if submit and localidad_seleccionada.strip():
-        st.session_state.lugar_actual = localidad_seleccionada.strip()
-        st.session_state.resultado_activo = True
-        st.rerun()
 
 # =========================================================
 # PANTALLA 2: RESULTADOS
