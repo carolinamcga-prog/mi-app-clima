@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import os
 import urllib.parse
+from data.localidades import LOCALIDADES_URUGUAY
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -104,7 +105,6 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
 def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
     
-    # Si es de noche y está despejado
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
         return """
         <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
@@ -184,16 +184,11 @@ if not st.session_state.resultado_activo:
         100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
 
-    div[data-baseweb="input"] {
+    div[data-baseweb="select"] {
         border-radius: 45px !important;
-        padding: 8px 20px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
-        font-size: 1.25rem !important;
         background-color: #f8fafc !important;
-    }
-    div[data-baseweb="input"] input {
-        font-size: 1.15rem !important;
     }
 
     .stButton > button {
@@ -237,9 +232,11 @@ if not st.session_state.resultado_activo:
     st.markdown("<br>", unsafe_allow_html=True)
 
     with st.form(key="search_form"):
-        lugar_input = st.text_input(
+        localidad_seleccionada = st.selectbox(
             label="Ubicación",
-            placeholder="🔍 Escribe una localidad o departamento (Presiona Enter o haz clic)...",
+            options=[""] + sorted(LOCALIDADES_URUGUAY),
+            format_func=lambda x: "📍 Escribe una letra (ej: M para Montevideo, Mercedes, Melo...)" if x == "" else x,
+            index=0,
             label_visibility="collapsed"
         )
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -260,8 +257,8 @@ if not st.session_state.resultado_activo:
     with c5:
         st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
 
-    if submit and lugar_input.strip():
-        st.session_state.lugar_actual = lugar_input.strip()
+    if submit and localidad_seleccionada.strip():
+        st.session_state.lugar_actual = localidad_seleccionada.strip()
         st.session_state.resultado_activo = True
         st.rerun()
 
@@ -307,7 +304,7 @@ else:
         </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
-        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de escribir una ciudad, pueblo, departamento o barrio uruguayo.")
+        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de seleccionar una ciudad, pueblo, departamento o barrio uruguayo.")
         if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
