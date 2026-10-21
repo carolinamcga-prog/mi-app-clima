@@ -217,7 +217,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
         </div>
         """
@@ -330,14 +330,6 @@ if not st.session_state.resultado_activo:
         margin: 6px 0 18px 0;
     }
 
-    /* TEXTO INSTITUCIONAL LIMPIO */
-    .texto-meteo-limpio {
-        color: #334155;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
-
     /* FORMULARIO CORPORATIVO */
     div[data-testid="stForm"] {
         border: 1px solid #e2e8f0 !important;
@@ -371,39 +363,28 @@ if not st.session_state.resultado_activo:
     frase_hoy = obtener_frase_dinamica_clima()
     st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # SECCIÓN METEO UY (CON unsafe_allow_html=True PARA QUE RENDERICE BIEN)
+    # SECCIÓN METEO UY (RENDERIZADO NATIVO PERFECTO E INFALIBLE)
     if st.session_state.seccion_activa == "meteo_uy":
-        st.markdown("""
-        <div class="texto-meteo-limpio">
-            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 10px; margin-bottom: 8px;">¿Qué es MeteoUy?</h4>
-            <p style="margin-bottom: 16px;"><b>MeteoUy</b> es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.</p>
-            
-            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 18px; margin-bottom: 8px;">Tecnología & Fuentes de Datos</h4>
-            <p style="margin-bottom: 12px;">Para garantizar la máxima confiabilidad técnica, nuestro motor procesa e integra en tiempo real:</p>
-            <ul style="margin-bottom: 16px; padding-left: 20px;">
-                <li><b>Modelos Numéricos Globales y Regionales:</b> ECMWF, GFS, ICON y WRF.</li>
-                <li><b>Telemetría Satelital:</b> Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite <b>GOES-19 (GOES-East)</b>.</li>
-                <li><b>Radares & Estaciones de Superficie:</b> Cobertura Doppler regional integrada con redes de estaciones automáticas (Davis Vantage Pro2, Netatmo y sensores IoT).</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        st.subheader("¿Qué es MeteoUy?")
+        st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
+        
+        st.subheader("Tecnología & Fuentes de Datos")
+        st.write("Para garantizar la máxima confiabilidad técnica, nuestro motor procesa e integra en tiempo real:")
+        st.markdown("- **Modelos Numéricos Globales y Regionales:** ECMWF, GFS, ICON y WRF.")
+        st.markdown("- **Telemetría Satelital:** Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite **GOES-19 (GOES-East)**.")
+        st.markdown("- **Radares & Estaciones de Superficie:** Cobertura Doppler regional integrada con redes de estaciones automáticas (Davis Vantage Pro2, Netatmo y sensores IoT).")
+        st.markdown("<br>", unsafe_allow_html=True)
 
     # SECCIÓN SERVICIOS PROFESIONALES + FORMULARIO
     elif st.session_state.seccion_activa == "servicios":
-        st.markdown("""
-        <div class="texto-meteo-limpio">
-            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 10px; margin-bottom: 8px;">Asesoramiento Meteorológico para Empresas y Profesionales</h4>
-            <p style="margin-bottom: 12px;">Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:</p>
-            <ul style="margin-bottom: 20px; padding-left: 20px;">
-                <li><b>Agro & Ganadería:</b> Modelado de precipitaciones por parcela, heladas y balance hídrico.</li>
-                <li><b>Construcción & Obras:</b> Alertas tempranas de viento y lluvias para seguridad operativa.</li>
-                <li><b>Logística & Transporte:</b> Monitoreo de rutas, puertos y condiciones adversas.</li>
-                <li><b>Eventos al Aire Libre:</b> Cobertura meteorológica en tiempo real.</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        st.subheader("Asesoramiento Meteorológico para Empresas y Profesionales")
+        st.write("Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:")
+        st.markdown("- **Agro & Ganadería:** Modelado de precipitaciones por parcela, heladas y balance hídrico.")
+        st.markdown("- **Construcción & Obras:** Alertas tempranas de viento y lluvias para seguridad operativa.")
+        st.markdown("- **Logística & Transporte:** Monitoreo de rutas, puertos y condiciones adversas.")
+        st.markdown("- **Eventos al Aire Libre:** Cobertura meteorológica en tiempo real.")
 
-        st.markdown("<h4 style='color: #0284c7; margin-bottom: 12px; font-weight: 800;'>📬 Solicitud de Asesoramiento / Cotización</h4>", unsafe_allow_html=True)
+        st.subheader("📬 Solicitud de Asesoramiento / Cotización")
         
         with st.form(key="form_servicios_profesionales"):
             nombre_empresa = st.text_input("Nombre / Empresa *", placeholder="Ej: AgroSur S.A. / Juan Pérez")
