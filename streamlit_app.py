@@ -371,7 +371,7 @@ if not st.session_state.resultado_activo:
     frase_hoy = obtener_frase_dinamica_clima()
     st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # SECCIÓN METEO UY (TEXTO INSTITUCIONAL Y TECNOLOGÍA LIMPIO)
+    # SECCIÓN METEO UY (CON unsafe_allow_html=True PARA QUE RENDERICE BIEN)
     if st.session_state.seccion_activa == "meteo_uy":
         st.markdown("""
         <div class="texto-meteo-limpio">
