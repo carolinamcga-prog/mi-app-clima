@@ -217,7 +217,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
         </div>
         """
@@ -363,12 +363,12 @@ if not st.session_state.resultado_activo:
     frase_hoy = obtener_frase_dinamica_clima()
     st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # SECCIÓN METEO UY (RENDERIZADO NATIVO PERFECTO E INFALIBLE)
+    # SECCIÓN METEO UY
     if st.session_state.seccion_activa == "meteo_uy":
         st.subheader("¿Qué es MeteoUy?")
         st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
         
-        st.subheader("Tecnología & Fuentes de Datos")
+        st.subheader("Tecnología y Fuentes de Datos")
         st.write("Para garantizar la máxima confiabilidad técnica, nuestro motor procesa e integra en tiempo real:")
         st.markdown("- **Modelos Numéricos Globales y Regionales:** ECMWF, GFS, ICON y WRF.")
         st.markdown("- **Telemetría Satelital:** Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite **GOES-19 (GOES-East)**.")
