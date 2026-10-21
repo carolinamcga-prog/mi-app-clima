@@ -343,33 +343,18 @@ if not st.session_state.resultado_activo:
         background-color: #f8fafc !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
-
-    /* LOGO PEQUEÑO EN BOTÓN SUPERIOR */
-    .btn-mini-logo {
-        height: 18px;
-        width: 18px;
-        border-radius: 50%;
-        object-fit: cover;
-        vertical-align: middle;
-        margin-right: 4px;
-    }
     </style>
     """, unsafe_allow_html=True)
 
     # BARRA SUPERIOR DE NAVEGACIÓN
     nav1, nav2 = st.columns(2)
     
-    # Verificamos si existe el logo local para meterlo mini en el botón
-    ruta_logo_local = obtener_ruta_logo()
-    
     with nav1:
-        # Botón MeteoUy con mini logo integrado
         if st.button("MeteoUy", key="btn_mu", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
             
     with nav2:
-        # Botón Servicios Profesionales sin ningún ícono/emoticono
         if st.button("Servicios Profesionales", key="btn_serv", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
             st.rerun()
@@ -406,7 +391,7 @@ if not st.session_state.resultado_activo:
         st.markdown("- **Logística & Transporte:** Monitoreo de rutas, puertos y condiciones adversas.")
         st.markdown("- **Eventos al Aire Libre:** Cobertura meteorológica en tiempo real.")
 
-        st.subheader("📬 Solicitud de Asesoramiento / Cotización")
+        st.subheader("Solicitud de Asesoramiento / Cotización")
         
         with st.form(key="form_servicios_profesionales"):
             nombre_empresa = st.text_input("Nombre / Empresa *", placeholder="Ej: AgroSur S.A. / Juan Pérez")
