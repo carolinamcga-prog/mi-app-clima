@@ -222,16 +222,17 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         </div>
         """
 
-def mostrar_logo():
+def obtener_ruta_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
-    logo_encontrado = None
     for nombre in posibles_nombres:
         if os.path.exists(nombre):
-            logo_encontrado = nombre
-            break
-            
-    if logo_encontrado:
-        st.image(logo_encontrado, use_container_width=True)
+            return nombre
+    return None
+
+def mostrar_logo():
+    logo_path = obtener_ruta_logo()
+    if logo_path:
+        st.image(logo_path, use_container_width=True)
     else:
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
@@ -293,10 +294,14 @@ if not st.session_state.resultado_activo:
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
-        height: 2.5rem !important;
+        height: 2.6rem !important;
         font-size: 0.88rem !important;
         font-weight: 700 !important;
         box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
     }
     div[data-testid="stHorizontalBlock"] .stButton > button:hover {
         background: #bae6fd !important;
@@ -338,17 +343,34 @@ if not st.session_state.resultado_activo:
         background-color: #f8fafc !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
+
+    /* LOGO PEQUEÑO EN BOTÓN SUPERIOR */
+    .btn-mini-logo {
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        object-fit: cover;
+        vertical-align: middle;
+        margin-right: 4px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     # BARRA SUPERIOR DE NAVEGACIÓN
     nav1, nav2 = st.columns(2)
+    
+    # Verificamos si existe el logo local para meterlo mini en el botón
+    ruta_logo_local = obtener_ruta_logo()
+    
     with nav1:
-        if st.button("🏢 MeteoUy", key="btn_mu", use_container_width=True):
+        # Botón MeteoUy con mini logo integrado
+        if st.button("MeteoUy", key="btn_mu", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
+            
     with nav2:
-        if st.button("💼 Servicios Profesionales", key="btn_serv", use_container_width=True):
+        # Botón Servicios Profesionales sin ningún ícono/emoticono
+        if st.button("Servicios Profesionales", key="btn_serv", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
             st.rerun()
 
