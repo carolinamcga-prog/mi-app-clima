@@ -107,49 +107,6 @@ FRASES_POR_CLIMA = {
     ]
 }
 
-# VIDEOS DE RESPALDO (CDN RÁPIDO) SI NO EXISTEN LOCALES EN ASSETS/VIDEOS/
-VIDEOS_RESPALDO = {
-    "noche": "https://cdn.pixabay.com/video/2020/09/19/50125-460882191_large.mp4",
-    "tormenta": "https://cdn.pixabay.com/video/2019/06/11/24362-341829035_large.mp4",
-    "lluvia": "https://cdn.pixabay.com/video/2021/08/13/84918-587841528_large.mp4",
-    "niebla": "https://cdn.pixabay.com/video/2020/05/25/40176-425127021_large.mp4",
-    "dia_sol": "https://cdn.pixabay.com/video/2019/04/23/23011-332493327_large.mp4",
-    "dia_nublado": "https://cdn.pixabay.com/video/2020/06/06/41267-428612194_large.mp4"
-}
-
-def obtener_video_fondo_uruguay():
-    """
-    Detecta el estado del clima en Uruguay y devuelve la ruta local o URL CDN del video.
-    """
-    try:
-        url = "https://api.open-meteo.com/v1/forecast?latitude=-34.9011&longitude=-56.1645&current=weathercode,is_day"
-        res = requests.get(url, timeout=3).json()
-        current = res.get("current", {})
-        wcode = current.get("weathercode", 0)
-        is_day = current.get("is_day", 1)
-        
-        if is_day == 0:
-            cat = "noche"
-        elif wcode in [95, 96, 99]:
-            cat = "tormenta"
-        elif wcode in range(51, 68) or wcode in range(80, 83):
-            cat = "lluvia"
-        elif wcode in [45, 48]:
-            cat = "niebla"
-        elif wcode in [0, 1]:
-            cat = "dia_sol"
-        else:
-            cat = "dia_nublado"
-    except Exception:
-        cat = "dia_nublado"
-
-    # Verificación si existe el archivo local en assets/videos/
-    ruta_local = f"assets/videos/{cat}.mp4"
-    if os.path.exists(ruta_local):
-        return ruta_local, cat
-    
-    return VIDEOS_RESPALDO.get(cat, VIDEOS_RESPALDO["dia_nublado"]), cat
-
 def obtener_frase_dinamica_clima():
     try:
         url = "https://api.open-meteo.com/v1/forecast?latitude=-34.9011&longitude=-56.1645&current=weathercode,wind_speed_10m"
@@ -242,7 +199,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#CBD5E1"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
                 <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
             </svg>
         </div>
@@ -260,7 +217,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
         </div>
         """
@@ -284,78 +241,38 @@ def mostrar_logo():
 # PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
-    # OBTENCIÓN DEL VIDEO DE FONDO DINÁMICO DE ACUERDO AL CLIMA DE URUGUAY
-    video_url, tipo_cat = obtener_video_fondo_uruguay()
-    
-    # OPACIDAD / COLOR TENUE ADAPTATIVO
-    if tipo_cat in ["noche", "tormenta"]:
-        overlay_bg = "rgba(10, 20, 38, 0.65)"
-    else:
-        overlay_bg = "rgba(255, 255, 255, 0.72)"
-
-    # INYECCIÓN DEL VIDEO EN CAPA FIJA DETRÁS DE TODO (UX FULLSCREEN)
-    st.markdown(f"""
+    st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    .stApp, html, body, [class*="st-"] {{
+    .stApp, html, body, [class*="st-"] {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }}
+    }
 
-    .stApp {{
-        background: transparent !important;
-    }}
-
-    /* ESTRUCTURA DEL VIDEO DE FONDO EN MOVIMIENTO */
-    .bg-video-container {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-        z-index: -2;
-    }}
-
-    .bg-video-element {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }}
-
-    /* CAPA TENUE (OVERLAY) CON DESENFOQUE SUAVE PARA MÁXIMA LEGIBILIDAD */
-    .bg-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: {overlay_bg};
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
-        z-index: -1;
-    }}
+    .stApp {
+        background-color: #ffffff !important;
+    }
 
     /* BUSCADOR CON ANIMACIÓN PULSANTE */
-    @keyframes pulseGlow {{
-        0% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }}
-        50% {{ box-shadow: 0 0 22px rgba(14, 165, 233, 0.7); border-color: #0284c7; }}
-        100% {{ box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }}
-    }}
+    @keyframes pulseGlow {
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 22px rgba(14, 165, 233, 0.7); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+    }
 
-    div[data-baseweb="select"] {{
+    div[data-baseweb="select"] {
         border-radius: 45px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
-        background-color: rgba(248, 250, 252, 0.9) !important;
-    }}
+        background-color: #f8fafc !important;
+    }
 
-    div[data-baseweb="select"] div[role="combobox"] {{
-        color: #64748b !important;
+    div[data-baseweb="select"] div[role="combobox"] {
+        color: #94a3b8 !important;
         font-size: 1.1rem !important;
-    }}
+    }
 
-    .stButton > button {{
+    .stButton > button {
         border-radius: 40px !important;
         height: 3.6rem !important;
         font-size: 1.2rem !important;
@@ -365,34 +282,31 @@ if not st.session_state.resultado_activo:
         color: white !important;
         box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35) !important;
         transition: all 0.3s ease !important;
-    }}
-    .stButton > button:hover {{
+    }
+    .stButton > button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
-    }}
+    }
 
     /* BOTONES NAVEGACIÓN TOP BAR */
-    div[data-testid="stHorizontalBlock"] .stButton > button {{
-        background: rgba(240, 249, 255, 0.88) !important;
+    div[data-testid="stHorizontalBlock"] .stButton > button {
+        background: #f0f9ff !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
-        height: 2.6rem !important;
-        font-size: 0.88rem !important;
+        height: 2.5rem !important;
+        font-size: 0.82rem !important;
         font-weight: 700 !important;
         box-shadow: none !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
-    div[data-testid="stHorizontalBlock"] .stButton > button:hover {{
+    }
+    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
         background: #bae6fd !important;
         color: #0284c7 !important;
-    }}
+    }
 
     /* BOTONES SOCIALES FOOTER */
-    div[data-testid="stColumn"] .stButton > button {{
-        background: rgba(224, 242, 254, 0.85) !important;
+    div[data-testid="stColumn"] .stButton > button {
+        background: #e0f2fe !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 30px !important;
@@ -400,53 +314,58 @@ if not st.session_state.resultado_activo:
         font-size: 0.95rem !important;
         font-weight: 600 !important;
         box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }}
-    div[data-testid="stColumn"] .stButton > button:hover {{
+    }
+    div[data-testid="stColumn"] .stButton > button:hover {
         background: #bae6fd !important;
         color: #0284c7 !important;
         border-color: #38bdf8 !important;
-    }}
+    }
+
+    /* TARJETA PRÉMIUM PRO */
+    .card-pro {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 24px;
+        padding: 32px;
+        color: #ffffff;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+        border: 1.5px solid rgba(56, 189, 248, 0.3);
+        margin-bottom: 20px;
+    }
 
     /* FRASE SUTIL DEBAJO DEL LOGO */
-    .frase-dia {{
+    .frase-dia {
         text-align: center;
         font-style: italic;
-        color: #334155;
-        font-size: 0.88rem;
-        font-weight: 600;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
         margin: 6px 0 18px 0;
-        text-shadow: 0 1px 2px rgba(255,255,255,0.8);
-    }}
+    }
 
     /* FORMULARIO CORPORATIVO */
-    div[data-testid="stForm"] {{
+    div[data-testid="stForm"] {
         border: 1px solid #e2e8f0 !important;
         border-radius: 20px !important;
         padding: 24px !important;
-        background-color: rgba(248, 250, 252, 0.92) !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-    }}
+        background-color: #f8fafc !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+    }
     </style>
-
-    <div class="bg-video-container">
-        <video autoplay loop muted playsinline class="bg-video-element">
-            <source src="{video_url}" type="video/mp4">
-        </video>
-    </div>
-    <div class="bg-overlay"></div>
     """, unsafe_allow_html=True)
 
-    # BARRA SUPERIOR DE NAVEGACIÓN
-    nav1, nav2 = st.columns(2)
-    
+    # BARRA SUPERIOR DE NAVEGACIÓN (3 BOTONES)
+    nav1, nav2, nav3 = st.columns(3)
     with nav1:
         if st.button("MeteoUy", key="btn_mu", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
-            
     with nav2:
-        if st.button("Servicios Profesionales", key="btn_serv", use_container_width=True):
+        if st.button("Servicios", key="btn_serv", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
+            st.rerun()
+    with nav3:
+        if st.button("⭐ MeteoUy Pro", key="btn_pro", use_container_width=True):
+            st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "pro" else "pro"
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -497,6 +416,33 @@ if not st.session_state.resultado_activo:
                     st.success("✅ ¡Gracias por comunicarte! Hemos recibido tu solicitud. Nos contactaremos a la brevedad.")
                 else:
                     st.error("⚠️ Por favor completa los campos obligatorios (*) para procesar tu consulta.")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # NUEVA SECCIÓN: METEO UY PRO (SUSCRIPCIÓN EMPRESARIAL $100/MES)
+    elif st.session_state.seccion_activa == "pro":
+        st.markdown("""
+        <div class="card-pro">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 1px;">PLAN EMPRESARIAL</span>
+                <span style="font-size: 2.2rem; font-weight: 800; color: #ffffff;">$100 <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">USD / mes</span></span>
+            </div>
+            <h2 style="color: #ffffff; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px;">MeteoUy Pro</h2>
+            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.5; margin-bottom: 20px;">
+                Diseñado específicamente para empresas agropecuarias, constructoras, operadores logísticos y profesionales que exigen la máxima precisión meteorológica en tiempo real en Uruguay.
+            </p>
+            <div style="height: 1px; background: rgba(255, 255, 255, 0.15); margin: 20px 0;"></div>
+            <div style="display: grid; gap: 12px; font-size: 0.95rem; color: #e2e8f0; margin-bottom: 25px;">
+                <div>✅ <b>Alertas Tempranas Prioritarias:</b> Notificaciones directas por WhatsApp ante eventos severos (vientos fuertes, granizo, heladas).</div>
+                <div>✅ <b>Modelos de Alta Resolución Ampliados:</b> Acceso a proyecciones horarias extendidas a 14 días.</div>
+                <div>✅ <b>Telemetría Satelital & Radar:</b> Datos crudos y capas de radar Doppler en alta definición.</div>
+                <div>✅ <b>Soporte Técnico Dedicado:</b> Consultoría meteorológica directa con especialistas.</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("SUSCRIBIRME A METEO UY PRO ($100 USD/MES)", use_container_width=True):
+            st.info("🔗 **Próximo paso:** Aquí se integrará el botón de pago automático de Mercado Pago o pasarela de tarjetas para gestionar la suscripción mensual de forma segura.")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
