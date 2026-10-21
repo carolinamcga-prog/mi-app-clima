@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import os
-import datetime
+import random
 import urllib.parse
 from data.localidades import LOCALIDADES_URUGUAY
 
@@ -62,20 +62,73 @@ COORDS_URUGUAY = {
     "centro": (-34.9050, -56.1910)
 }
 
-# FRASES DIARIAS SOBRE EL TIEMPO
-FRASES_TIEMPO = [
-    "«El tiempo y las mareas no esperan a nadie.» — Proverbio",
-    "«No hay tal cosa como mal tiempo, solo ropa inadecuada.» — Alfred Wainwright",
-    "«Para apreciar la belleza del cielo, primero hay que observar la tormenta.»",
-    "«El clima es lo que esperamos, el tiempo es lo que tenemos.» — Mark Twain",
-    "«La lluvia de hoy es la abundancia de mañana.»",
-    "«Cualquiera que diga que la luz del sol trae felicidad nunca ha bailado bajo la lluvia.»",
-    "«Tras las nubes más oscuras, el sol siempre vuelve a brillar.»"
-]
+# BASE DE DATOS EXTENSA DE FRASES DINÁMICAS POR CLIMA
+FRASES_POR_CLIMA = {
+    "sol": [
+        "«No hay nada más bello que la luz del sol tras disipar la niebla.»",
+        "«Camina hacia el sol y las sombras quedarán siempre detrás de ti.» — Walt Whitman",
+        "«El sol es el pincel con el que la naturaleza dibuja cada mañana.»",
+        "«Un día despejado no solo aclara el horizonte, también renueva la mente.»",
+        "«Sal al sol, respira profundo y deja que la luz haga su trabajo.»",
+        "«El sol siempre vuelve a salir, recordándonos que cada día es un nuevo comienzo.»",
+        "«Hay una paz especial en las mañanas claras e iluminadas.»"
+    ],
+    "lluvia": [
+        "«La lluvia de hoy es la abundancia y la cosecha verde de mañana.»",
+        "«El olor a tierra mojada nos recuerda las cosas sencillas de la vida.»",
+        "«Cualquiera que diga que el sol trae felicidad nunca ha disfrutado la calma de la lluvia.»",
+        "«Sin lluvia, nada crece. Aprende a abrazar las precipitaciones de la vida.»",
+        "«El agua sobre el tejado es la melodía perfecta para una jornada tranquila.»",
+        "«Las nubes se cargan de agua para darle vida al campo.»",
+        "«Un día de lluvia invita a la pausa, al mate y a la reflexión.»"
+    ],
+    "tormenta": [
+        "«Para apreciar la serenidad del cielo, primero hay que aprender de la tormenta.»",
+        "«Las tormentas prueban la fortaleza de nuestras raíces.»",
+        "«Por más fuerte que parezca el temporal, ninguna tormenta dura para siempre.»",
+        "«El trueno impresiona, pero la lluvia constante es la que da fruto.»",
+        "«En medio de la tormenta es donde se reconoce la calma que vendrá.»",
+        "«Acepta los truenos de hoy con la certeza del cielo limpio de mañana.»"
+    ],
+    "viento": [
+        "«No podemos cambiar la dirección del viento, pero sí ajustar las velas.» — H. Jackson Brown Jr.",
+        "«El viento fuerte prueba las ramas, pero fortalece el tronco.»",
+        "«Donde el viento sopla con fuerza, el aire se renueva y se vuelve puro.»",
+        "«Deja que el viento se lleve lo viejo para darle espacio a lo nuevo.»",
+        "«El viento nos recuerda que todo en la naturaleza está en constante movimiento.»"
+    ],
+    "nublado": [
+        "«Incluso detrás de las nubes más densas, el sol nunca deja de brillar.»",
+        "«El cielo gris posee una elegancia sobria que invita a la contemplación.»",
+        "«El clima es lo que esperamos, pero el tiempo es lo que nos toca disfrutar.» — Mark Twain",
+        "«Las nubes son solo la preparación de la naturaleza para el cambio.»",
+        "«Un día templado y nublado es la excusa perfecta para bajar un cambio y disfrutar.»",
+        "«El horizonte nublado nos enseña que el cambio es parte del ciclo natural.»"
+    ]
+}
 
-def obtener_frase_del_dia():
-    dia_del_ano = datetime.datetime.now().timetuple().tm_yday
-    return FRASES_TIEMPO[dia_del_ano % len(FRASES_TIEMPO)]
+def obtener_frase_dinamica_clima():
+    try:
+        url = "https://api.open-meteo.com/v1/forecast?latitude=-34.9011&longitude=-56.1645&current=weathercode,wind_speed_10m"
+        data = requests.get(url, timeout=4).json()
+        current = data.get("current", {})
+        wcode = current.get("weathercode", 0)
+        viento = current.get("wind_speed_10m", 0)
+
+        if wcode in [95, 96, 99]:
+            categoria = "tormenta"
+        elif wcode in range(51, 68) or wcode in range(80, 83):
+            categoria = "lluvia"
+        elif viento > 28:
+            categoria = "viento"
+        elif wcode in [0, 1]:
+            categoria = "sol"
+        else:
+            categoria = "nublado"
+    except Exception:
+        categoria = "nublado"
+
+    return random.choice(FRASES_POR_CLIMA[categoria])
 
 def es_coordenada_uruguay(lat, lon):
     return (-35.5 <= lat <= -30.0) and (-58.6 <= lon <= -53.0)
@@ -160,7 +213,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
         </div>
         """
@@ -280,13 +333,6 @@ if not st.session_state.resultado_activo:
         line-height: 1.6;
         margin-bottom: 20px;
     }
-    .texto-meteo-limpio h4 {
-        color: #0284c7;
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-top: 15px;
-        margin-bottom: 5px;
-    }
 
     /* DISEÑO PULIDO Y PROFESIONAL PARA EL FORMULARIO B2B */
     div[data-testid="stForm"] {
@@ -318,18 +364,21 @@ if not st.session_state.resultado_activo:
         mostrar_logo()
 
     # FRASE CHICA DEL DÍA DEBAJO DEL LOGO
-    frase_hoy = obtener_frase_del_dia()
+    frase_hoy = obtener_frase_dinamica_clima()
     st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
-    # SECCIÓN METEO UY (SOLO APARECE SI APRETAN EL BOTÓN ARRIBA)
+    # SECCIÓN METEO UY (TEXTO PLANO LIMPIO, SIN CUADROS NI DIBUJOS)
     if st.session_state.seccion_activa == "meteo_uy":
         st.markdown("""
         <div class="texto-meteo-limpio">
-            <h4>¿Qué es MeteoUy?</h4>
-            MeteoUy es la plataforma privada de monitoreo atmosférico de alta resolución en Uruguay. Unificamos telemetría satelital, radares meteorológicos y estaciones automáticas de superficie para ofrecer datos en tiempo real con máxima precisión geográfica en más de 600 localidades del país.
+            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 10px; margin-bottom: 8px;">¿Qué es MeteoUy?</h4>
+            <p style="margin-bottom: 16px;"><b>MeteoUy</b> es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.</p>
             
-            <h4>Tecnología & Modelado Multimodelo</h4>
-            Procesamos ensembles atmosféricos de vanguardia (ECMWF, GFS, ICON, WRF) combinados con imágenes infrarrojas del satélite geostacionario GOES-19 para la detección anticipada de tormentas, frentes fríos y ráfagas severas.
+            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 18px; margin-bottom: 8px;">Tecnología & Modelado Multimodelo</h4>
+            <p style="margin-bottom: 16px;">Procesamos ensambles atmosféricos de vanguardia (<b>ECMWF, GFS, ICON, WRF</b>) combinados con imágenes infrarrojas en tiempo real del satélite geostacionario <b>GOES-19 (GOES-East)</b> para el seguimiento y detección anticipada de tormentas severas, frentes fríos y ráfagas de viento.</p>
+
+            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 18px; margin-bottom: 8px;">Red de Estaciones de Superficie</h4>
+            <p style="margin-bottom: 16px;">Integramos datos de estaciones automáticas de superficie (Davis Vantage Pro2, Netatmo y sensores IoT) ubicadas en puntos estratégicos del territorio uruguayo para validar las variables de temperatura, humedad, presión y precipitación instantánea.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -337,9 +386,9 @@ if not st.session_state.resultado_activo:
     elif st.session_state.seccion_activa == "servicios":
         st.markdown("""
         <div class="texto-meteo-limpio">
-            <h4>Asesoramiento Meteorológico para Empresas y Profesionales</h4>
-            Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:
-            <ul>
+            <h4 style="color: #0284c7; font-size: 1.15rem; font-weight: 800; margin-top: 10px; margin-bottom: 8px;">Asesoramiento Meteorológico para Empresas y Profesionales</h4>
+            <p style="margin-bottom: 12px;">Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:</p>
+            <ul style="margin-bottom: 20px;">
                 <li><b>Agro & Ganadería:</b> Modelado de precipitaciones por parcela, heladas y balance hídrico.</li>
                 <li><b>Construcción & Obras:</b> Alertas tempranas de viento y lluvias para seguridad operativa.</li>
                 <li><b>Logística & Transporte:</b> Monitoreo de rutas, puertos y condiciones adversas.</li>
