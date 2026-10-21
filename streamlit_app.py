@@ -107,25 +107,48 @@ FRASES_POR_CLIMA = {
     ]
 }
 
-def obtener_estado_clima_uruguay():
+# VIDEOS DE RESPALDO (CDN RÁPIDO) SI NO EXISTEN LOCALES EN ASSETS/VIDEOS/
+VIDEOS_RESPALDO = {
+    "noche": "https://cdn.pixabay.com/video/2020/09/19/50125-460882191_large.mp4",
+    "tormenta": "https://cdn.pixabay.com/video/2019/06/11/24362-341829035_large.mp4",
+    "lluvia": "https://cdn.pixabay.com/video/2021/08/13/84918-587841528_large.mp4",
+    "niebla": "https://cdn.pixabay.com/video/2020/05/25/40176-425127021_large.mp4",
+    "dia_sol": "https://cdn.pixabay.com/video/2019/04/23/23011-332493327_large.mp4",
+    "dia_nublado": "https://cdn.pixabay.com/video/2020/06/06/41267-428612194_large.mp4"
+}
+
+def obtener_video_fondo_uruguay():
+    """
+    Detecta el estado del clima en Uruguay y devuelve la ruta local o URL CDN del video.
+    """
     try:
         url = "https://api.open-meteo.com/v1/forecast?latitude=-34.9011&longitude=-56.1645&current=weathercode,is_day"
         res = requests.get(url, timeout=3).json()
         current = res.get("current", {})
         wcode = current.get("weathercode", 0)
         is_day = current.get("is_day", 1)
-
+        
         if is_day == 0:
-            return "noche"
-        if wcode in [95, 96, 99]:
-            return "tormenta"
-        if wcode in range(51, 68) or wcode in range(80, 83):
-            return "lluvia"
-        if wcode in [0, 1]:
-            return "sol"
-        return "nublado"
+            cat = "noche"
+        elif wcode in [95, 96, 99]:
+            cat = "tormenta"
+        elif wcode in range(51, 68) or wcode in range(80, 83):
+            cat = "lluvia"
+        elif wcode in [45, 48]:
+            cat = "niebla"
+        elif wcode in [0, 1]:
+            cat = "dia_sol"
+        else:
+            cat = "dia_nublado"
     except Exception:
-        return "nublado"
+        cat = "dia_nublado"
+
+    # Verificación si existe el archivo local en assets/videos/
+    ruta_local = f"assets/videos/{cat}.mp4"
+    if os.path.exists(ruta_local):
+        return ruta_local, cat
+    
+    return VIDEOS_RESPALDO.get(cat, VIDEOS_RESPALDO["dia_nublado"]), cat
 
 def obtener_frase_dinamica_clima():
     try:
@@ -219,7 +242,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#CBD5E1"/>
                 <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
             </svg>
         </div>
@@ -261,18 +284,16 @@ def mostrar_logo():
 # PANTALLA 1: INICIO
 # =========================================================
 if not st.session_state.resultado_activo:
-    clima_cat = obtener_estado_clima_uruguay()
-
-    # GRADIENTES ANIMADOS FLUIDOS EN MOVIMIENTO CONTINUO SEGÚN EL CLIMA
-    if clima_cat == "noche":
-        gradient_bg = "linear-gradient(-45deg, #091326, #111d33, #050b14, #1a2942)"
-    elif clima_cat in ["lluvia", "tormenta"]:
-        gradient_bg = "linear-gradient(-45deg, #1e293b, #334155, #0f172a, #1e293b)"
-    elif clima_cat == "sol":
-        gradient_bg = "linear-gradient(-45deg, #e0f2fe, #bae6fd, #f0f9ff, #7dd3fc)"
+    # OBTENCIÓN DEL VIDEO DE FONDO DINÁMICO DE ACUERDO AL CLIMA DE URUGUAY
+    video_url, tipo_cat = obtener_video_fondo_uruguay()
+    
+    # OPACIDAD / COLOR TENUE ADAPTATIVO
+    if tipo_cat in ["noche", "tormenta"]:
+        overlay_bg = "rgba(10, 20, 38, 0.65)"
     else:
-        gradient_bg = "linear-gradient(-45deg, #f1f5f9, #e2e8f0, #cbd5e1, #f8fafc)"
+        overlay_bg = "rgba(255, 255, 255, 0.72)"
 
+    # INYECCIÓN DEL VIDEO EN CAPA FIJA DETRÁS DE TODO (UX FULLSCREEN)
     st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -281,16 +302,38 @@ if not st.session_state.resultado_activo:
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }}
 
-    @keyframes backgroundWave {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
+    .stApp {{
+        background: transparent !important;
     }}
 
-    .stApp {{
-        background: {gradient_bg} !important;
-        background-size: 400% 400% !important;
-        animation: backgroundWave 15s ease infinite !important;
+    /* ESTRUCTURA DEL VIDEO DE FONDO EN MOVIMIENTO */
+    .bg-video-container {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        z-index: -2;
+    }}
+
+    .bg-video-element {{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }}
+
+    /* CAPA TENUE (OVERLAY) CON DESENFOQUE SUAVE PARA MÁXIMA LEGIBILIDAD */
+    .bg-overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: {overlay_bg};
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        z-index: -1;
     }}
 
     /* BUSCADOR CON ANIMACIÓN PULSANTE */
@@ -384,14 +427,23 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
     }}
     </style>
+
+    <div class="bg-video-container">
+        <video autoplay loop muted playsinline class="bg-video-element">
+            <source src="{video_url}" type="video/mp4">
+        </video>
+    </div>
+    <div class="bg-overlay"></div>
     """, unsafe_allow_html=True)
 
     # BARRA SUPERIOR DE NAVEGACIÓN
     nav1, nav2 = st.columns(2)
+    
     with nav1:
         if st.button("MeteoUy", key="btn_mu", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "meteo_uy" else "meteo_uy"
             st.rerun()
+            
     with nav2:
         if st.button("Servicios Profesionales", key="btn_serv", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
