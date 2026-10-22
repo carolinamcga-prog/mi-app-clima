@@ -414,20 +414,15 @@ if not st.session_state.resultado_activo:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # BUSCADOR DE LOCALIDADES LIMPIO Y FLUIDO
-    def al_seleccionar_localidad():
-        if st.session_state.localidad_input and st.session_state.localidad_input.strip():
-            st.session_state.lugar_actual = st.session_state.localidad_input.strip()
-            st.session_state.resultado_activo = True
-
-    opciones_localidades = [""] + sorted(LOCALIDADES_URUGUAY)
+    # BUSCADOR DE LOCALIDADES TRADUCIDO Y CONFIGURADO SOLO PARA BOTÓN/ENTER
+    opciones_localidades = [""] + sorted(COORDS_URUGUAY.keys())
 
     localidad_seleccionada = st.selectbox(
         label="Buscador de localidades",
         options=opciones_localidades,
         index=0,
         key="localidad_input",
-        on_change=al_seleccionar_localidad,
+        format_func=lambda x: "Escriba o elija una localidad..." if x == "" else x.title(),
         label_visibility="collapsed"
     )
 
@@ -437,6 +432,8 @@ if not st.session_state.resultado_activo:
             st.session_state.lugar_actual = localidad_seleccionada.strip()
             st.session_state.resultado_activo = True
             st.rerun()
+        else:
+            st.warning("⚠️ Por favor, seleccione o escriba una localidad del Uruguay.")
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
