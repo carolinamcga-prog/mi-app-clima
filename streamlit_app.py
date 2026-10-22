@@ -62,7 +62,6 @@ COORDS_URUGUAY = {
     "centro": (-34.9050, -56.1910)
 }
 
-# BASE DE DATOS EXTENSA DE FRASES DINÁMICAS POR CLIMA
 FRASES_POR_CLIMA = {
     "sol": [
         "«No hay nada más bello que la luz del sol tras disipar la niebla.»",
@@ -220,24 +219,23 @@ if not st.session_state.resultado_activo:
         background-color: #ffffff !important;
     }
 
-    /* BUSCADOR CON ANIMACIÓN PULSANTE */
+    /* BUSCADOR TIPO TEXTO CON ENTER HABILITADO Y RESPLANDOR */
     @keyframes pulseGlow {
         0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
         50% { box-shadow: 0 0 22px rgba(14, 165, 233, 0.7); border-color: #0284c7; }
         100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
     }
 
-    div[data-baseweb="select"] {
+    div[data-testid="stTextInput"] input {
         border-radius: 45px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
         background-color: #f8fafc !important;
-    }
-
-    div[data-baseweb="select"] div[role="combobox"] {
-        color: #0f172a !important;
+        height: 3.6rem !important;
         font-size: 1.1rem !important;
         font-weight: 600 !important;
+        color: #0f172a !important;
+        padding-left: 20px !important;
     }
 
     .stButton > button {
@@ -414,26 +412,29 @@ if not st.session_state.resultado_activo:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # BUSCADOR DE LOCALIDADES TRADUCIDO Y CONFIGURADO SOLO PARA BOTÓN/ENTER
-    opciones_localidades = [""] + sorted(COORDS_URUGUAY.keys())
+    # BUSCADOR TIPO ENTRADA DE TEXTO QUE RESPONDE AL ENTER
+    def procesar_busqueda():
+        val = st.session_state.input_localidad_texto.strip()
+        if val:
+            st.session_state.lugar_actual = val
+            st.session_state.resultado_activo = True
 
-    localidad_seleccionada = st.selectbox(
-        label="Buscador de localidades",
-        options=opciones_localidades,
-        index=0,
-        key="localidad_input",
-        format_func=lambda x: "Escriba o elija una localidad..." if x == "" else x.title(),
+    localidad_ingresada = st.text_input(
+        label="Buscador",
+        placeholder="Escribí una localidad o departamento de Uruguay...",
+        key="input_localidad_texto",
+        on_change=procesar_busqueda,
         label_visibility="collapsed"
     )
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
     if st.button("VER PRONÓSTICO", use_container_width=True):
-        if localidad_seleccionada and localidad_seleccionada.strip():
-            st.session_state.lugar_actual = localidad_seleccionada.strip()
+        if localidad_ingresada and localidad_ingresada.strip():
+            st.session_state.lugar_actual = localidad_ingresada.strip()
             st.session_state.resultado_activo = True
             st.rerun()
         else:
-            st.warning("⚠️ Por favor, seleccione o escriba una localidad del Uruguay.")
+            st.warning("⚠️ Por favor, escribí una localidad del Uruguay.")
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
@@ -492,7 +493,7 @@ else:
         </style>
         """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
-        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegúrate de seleccionar una ciudad, pueblo, departamento o barrio uruguayo.")
+        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegurate de ingresar una ciudad, pueblo, departamento o barrio uruguayo.")
         if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
@@ -549,7 +550,7 @@ else:
         @keyframes spinGlow {
             0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
             50% { transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
-            100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+            100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
         }
         @keyframes moonGlow {
             0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
