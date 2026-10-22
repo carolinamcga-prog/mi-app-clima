@@ -642,4 +642,11 @@ else:
         with col_top2:
             st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
             st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
-        with col_
+        with col_top3:
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+
+        t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
+        
+        html_hoy = f'<div class="card-editorial-hoy"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;"><div><span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span><div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div></div><div style="display: flex; align-items: center; gap: 16px;"><div>{dibujo_hoy}</div><div style="text-align: right;"><span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span><span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div><p style="font-size: 1.05
