@@ -179,48 +179,15 @@ def generar_titular_pronostico_horas(wcode, lluvia_hoy, prob_lluvia, viento, uv_
 def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     t = texto_clima.lower()
     if is_day == 0 and (wcode in [0, 1] or "despejado" in t or "claro" in t or "nocturn" in t):
-        return """
-        <div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-luna" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M42 36C42 45.9411 33.9411 54 24 54C20.6133 54 17.4475 53.053 14.75 51.4552C21.8211 51.0251 27.5 45.1378 27.5 38C27.5 30.8622 21.8211 24.9749 14.75 24.5448C17.4475 22.947 20.6133 22 24 22C33.9411 22 42 30.0589 42 36Z" fill="#38BDF8"/></svg></div>'
     elif wcode in [0, 1] or "despejado" in t or "sol" in t:
-        return """
-        <div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <circle cx="32" cy="32" r="14" fill="#FBBF24"/>
-                <path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-sol" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><circle cx="32" cy="32" r="14" fill="#FBBF24"/><path d="M32 6V2M32 62V58M58 32H62M2 32H6M50.4 13.6L53.2 10.8M10.8 53.2L13.6 50.4M50.4 50.4L53.2 53.2M10.8 10.8L13.6 13.6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/></svg></div>'
     elif "lluvia" in t or "llovizna" in t or "chubascos" in t or "garúa" in t or wcode in range(51, 68) or wcode in range(80, 83):
-        return """
-        <div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/>
-                <path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-lluvia" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#CBD5E1"/><path d="M22 52L20 58M32 52L30 58M42 52L40 58" stroke="#38BDF8" stroke-width="3.5" stroke-linecap="round"/></svg></div>'
     elif "tormenta" in t or wcode in [95, 96, 99]:
-        return """
-        <div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/>
-                <path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/><path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/></svg></div>'
     else:
-        return """
-        <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
-            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
-            </svg>
-        </div>
-        """
+        return '<div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
 
 def obtener_ruta_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
@@ -564,57 +531,57 @@ else:
         desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
         dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
 
-        st.markdown(f"""
+        st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        .stApp, html, body, [class*="st-"] {{
+        .stApp, html, body, [class*="st-"] {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }}
+        }
 
-        .stApp {{
+        .stApp {
             background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
             background-attachment: fixed !important;
-        }}
+        }
 
-        .block-container {{
+        .block-container {
             position: relative !important;
             z-index: 10 !important;
-        }}
+        }
 
-        @keyframes spinGlow {{
-            0% {{ transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-            50% {{ transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }}
-            100% {{ transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }}
-        }}
-        @keyframes moonGlow {{
-            0% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
-            50% {{ transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }}
-            100% {{ transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }}
-        }}
-        @keyframes slideRain {{
-            0% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(3px); }}
-            100% {{ transform: translateY(0px); }}
-        }}
-        @keyframes flashStorm {{
-            0% {{ filter: brightness(1); }}
-            50% {{ filter: brightness(1.35); }}
-            100% {{ filter: brightness(1); }}
-        }}
-        @keyframes floatCloud {{
-            0% {{ transform: translateY(0px); }}
-            50% {{ transform: translateY(-4px); }}
-            100% {{ transform: translateY(0px); }}
-        }}
+        @keyframes spinGlow {
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+            50% { transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
+            100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+        }
+        @keyframes moonGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+        }
+        @keyframes slideRain {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(3px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes flashStorm {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.35); }
+            100% { filter: brightness(1); }
+        }
+        @keyframes floatCloud {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
 
-        .anim-sol svg {{ animation: spinGlow 14s linear infinite; }}
-        .anim-luna svg {{ animation: moonGlow 4s ease-in-out infinite; }}
-        .anim-lluvia svg {{ animation: slideRain 2.2s ease-in-out infinite; }}
-        .anim-tormenta svg {{ animation: flashStorm 1.6s ease-in-out infinite; }}
-        .anim-nube svg {{ animation: floatCloud 3.5s ease-in-out infinite; }}
+        .anim-sol svg { animation: spinGlow 14s linear infinite; }
+        .anim-luna svg { animation: moonGlow 4s ease-in-out infinite; }
+        .anim-lluvia svg { animation: slideRain 2.2s ease-in-out infinite; }
+        .anim-tormenta svg { animation: flashStorm 1.6s ease-in-out infinite; }
+        .anim-nube svg { animation: floatCloud 3.5s ease-in-out infinite; }
 
-        .card-editorial-hoy {{
+        .card-editorial-hoy {
             background: rgba(15, 32, 56, 0.75) !important;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -624,9 +591,9 @@ else:
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
             margin-bottom: 20px !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        }}
+        }
 
-        .card-editorial-semana {{
+        .card-editorial-semana {
             background: rgba(255, 255, 255, 0.96) !important;
             border-radius: 20px !important;
             padding: 20px 24px !important;
@@ -634,9 +601,9 @@ else:
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
             margin-bottom: 16px !important;
             border: 1px solid rgba(255, 255, 255, 0.8) !important;
-        }}
+        }
 
-        .footer-metodologico {{
+        .footer-metodologico {
             text-align: center !important;
             margin-top: 35px !important;
             padding: 18px 20px !important;
@@ -644,9 +611,9 @@ else:
             color: #94a3b8 !important;
             font-size: 0.78rem !important;
             line-height: 1.5 !important;
-        }}
+        }
         
-        .titulo-pantalla {{
+        .titulo-pantalla {
             text-align: center !important;
             color: #ffffff !important;
             font-size: 2rem !important;
@@ -654,16 +621,16 @@ else:
             letter-spacing: -0.5px;
             margin: 0 !important;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-        }}
+        }
         
-        .subtitulo-pantalla {{
+        .subtitulo-pantalla {
             text-align: center !important;
             color: #38bdf8 !important;
             font-size: 1.05rem !important;
             font-weight: 700 !important;
             letter-spacing: 0.5px;
             margin-top: 2px !important;
-        }}
+        }
         </style>
         """, unsafe_allow_html=True)
         
@@ -684,39 +651,7 @@ else:
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        html_hoy = f"""
-        <div class="card-editorial-hoy">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div>
-                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div>{dibujo_hoy}</div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
-                        <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
-                    </div>
-                </div>
-            </div>
-            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>
-            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div>
-                </div>
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div>
-                </div>
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div>
-                </div>
-            </div>
-        </div>
-        """
+        html_hoy = f'<div class="card-editorial-hoy"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;"><div><span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span><div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div></div><div style="display: flex; align-items: center; gap: 16px;"><div>{dibujo_hoy}</div><div style="text-align: right;"><span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span><span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div><p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p><div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;"><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div></div><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div></div><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div></div></div></div>'
         st.markdown(html_hoy, unsafe_allow_html=True)
 
         st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
@@ -743,8 +678,11 @@ else:
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            html_semana = f"""
-            <div class="card-editorial-semana">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div>
-                        <span style="font-size: 0.75rem; font-
+            html_semana = f'<div class="card-editorial-semana"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span><div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div></div><div style="display: flex; align-items: center; gap: 14px;"><div>{dibujo_ext}</div><div style="text-align: right;"><span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div></div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;"><div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div><div style="font-size: 0.82rem; color: #475569; font-weight: 600;">Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b></div></div></div>'
+            st.markdown(html_semana, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="footer-metodologico">
+            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
+        </div>
+        """, unsafe_allow_html=True)
