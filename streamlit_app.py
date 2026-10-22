@@ -217,7 +217,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return """
         <div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
-                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/>
+                <path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 32.2 51 30.2 46 28Z" fill="#94A3B8"/>
             </svg>
         </div>
         """
@@ -268,8 +268,9 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-baseweb="select"] div[role="combobox"] {
-        color: #94a3b8 !important;
+        color: #0f172a !important;
         font-size: 1.1rem !important;
+        font-weight: 600 !important;
     }
 
     .stButton > button {
@@ -419,7 +420,7 @@ if not st.session_state.resultado_activo:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # NUEVA SECCIÓN: METEO UY PRO (SUSCRIPCIÓN EMPRESARIAL $100/MES)
+    # SECCIÓN: METEO UY PRO
     elif st.session_state.seccion_activa == "pro":
         st.markdown("""
         <div class="card-pro">
@@ -446,16 +447,17 @@ if not st.session_state.resultado_activo:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # BUSCADOR ORIGINAL DE LOCALIDADES
+    # BUSCADOR DE LOCALIDADES LIMPIO Y FLUIDO
     def al_seleccionar_localidad():
         if st.session_state.localidad_input and st.session_state.localidad_input.strip():
             st.session_state.lugar_actual = st.session_state.localidad_input.strip()
             st.session_state.resultado_activo = True
 
+    opciones_localidades = [""] + sorted(LOCALIDADES_URUGUAY)
+
     localidad_seleccionada = st.selectbox(
-        label="Ubicación",
-        options=[""] + sorted(LOCALIDADES_URUGUAY),
-        format_func=lambda x: "Escriba localidad" if x == "" else x,
+        label="Buscador de localidades",
+        options=opciones_localidades,
         index=0,
         key="localidad_input",
         on_change=al_seleccionar_localidad,
@@ -721,52 +723,4 @@ else:
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
-        t_min = daily.get("temperature_2m_min", [])
-        lluvia = daily.get("precipitation_sum", [])
-        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
-        viento_diario = daily.get("windspeed_10m_max", [])
-        wcodes_daily = daily.get("weathercode", [])
-        
-        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
-        
-        for i in range(1, min(3, len(fechas))):
-            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
-            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
-            
-            tmax_val = t_max[i] if i < len(t_max) else "--"
-            tmin_val = t_min[i] if i < len(t_min) else "--"
-            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
-            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
-            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-            fecha_val = fechas[i] if i < len(fechas) else ""
-            
-            html_semana = f"""
-            <div class="card-editorial-semana">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div>
-                        <span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>
-                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                        <div>{dibujo_ext}</div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>
-                    <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
-                        Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b>
-                    </div>
-                </div>
-            </div>
-            """
-            st.markdown(html_semana, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="footer-metodologico">
-            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
-        </div>
-        """, unsafe_allow_html=True)
+        t_min =
