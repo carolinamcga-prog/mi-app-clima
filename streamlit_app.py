@@ -723,4 +723,28 @@ else:
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
-        t_min =
+        t_min = daily.get("temperature_2m_min", [])
+        lluvia = daily.get("precipitation_sum", [])
+        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
+        viento_diario = daily.get("windspeed_10m_max", [])
+        wcodes_daily = daily.get("weathercode", [])
+        
+        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
+        
+        for i in range(1, min(3, len(fechas))):
+            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
+            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
+            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
+            
+            tmax_val = t_max[i] if i < len(t_max) else "--"
+            tmin_val = t_min[i] if i < len(t_min) else "--"
+            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
+            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
+            html_semana = f"""
+            <div class="card-editorial-semana">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <span style="font-size: 0.75rem; font-
