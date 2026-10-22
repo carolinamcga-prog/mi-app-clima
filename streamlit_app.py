@@ -319,7 +319,7 @@ if not st.session_state.resultado_activo:
     </style>
     """, unsafe_allow_html=True)
 
-    # BARRA SUPERIOR DE NAVEGACIÓN (3 BOTONES)
+    # BARRA SUPERIOR DE NAVEGACIÓN (3 BOTONES SIN ESTRELLITA)
     nav1, nav2, nav3 = st.columns(3)
     with nav1:
         if st.button("MeteoUy", key="btn_mu", use_container_width=True):
@@ -330,7 +330,7 @@ if not st.session_state.resultado_activo:
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "servicios" else "servicios"
             st.rerun()
     with nav3:
-        if st.button("⭐ MeteoUy Pro", key="btn_pro", use_container_width=True):
+        if st.button("MeteoUy Pro", key="btn_pro", use_container_width=True):
             st.session_state.seccion_activa = "inicio" if st.session_state.seccion_activa == "pro" else "pro"
             st.rerun()
 
@@ -642,45 +642,4 @@ else:
         with col_top2:
             st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
             st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
-        with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
-
-        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
-
-        t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
-        
-        html_hoy = f'<div class="card-editorial-hoy"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;"><div><span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span><div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div></div><div style="display: flex; align-items: center; gap: 16px;"><div>{dibujo_hoy}</div><div style="text-align: right;"><span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span><span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div><p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p><div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div><div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;"><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div></div><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div></div><div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div></div></div></div>'
-        st.markdown(html_hoy, unsafe_allow_html=True)
-
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
-        
-        fechas = daily.get("time", [])
-        t_max = daily.get("temperature_2m_max", [])
-        t_min = daily.get("temperature_2m_min", [])
-        lluvia = daily.get("precipitation_sum", [])
-        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
-        viento_diario = daily.get("windspeed_10m_max", [])
-        wcodes_daily = daily.get("weathercode", [])
-        
-        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
-        
-        for i in range(1, min(3, len(fechas))):
-            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
-            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
-            
-            tmax_val = t_max[i] if i < len(t_max) else "--"
-            tmin_val = t_min[i] if i < len(t_min) else "--"
-            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
-            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
-            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-            fecha_val = fechas[i] if i < len(fechas) else ""
-            
-            html_semana = f'<div class="card-editorial-semana"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span><div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div></div><div style="display: flex; align-items: center; gap: 14px;"><div>{dibujo_ext}</div><div style="text-align: right;"><span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div></div></div><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;"><div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div><div style="font-size: 0.82rem; color: #475569; font-weight: 600;">Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b></div></div></div>'
-            st.markdown(html_semana, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="footer-metodologico">
-            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
-        </div>
-        """, unsafe_allow_html=True)
+        with col_
