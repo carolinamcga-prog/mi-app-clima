@@ -3,8 +3,14 @@ import requests
 import os
 import random
 import urllib.parse
-import plotly.graph_objects as go
 from data.localidades import LOCALIDADES_URUGUAY
+
+# Intentar importar plotly para el gráfico de 24hs (con control de errores por si no está instalado)
+try:
+    import plotly.graph_objects as go
+    PLOTLY_DISPONIBLE = True
+except ImportError:
+    PLOTLY_DISPONIBLE = False
 
 # ---------------------------------------------------------
 # CONFIGURACIÓN DE PÁGINA
@@ -486,28 +492,32 @@ else:
         )
         st.markdown(card_html, unsafe_allow_html=True)
 
-        if "temperature_2m" in hourly and "time" in hourly:
-            horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
-            temps = hourly["temperature_2m"][:24]
+        # GRÁFICO PLOTLY (Si está disponible)
+        if PLOTLY_DISPONIBLE and "temperature_2m" in hourly and "time" in hourly:
+            try:
+                horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
+                temps = hourly["temperature_2m"][:24]
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=horas, y=temps,
-                mode='lines+markers',
-                line=dict(color='#38bdf8', width=3, shape='spline'),
-                marker=dict(size=6, color='#ffffff'),
-                hovertemplate='%{x}hs: <b>%{y}°C</b><extra></extra>'
-            ))
-            fig.update_layout(
-                title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#ffffff", size=14)),
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                margin=dict(l=10, r=10, t=35, b=10),
-                height=180,
-                xaxis=dict(showgrid=False, tickfont=dict(color='#94a3b8', size=10)),
-                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#94a3b8', size=10))
-            )
-            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=horas, y=temps,
+                    mode='lines+markers',
+                    line=dict(color='#38bdf8', width=3, shape='spline'),
+                    marker=dict(size=6, color='#ffffff'),
+                    hovertemplate='%{x}hs: <b>%{y}°C</b><extra></extra>'
+                ))
+                fig.update_layout(
+                    title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#ffffff", size=14)),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=10, r=10, t=35, b=10),
+                    height=180,
+                    xaxis=dict(showgrid=False, tickfont=dict(color='#94a3b8', size=10)),
+                    yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#94a3b8', size=10))
+                )
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            except Exception:
+                pass
 
         st.markdown("<h3 style='color: white; font-size: 1rem; font-weight: 700; margin: 15px 0 10px 0;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
@@ -539,3 +549,4 @@ else:
                 '</div></div>'
             )
             st.markdown(card_semana, unsafe_allow_html=True)
+            
