@@ -360,7 +360,6 @@ if not st.session_state.resultado_activo:
         else:
             st.warning("⚠️ Por favor, escribí una localidad del Uruguay.")
 
-    # RECIENTES / FAVORITOS
     if st.session_state.favoritos:
         st.markdown("<p style='text-align: center; color: #64748b; font-size: 0.82rem; font-weight: 700; margin-top: 15px;'>📍 BÚSQUEDAS RECIENTES</p>", unsafe_allow_html=True)
         cols_fav = st.columns(len(st.session_state.favoritos))
@@ -468,32 +467,25 @@ else:
 
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-        # BANNER AUTOMÁTICO DE ALERTA TEMPRANA
         if viento_actual > 40 or prob_lluvia_hoy > 70 or wcode_actual in [95, 96, 99]:
             st.markdown(f"<div class='alerta-banner'>⚠️ <b>AVISO METEO UY:</b> Condiciones adversas previstas en la zona ({desc_actual}). Extremar precauciones.</div>", unsafe_allow_html=True)
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        st.markdown(f"""
-        <div class="card-editorial-hoy">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8;">CONDICIÓN ACTUAL</span>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 2px;">{desc_actual}</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div>{dibujo_hoy}</div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 3rem; font-weight: 800; color: #ffffff;">{temp_actual}°</span>
-                        <span style="font-size: 1.1rem; color: #94a3b8;"> / {t_max_hoy}°</span>
-                    </div>
-                </div>
-            </div>
-            <p style="font-size: 0.95rem; font-weight: 600; color: #f1f5f9; margin: 14px 0 0 0;">{frase_humana}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        card_html = (
+            '<div class="card-editorial-hoy">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center;">'
+            f'<div><span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8;">CONDICIÓN ACTUAL</span>'
+            f'<div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 2px;">{desc_actual}</div></div>'
+            f'<div style="display: flex; align-items: center; gap: 14px;">'
+            f'<div>{dibujo_hoy}</div>'
+            f'<div style="text-align: right;"><span style="font-size: 3rem; font-weight: 800; color: #ffffff;">{temp_actual}°</span>'
+            f'<span style="font-size: 1.1rem; color: #94a3b8;"> / {t_max_hoy}°</span></div></div></div>'
+            f'<p style="font-size: 0.95rem; font-weight: 600; color: #f1f5f9; margin: 14px 0 0 0;">{frase_humana}</p>'
+            '</div>'
+        )
+        st.markdown(card_html, unsafe_allow_html=True)
 
-        # GRÁFICO PLOTLY DE TEMPERATURA PRÓXIMAS 24 HORAS
         if "temperature_2m" in hourly and "time" in hourly:
             horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
             temps = hourly["temperature_2m"][:24]
@@ -517,7 +509,6 @@ else:
             )
             st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        # EXTENDIDO
         st.markdown("<h3 style='color: white; font-size: 1rem; font-weight: 700; margin: 15px 0 10px 0;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
@@ -536,11 +527,15 @@ else:
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
-            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
-            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             
-            st.markdown(f"""
-            <div class="card-editorial-semana">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <span style="font-size: 0
+            card_semana = (
+                '<div class="card-editorial-semana">'
+                '<div style="display: flex; justify-content: space-between; align-items: center;">'
+                f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7;">{etiquetas[i-1]}</span>'
+                f'<div style="font-size: 0.85rem; font-weight: 700; color: #334155; margin-top: 2px;">{estado_texto}</div></div>'
+                f'<div style="display: flex; align-items: center; gap: 10px;">'
+                f'<div>{dibujo_ext}</div>'
+                f'<span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div>'
+                '</div></div>'
+            )
+            st.markdown(card_semana, unsafe_allow_html=True)
