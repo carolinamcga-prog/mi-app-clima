@@ -222,69 +222,9 @@ if not st.session_state.resultado_activo:
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
-    /* FONDO CELESTE CLARO BIEN LIMPIO Y PROFESIONAL */
+    /* ESTILO SEGURO: FONDO CELESTE CLARO PROFESIONAL */
     .stApp {
         background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
-        position: relative !important;
-        overflow-x: hidden !important;
-    }
-
-    /* NUBES FLOTANTES ANIMADAS */
-    .cloud-anim-1, .cloud-anim-2 {
-        position: fixed;
-        background: rgba(255, 255, 255, 0.65);
-        border-radius: 100px;
-        pointer-events: none;
-        z-index: 0;
-        filter: blur(1px);
-    }
-
-    .cloud-anim-1 {
-        width: 180px;
-        height: 60px;
-        top: 15%;
-        left: -200px;
-        animation: floatCloud1 35s linear infinite;
-    }
-    .cloud-anim-1::before, .cloud-anim-1::after {
-        content: '';
-        position: absolute;
-        background: rgba(255, 255, 255, 0.65);
-        border-radius: 50%;
-    }
-    .cloud-anim-1::before { width: 70px; height: 70px; top: -35px; left: 25px; }
-    .cloud-anim-1::after { width: 90px; height: 90px; top: -50px; left: 75px; }
-
-    .cloud-anim-2 {
-        width: 240px;
-        height: 80px;
-        top: 60%;
-        left: -300px;
-        animation: floatCloud2 50s linear infinite;
-        animation-delay: 10s;
-    }
-    .cloud-anim-2::before, .cloud-anim-2::after {
-        content: '';
-        position: absolute;
-        background: rgba(255, 255, 255, 0.55);
-        border-radius: 50%;
-    }
-    .cloud-anim-2::before { width: 90px; height: 90px; top: -45px; left: 40px; }
-    .cloud-anim-2::after { width: 110px; height: 110px; top: -60px; left: 100px; }
-
-    @keyframes floatCloud1 {
-        0% { transform: translateX(0vw); }
-        100% { transform: translateX(120vw); }
-    }
-    @keyframes floatCloud2 {
-        0% { transform: translateX(0vw); }
-        100% { transform: translateX(130vw); }
-    }
-
-    /* Asegurar que los elementos de la UI estén por encima de las nubes */
-    .block-container {
-        position: relative !important;
-        z-index: 10 !important;
     }
 
     @keyframes pulseGlow {
@@ -375,10 +315,6 @@ if not st.session_state.resultado_activo:
         box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
     </style>
-    
-    <!-- ELEMENTOS HTML DE LAS NUBES FLOTANTES -->
-    <div class="cloud-anim-1"></div>
-    <div class="cloud-anim-2"></div>
     """, unsafe_allow_html=True)
 
     nav1, nav2, nav3 = st.columns(3)
@@ -590,11 +526,6 @@ else:
         .stApp {
             background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
             background-attachment: fixed !important;
-        }
-
-        .block-container {
-            position: relative !important;
-            z-index: 10 !important;
         }
 
         @keyframes spinGlow {
