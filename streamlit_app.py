@@ -229,10 +229,10 @@ if not st.session_state.resultado_activo:
         overflow-x: hidden !important;
     }
 
-    /* CONTENEDOR DE NUBES FLOTANTES ANIMADAS */
+    /* NUBES FLOTANTES ANIMADAS */
     .cloud-anim-1, .cloud-anim-2 {
         position: fixed;
-        background: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.65);
         border-radius: 100px;
         pointer-events: none;
         z-index: 0;
@@ -249,7 +249,7 @@ if not st.session_state.resultado_activo:
     .cloud-anim-1::before, .cloud-anim-1::after {
         content: '';
         position: absolute;
-        background: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.65);
         border-radius: 50%;
     }
     .cloud-anim-1::before { width: 70px; height: 70px; top: -35px; left: 25px; }
@@ -266,7 +266,7 @@ if not st.session_state.resultado_activo:
     .cloud-anim-2::before, .cloud-anim-2::after {
         content: '';
         position: absolute;
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.55);
         border-radius: 50%;
     }
     .cloud-anim-2::before { width: 90px; height: 90px; top: -45px; left: 40px; }
@@ -368,7 +368,7 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-testid="stForm"] {
-        border: 1px solid #bae6fd !important;
+        border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
         padding: 24px !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
