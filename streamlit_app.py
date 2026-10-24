@@ -205,7 +205,9 @@ def obtener_ruta_logo():
 def mostrar_logo():
     logo_path = obtener_ruta_logo()
     if logo_path:
+        st.markdown('<div class="transparent-logo-container">', unsafe_allow_html=True)
         st.image(logo_path, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
@@ -222,9 +224,15 @@ if not st.session_state.resultado_activo:
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
-    /* ESTILO SEGURO: FONDO CELESTE CLARO PROFESIONAL */
+    /* ESTILO DE FONDO CELESTE CLARO PROFESIONAL */
     .stApp {
         background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
+    }
+
+    /* FILTRO CSS PARA QUITAR EL RECUADRO BLANCO DEL LOGO */
+    .transparent-logo-container img {
+        mix-blend-mode: multiply !important;
+        background: transparent !important;
     }
 
     @keyframes pulseGlow {
