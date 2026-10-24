@@ -341,7 +341,9 @@ if not st.session_state.resultado_activo:
 
     if st.session_state.seccion_activa == "meteo_uy":
         st.subheader("¿Qué es MeteoUy?")
-        st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
+        st.write("**MeteoUy** is la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
+        
+        st.write("Más allá de un simple pronóstico, en MeteoUy creamos un servicio meteorológico integral diseñado para transformar los datos atmosféricos en información práctica y de alto valor, ayudándote a decidir con certeza qué hacer en cada momento y situación.")
         
         st.subheader("Tecnología y Fuentes de Datos")
         st.write("Para garantizar la máxima confiabilidad técnica, nuestro motor procesa e integra en tiempo real:")
