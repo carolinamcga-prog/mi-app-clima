@@ -348,6 +348,8 @@ if not st.session_state.resultado_activo:
         st.markdown("- **Modelos Numéricos Globales y Regionales:** ECMWF, GFS, ICON y WRF.")
         st.markdown("- **Telemetría Satelital:** Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite **GOES-19 (GOES-East)**.")
         st.markdown("- **Radares & Estaciones de Superficie:** Cobertura Doppler regional integrada con redes de estaciones automáticas (Davis Vantage Pro2, Netatmo y sensores IoT).")
+        
+        st.write("Asimismo, nuestro equipo técnico se capacita y actualiza de forma constante en nuevas herramientas analíticas y metodologías de observación atmosférica, asegurando la excelencia operativa para brindar siempre el mejor servicio a nuestros usuarios.")
         st.markdown("<br>", unsafe_allow_html=True)
 
     elif st.session_state.seccion_activa == "servicios":
