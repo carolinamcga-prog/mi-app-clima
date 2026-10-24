@@ -3,6 +3,7 @@ import requests
 import os
 import random
 import urllib.parse
+import plotly.graph_objects as go
 from data.localidades import LOCALIDADES_URUGUAY
 
 # ---------------------------------------------------------
@@ -24,6 +25,8 @@ if "lugar_actual" not in st.session_state:
     st.session_state.lugar_actual = ""
 if "seccion_activa" not in st.session_state:
     st.session_state.seccion_activa = "inicio"
+if "favoritos" not in st.session_state:
+    st.session_state.favoritos = ["Montevideo", "Punta del Este", "Salto"]
 
 # BASE DE DATOS LOCAL EXCLUSIVA PARA URUGUAY
 COORDS_URUGUAY = {
@@ -105,6 +108,13 @@ FRASES_POR_CLIMA = {
         "«El horizonte nublado nos enseña que el cambio es parte del ciclo natural.»"
     ]
 }
+
+def agregar_favorito(lugar):
+    lugar_fmt = lugar.title()
+    if lugar_fmt not in st.session_state.favoritos:
+        st.session_state.favoritos.insert(0, lugar_fmt)
+        if len(st.session_state.favoritos) > 4:
+            st.session_state.favoritos.pop()
 
 def obtener_frase_dinamica_clima():
     try:
@@ -263,26 +273,6 @@ if not st.session_state.resultado_activo:
         font-weight: 700 !important;
         box-shadow: none !important;
     }
-    div[data-testid="stHorizontalBlock"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-    }
-
-    div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1.5px solid #bae6fd !important;
-        border-radius: 30px !important;
-        height: 3rem !important;
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15) !important;
-    }
-    div[data-testid="stColumn"] .stButton > button:hover {
-        background: #bae6fd !important;
-        color: #0284c7 !important;
-        border-color: #38bdf8 !important;
-    }
 
     .card-pro {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -301,14 +291,6 @@ if not st.session_state.resultado_activo:
         font-size: 0.85rem;
         font-weight: 500;
         margin: 6px 0 18px 0;
-    }
-
-    div[data-testid="stForm"] {
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 20px !important;
-        padding: 24px !important;
-        background-color: #f8fafc !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -338,105 +320,66 @@ if not st.session_state.resultado_activo:
 
     if st.session_state.seccion_activa == "meteo_uy":
         st.subheader("¿Qué es MeteoUy?")
-        st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
-        
-        st.subheader("Tecnología y Fuentes de Datos")
-        st.write("Para garantizar la máxima confiabilidad técnica, nuestro motor procesa e integra en tiempo real:")
-        st.markdown("- **Modelos Numéricos Globales y Regionales:** ECMWF, GFS, ICON y WRF.")
-        st.markdown("- **Telemetría Satelital:** Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite **GOES-19 (GOES-East)**.")
-        st.markdown("- **Radares & Estaciones de Superficie:** Cobertura Doppler regional integrada con redes de estaciones automáticas (Davis Vantage Pro2, Netatmo y sensores IoT).")
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas para ofrecer pronósticos exactos en más de 600 localidades del país.")
 
     elif st.session_state.seccion_activa == "servicios":
-        st.subheader("Asesoramiento Meteorológico para Empresas y Profesionales")
-        st.write("Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para diversos sectores productivos de Uruguay:")
-        st.markdown("- **Agro & Ganadería:** Modelado de precipitaciones por parcela, heladas y balance hídrico.")
-        st.markdown("- **Construcción & Obras:** Alertas tempranas de viento y lluvias para seguridad operativa.")
-        st.markdown("- **Logística & Transporte:** Monitoreo de rutas, puertos y condiciones adversas.")
-        st.markdown("- **Eventos al Aire Libre:** Cobertura meteorológica en tiempo real.")
-
-        st.subheader("Solicitud de Asesoramiento / Cotización")
-        
-        with st.form(key="form_servicios_profesionales"):
-            nombre_empresa = st.text_input("Nombre / Empresa *", placeholder="Ej: AgroSur S.A. / Juan Pérez")
-            email_contacto = st.text_input("Correo Electrónico de Contacto *", placeholder="ejemplo@empresa.com.uy")
-            telefono_whatsapp = st.text_input("Teléfono / WhatsApp *", placeholder="099 123 456")
-            sector_rubro = st.text_input("Rubro o Sector", placeholder="Ej: Agro, Construcción, Eventos, Logística...")
-            mensaje_detalle = st.text_area("Detalle de la necesidad o consulta *", placeholder="Describinos en qué consiste tu consulta...")
-            
-            submit_button = st.form_submit_button(label="ENVIAR SOLICITUD A METEO UY", use_container_width=True)
-            
-            if submit_button:
-                if nombre_empresa and email_contacto and mensaje_detalle:
-                    st.success("✅ ¡Gracias por comunicarte! Hemos recibido tu solicitud. Nos contactaremos a la brevedad.")
-                else:
-                    st.error("⚠️ Por favor completa los campos obligatorios (*) para procesar tu consulta.")
-
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.subheader("Asesoramiento Meteorológico para Empresas")
+        st.write("Ofrecemos pronósticos dedicados y análisis de riesgo climático a medida para Agro, Construcción, Logística y Eventos.")
 
     elif st.session_state.seccion_activa == "pro":
         st.markdown("""
         <div class="card-pro">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 1px;">PLAN EMPRESARIAL</span>
-                <span style="font-size: 2.2rem; font-weight: 800; color: #ffffff;">$100 <span style="font-size: 0.9rem; color: #94a3b8; font-weight: 500;">USD / mes</span></span>
-            </div>
-            <h2 style="color: #ffffff; font-size: 1.6rem; font-weight: 800; margin-bottom: 10px;">MeteoUy Pro</h2>
-            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.5; margin-bottom: 20px;">
-                Diseñado específicamente para empresas agropecuarias, constructoras, operadores logísticos y profesionales que exigen la máxima precisión meteorológica en tiempo real en Uruguay.
-            </p>
-            <div style="height: 1px; background: rgba(255, 255, 255, 0.15); margin: 20px 0;"></div>
-            <div style="display: grid; gap: 12px; font-size: 0.95rem; color: #e2e8f0; margin-bottom: 25px;">
-                <div>✅ <b>Alertas Tempranas Prioritarias:</b> Notificaciones directas por WhatsApp ante eventos severos (vientos fuertes, granizo, heladas).</div>
-                <div>✅ <b>Modelos de Alta Resolución Ampliados:</b> Acceso a proyecciones horarias extendidas a 14 días.</div>
-                <div>✅ <b>Telemetría Satelital & Radar:</b> Datos crudos y capas de radar Doppler en alta definición.</div>
-                <div>✅ <b>Soporte Técnico Dedicado:</b> Consultoría meteorológica directa con especialistas.</div>
-            </div>
+            <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.8rem;">PLAN EMPRESARIAL</span>
+            <h2 style="color: #ffffff; margin-top: 10px;">MeteoUy Pro ($100 USD/mes)</h2>
+            <p style="color: #cbd5e1;">Acceso prioritario a modelos extendidos de 14 días y alertas críticas por WhatsApp.</p>
         </div>
         """, unsafe_allow_html=True)
-
-        if st.button("SUSCRIBIRME A METEO UY PRO ($100 USD/MES)", use_container_width=True):
-            st.info("🔗 **Próximo paso:** Aquí se integrará el botón de pago automático de Mercado Pago o pasarela de tarjetas para gestionar la suscripción mensual de forma segura.")
-
-        st.markdown("<br>", unsafe_allow_html=True)
 
     def procesar_busqueda():
         val = st.session_state.input_localidad_texto.strip()
         if val:
             st.session_state.lugar_actual = val
+            agregar_favorito(val)
             st.session_state.resultado_activo = True
 
     localidad_ingresada = st.text_input(
         label="Buscador",
-        placeholder="Escribí una localidad o departamento de Uruguay...",
+        placeholder="Escribí una localidad de Uruguay...",
         key="input_localidad_texto",
         on_change=procesar_busqueda,
         label_visibility="collapsed"
     )
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     if st.button("VER PRONÓSTICO", use_container_width=True):
         if localidad_ingresada and localidad_ingresada.strip():
             st.session_state.lugar_actual = localidad_ingresada.strip()
+            agregar_favorito(localidad_ingresada.strip())
             st.session_state.resultado_activo = True
             st.rerun()
         else:
             st.warning("⚠️ Por favor, escribí una localidad del Uruguay.")
 
+    # RECIENTES / FAVORITOS
+    if st.session_state.favoritos:
+        st.markdown("<p style='text-align: center; color: #64748b; font-size: 0.82rem; font-weight: 700; margin-top: 15px;'>📍 BÚSQUEDAS RECIENTES</p>", unsafe_allow_html=True)
+        cols_fav = st.columns(len(st.session_state.favoritos))
+        for idx, fav in enumerate(st.session_state.favoritos):
+            with cols_fav[idx]:
+                if st.button(fav, key=f"fav_{idx}", use_container_width=True):
+                    st.session_state.lugar_actual = fav
+                    st.session_state.resultado_activo = True
+                    st.rerun()
+
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
     
     c1, c2, c3, c4, c5 = st.columns(5)
-    with c1:
-        st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
-    with c2:
-        st.button("📸 Instagram", key="btn_ig", use_container_width=True)
-    with c3:
-        st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
-    with c4:
-        st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
-    with c5:
-        st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
+    with c1: st.button("✉️", key="btn_contact", use_container_width=True)
+    with c2: st.button("📸", key="btn_ig", use_container_width=True)
+    with c3: st.button("💼", key="btn_li", use_container_width=True)
+    with c4: st.button("▶️", key="btn_yt", use_container_width=True)
+    with c5: st.button("🎵", key="btn_tk", use_container_width=True)
 
 # =========================================================
 # PANTALLA 2: RESULTADOS DE CLIMA
@@ -474,17 +417,9 @@ else:
             pass
 
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
-        st.markdown("""
-        <style>
-        .stApp { background-color: #f0f4f8 !important; }
-        </style>
-        """, unsafe_allow_html=True)
-        st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
-        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegurate de ingresar una ciudad, pueblo, departamento o barrio uruguayo.")
-        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
+        st.warning("⚠️ **MeteoUy es un servicio exclusivo para Uruguay.**")
+        if st.button("🌧️↩️ Volver al buscador"):
             st.session_state.resultado_activo = False
-            st.session_state.lugar_actual = ""
-            st.session_state.seccion_activa = "inicio"
             st.rerun()
     else:
         url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
@@ -496,6 +431,7 @@ else:
             
         current = data.get("current", {})
         daily = data.get("daily", {})
+        hourly = data.get("hourly", {})
         
         temp_actual = current.get("temperature_2m", 0)
         humedad_actual = current.get("relative_humidity_2m", 0)
@@ -504,13 +440,8 @@ else:
         uv_actual = current.get("uv_index", 0.0)
         is_day_actual = current.get("is_day", 1)
         
-        prob_lluvia_hoy = 0
-        if daily.get("precipitation_probability_max") and len(daily["precipitation_probability_max"]) > 0:
-            prob_lluvia_hoy = daily["precipitation_probability_max"][0] or 0
-
-        lluvia_diaria_hoy = 0.0
-        if daily.get("precipitation_sum") and len(daily["precipitation_sum"]) > 0:
-            lluvia_diaria_hoy = daily["precipitation_sum"][0] or 0.0
+        prob_lluvia_hoy = daily.get("precipitation_probability_max", [0])[0] or 0
+        lluvia_diaria_hoy = daily.get("precipitation_sum", [0.0])[0] or 0.0
 
         frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
         desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
@@ -518,164 +449,80 @@ else:
 
         st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        .stApp, html, body, [class*="st-"] {
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
-
-        .stApp {
-            background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
-            background-attachment: fixed !important;
-        }
-
-        .block-container {
-            position: relative !important;
-            z-index: 10 !important;
-        }
-
-        @keyframes spinGlow {
-            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
-            50% { transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
-            100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
-        }
-        @keyframes moonGlow {
-            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
-        }
-        @keyframes slideRain {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(3px); }
-            100% { transform: translateY(0px); }
-        }
-        @keyframes flashStorm {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.35); }
-            100% { filter: brightness(1); }
-        }
-        @keyframes floatCloud {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-4px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .anim-sol svg { animation: spinGlow 14s linear infinite; }
-        .anim-luna svg { animation: moonGlow 4s ease-in-out infinite; }
-        .anim-lluvia svg { animation: slideRain 2.2s ease-in-out infinite; }
-        .anim-tormenta svg { animation: flashStorm 1.6s ease-in-out infinite; }
-        .anim-nube svg { animation: floatCloud 3.5s ease-in-out infinite; }
-
-        .card-editorial-hoy {
-            background: rgba(15, 32, 56, 0.75) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 24px !important;
-            padding: 28px !important;
-            color: #ffffff !important;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
-            margin-bottom: 20px !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        }
-
-        .card-editorial-semana {
-            background: rgba(255, 255, 255, 0.96) !important;
-            border-radius: 20px !important;
-            padding: 20px 24px !important;
-            color: #0f172a !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-            margin-bottom: 16px !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .footer-metodologico {
-            text-align: center !important;
-            margin-top: 35px !important;
-            padding: 18px 20px !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #94a3b8 !important;
-            font-size: 0.78rem !important;
-            line-height: 1.5 !important;
-        }
-        
-        .titulo-pantalla {
-            text-align: center !important;
-            color: #ffffff !important;
-            font-size: 2rem !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.5px;
-            margin: 0 !important;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        .subtitulo-pantalla {
-            text-align: center !important;
-            color: #38bdf8 !important;
-            font-size: 1.05rem !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.5px;
-            margin-top: 2px !important;
-        }
+        .stApp { background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important; }
+        .card-editorial-hoy { background: rgba(15, 32, 56, 0.75) !important; border-radius: 24px; padding: 24px; color: #fff; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.12); }
+        .card-editorial-semana { background: rgba(255, 255, 255, 0.96) !important; border-radius: 20px; padding: 18px 22px; color: #0f172a; margin-bottom: 14px; }
+        .alerta-banner { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 16px; border-radius: 16px; margin-bottom: 15px; font-weight: 600; font-size: 0.9rem; }
         </style>
         """, unsafe_allow_html=True)
         
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
-            if st.button("← Volver", help="Buscar otra localidad"):
+            if st.button("← Volver"):
                 st.session_state.resultado_activo = False
-                st.session_state.lugar_actual = ""
-                st.session_state.seccion_activa = "inicio"
                 st.rerun()
         with col_top2:
-            st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
-            st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='text-align: center; color: white; margin: 0;'>MeteoUy</h2><p style='text-align: center; color: #38bdf8; font-weight: 700; margin: 0;'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right;'><span style='background: rgba(220, 38, 38, 0.2); color: #f87171; padding: 4px 10px; border-radius: 12px; font-weight: 800; font-size: 0.75rem;'>LIVE</span></div>", unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+        # BANNER AUTOMÁTICO DE ALERTA TEMPRANA
+        if viento_actual > 40 or prob_lluvia_hoy > 70 or wcode_actual in [95, 96, 99]:
+            st.markdown(f"<div class='alerta-banner'>⚠️ <b>AVISO METEO UY:</b> Condiciones adversas previstas en la zona ({desc_actual}). Extremar precauciones.</div>", unsafe_allow_html=True)
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
         st.markdown(f"""
         <div class="card-editorial-hoy">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8;">CONDICIÓN ACTUAL</span>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 2px;">{desc_actual}</div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
                     <div>{dibujo_hoy}</div>
                     <div style="text-align: right;">
-                        <span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>
-                        <span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span>
+                        <span style="font-size: 3rem; font-weight: 800; color: #ffffff;">{temp_actual}°</span>
+                        <span style="font-size: 1.1rem; color: #94a3b8;"> / {t_max_hoy}°</span>
                     </div>
                 </div>
             </div>
-            <p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>
-            <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div>
-                </div>
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div>
-                </div>
-                <div>
-                    <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div>
-                    <div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div>
-                </div>
-            </div>
+            <p style="font-size: 0.95rem; font-weight: 600; color: #f1f5f9; margin: 14px 0 0 0;">{frase_humana}</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
+        # GRÁFICO PLOTLY DE TEMPERATURA PRÓXIMAS 24 HORAS
+        if "temperature_2m" in hourly and "time" in hourly:
+            horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
+            temps = hourly["temperature_2m"][:24]
+
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=horas, y=temps,
+                mode='lines+markers',
+                line=dict(color='#38bdf8', width=3, shape='spline'),
+                marker=dict(size=6, color='#ffffff'),
+                hovertemplate='%{x}hs: <b>%{y}°C</b><extra></extra>'
+            ))
+            fig.update_layout(
+                title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#ffffff", size=14)),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=10, r=10, t=35, b=10),
+                height=180,
+                xaxis=dict(showgrid=False, tickfont=dict(color='#94a3b8', size=10)),
+                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#94a3b8', size=10))
+            )
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+        # EXTENDIDO
+        st.markdown("<h3 style='color: white; font-size: 1rem; font-weight: 700; margin: 15px 0 10px 0;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
         t_min = daily.get("temperature_2m_min", [])
-        lluvia = daily.get("precipitation_sum", [])
         prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
         viento_diario = daily.get("windspeed_10m_max", [])
         wcodes_daily = daily.get("weathercode", [])
@@ -689,36 +536,11 @@ else:
             
             tmax_val = t_max[i] if i < len(t_max) else "--"
             tmin_val = t_min[i] if i < len(t_min) else "--"
-            lluvia_val = lluvia[i] if i < len(lluvia) else 0.0
             prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-            fecha_val = fechas[i] if i < len(fechas) else ""
             
             st.markdown(f"""
             <div class="card-editorial-semana">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>
-                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                        <div>{dibujo_ext}</div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>
-                    <div style="font-size: 0.82rem; color: #475569; font-weight: 600;">
-                        Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="footer-metodologico">
-            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
-        </div>
-        """, unsafe_allow_html=True)
+                        <span style="font-size: 0
