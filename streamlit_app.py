@@ -205,89 +205,9 @@ def obtener_ruta_logo():
 def mostrar_logo():
     logo_path = obtener_ruta_logo()
     if logo_path:
-        # CONTENEDOR EXCLUSIVO DETRÁS DEL LOGO CON RAYOS DE SOL DORADOS GIRATORIOS
-        st.markdown("""
-        <style>
-        .logo-sun-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .logo-sun-glow {
-            position: absolute;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg at 50% 50%, 
-                rgba(251, 191, 36, 0.45) 0deg, 
-                rgba(255, 255, 255, 0) 45deg, 
-                rgba(251, 191, 36, 0.45) 90deg, 
-                rgba(255, 255, 255, 0) 135deg, 
-                rgba(251, 191, 36, 0.45) 180deg, 
-                rgba(255, 255, 255, 0) 225deg, 
-                rgba(251, 191, 36, 0.45) 270deg, 
-                rgba(255, 255, 255, 0) 315deg, 
-                rgba(251, 191, 36, 0.45) 360deg);
-            animation: rotateLogoSun 20s linear infinite;
-            filter: blur(12px);
-            z-index: 1;
-            pointer-events: none;
-        }
-        @keyframes rotateLogoSun {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .logo-sun-container img {
-            position: relative;
-            z-index: 2;
-        }
-        </style>
-        <div class="logo-sun-container">
-            <div class="logo-sun-glow"></div>
-        """, unsafe_allow_html=True)
-        
         st.image(logo_path, use_container_width=True)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
     else:
-        # SI NO HAY IMAGEN, APLICAMOS EL EFECTO DETRÁS DEL TÍTULO
-        st.markdown("""
-        <style>
-        .title-sun-container {
-            position: relative;
-            text-align: center;
-            padding: 20px 0;
-        }
-        .title-sun-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 220px;
-            height: 100px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.5) 0%, rgba(251, 191, 36, 0) 70%);
-            animation: pulseTitleSun 4s ease-in-out infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
-        @keyframes pulseTitleSun {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.9; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-        }
-        .title-sun-container h1 {
-            position: relative;
-            z-index: 2;
-        }
-        </style>
-        <div class="title-sun-container">
-            <div class="title-sun-glow"></div>
-            <h1 style='color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: "Plus Jakarta Sans", sans-serif; margin: 0;'>MeteoUy</h1>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 
 # =========================================================
@@ -302,21 +222,50 @@ if not st.session_state.resultado_activo:
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
+    /* FONDO CELESTE CLARO BIEN LIMPIO Y PROFESIONAL */
     .stApp {
-        background-color: #ffffff !important;
+        background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
+        position: relative !important;
+        overflow-x: hidden !important;
+    }
+
+    /* NUBES BLANCAS DESLIZÁNDOSE SUAVEMENTE DE FONDO */
+    .clouds-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200vw;
+        height: 100vh;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><path d="M150 120c0-25 20-45 45-45 15 0 28 8 36 20 10-10 24-16 40-16 30 0 55 25 55 55 0 3-0.3 6-1 9 18 4 31 20 31 39 0 22-18 40-40 40H160c-22 0-40-18-40-40 0-18 12-33 29-38-2-5-3-11-3-17z" fill="rgba(255,255,255,0.45)"/><path d="M550 250c0-20 16-36 36-36 12 0 22 6 29 16 8-8 19-13 32-13 24 0 44 20 44 44 0 2-0.2 5-0.8 7 14 3 24 16 24 31 0 17-14 31-31 31H530c-17 0-31-14-31-31 0-14 10-26 24-30-1-4-2-8-2-13z" fill="rgba(255,255,255,0.3)"/></svg>');
+        background-repeat: repeat-x;
+        background-size: 800px 400px;
+        pointer-events: none;
+        z-index: 0;
+        animation: slideClouds 60s linear infinite;
+    }
+
+    @keyframes slideClouds {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* Asegurar que los elementos de la UI estén por encima de las nubes */
+    .block-container {
+        position: relative !important;
+        z-index: 10 !important;
     }
 
     @keyframes pulseGlow {
-        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
-        50% { box-shadow: 0 0 22px rgba(14, 165, 233, 0.7); border-color: #0284c7; }
-        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); border-color: #38bdf8; }
+        0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
+        50% { box-shadow: 0 0 22px rgba(14, 165, 233, 0.8); border-color: #0284c7; }
+        100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); border-color: #38bdf8; }
     }
 
     div[data-testid="stTextInput"] input {
         border-radius: 45px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
-        background-color: #f8fafc !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         height: 3.6rem !important;
         font-size: 1.1rem !important;
         font-weight: 600 !important;
@@ -341,7 +290,7 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-testid="stHorizontalBlock"] .stButton > button {
-        background: #f0f9ff !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
@@ -352,7 +301,7 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 30px !important;
@@ -380,20 +329,23 @@ if not st.session_state.resultado_activo:
     .frase-dia {
         text-align: center;
         font-style: italic;
-        color: #64748b;
-        font-size: 0.85rem;
-        font-weight: 500;
+        color: #0369a1;
+        font-size: 0.88rem;
+        font-weight: 600;
         margin: 6px 0 18px 0;
     }
 
     div[data-testid="stForm"] {
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #bae6fd !important;
         border-radius: 20px !important;
         padding: 24px !important;
-        background-color: #f8fafc !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
     </style>
+    
+    <!-- ELEMENTO HTML DE LAS NUBES BLANCAS DESLIZÁNDOSE -->
+    <div class="clouds-background"></div>
     """, unsafe_allow_html=True)
 
     nav1, nav2, nav3 = st.columns(3)
