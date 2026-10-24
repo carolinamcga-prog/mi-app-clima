@@ -224,6 +224,47 @@ if not st.session_state.resultado_activo:
 
     .stApp {
         background-color: #ffffff !important;
+        position: relative !important;
+        overflow-x: hidden !important;
+    }
+
+    /* RAYOS DE SOL DORADOS GIRATORIOS DE FONDO (EFECTO CONIC-GRADIENT AMARILLO/DORADO) */
+    .sun-background-glow {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 150vw;
+        height: 150vh;
+        transform: translate(-50%, -50%);
+        background: conic-gradient(from 0deg at 50% 50%, 
+            rgba(251, 191, 36, 0.12) 0deg, 
+            rgba(255, 255, 255, 0) 30deg, 
+            rgba(251, 191, 36, 0.12) 60deg, 
+            rgba(255, 255, 255, 0) 90deg, 
+            rgba(251, 191, 36, 0.12) 120deg, 
+            rgba(255, 255, 255, 0) 150deg, 
+            rgba(251, 191, 36, 0.12) 180deg, 
+            rgba(255, 255, 255, 0) 210deg, 
+            rgba(251, 191, 36, 0.12) 240deg, 
+            rgba(255, 255, 255, 0) 270deg, 
+            rgba(251, 191, 36, 0.12) 300deg, 
+            rgba(255, 255, 255, 0) 330deg, 
+            rgba(251, 191, 36, 0.12) 360deg);
+        pointer-events: none;
+        z-index: 0;
+        animation: rotateSunGlow 60s linear infinite;
+        filter: blur(35px);
+    }
+
+    @keyframes rotateSunGlow {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Asegurar que los elementos de la UI estén por encima del fondo */
+    .block-container {
+        position: relative !important;
+        z-index: 10 !important;
     }
 
     @keyframes pulseGlow {
@@ -236,7 +277,7 @@ if not st.session_state.resultado_activo:
         border-radius: 45px !important;
         border: 2.5px solid #38bdf8 !important;
         animation: pulseGlow 2.5s infinite ease-in-out !important;
-        background-color: #f8fafc !important;
+        background-color: rgba(248, 250, 252, 0.95) !important;
         height: 3.6rem !important;
         font-size: 1.1rem !important;
         font-weight: 600 !important;
@@ -261,7 +302,7 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-testid="stHorizontalBlock"] .stButton > button {
-        background: #f0f9ff !important;
+        background: rgba(240, 249, 255, 0.95) !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 20px !important;
@@ -272,7 +313,7 @@ if not st.session_state.resultado_activo:
     }
 
     div[data-testid="stColumn"] .stButton > button {
-        background: #e0f2fe !important;
+        background: rgba(224, 242, 254, 0.95) !important;
         color: #0369a1 !important;
         border: 1.5px solid #bae6fd !important;
         border-radius: 30px !important;
@@ -310,10 +351,13 @@ if not st.session_state.resultado_activo:
         border: 1px solid #e2e8f0 !important;
         border-radius: 20px !important;
         padding: 24px !important;
-        background-color: #f8fafc !important;
+        background-color: rgba(248, 250, 252, 0.95) !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
     }
     </style>
+    
+    <!-- ELEMENTO HTML DE LOS RAYOS SOLARES DE FONDO -->
+    <div class="sun-background-glow"></div>
     """, unsafe_allow_html=True)
 
     nav1, nav2, nav3 = st.columns(3)
@@ -341,7 +385,7 @@ if not st.session_state.resultado_activo:
 
     if st.session_state.seccion_activa == "meteo_uy":
         st.subheader("¿Qué es MeteoUy?")
-        st.write("**MeteoUy** is la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
+        st.write("**MeteoUy** es la plataforma privada de monitoreo meteorológico de alta resolución en Uruguay. Unificamos telemetría satelital, cobertura de radares regionales y estaciones automáticas de superficie para ofrecer pronósticos en tiempo real con máxima exactitud en más de 600 localidades del país.")
         
         st.write("Más allá de un simple pronóstico, en MeteoUy creamos un servicio meteorológico integral diseñado para transformar los datos atmosféricos en información práctica y de alto valor, ayudándote a decidir con certeza qué hacer en cada momento y situación.")
         
