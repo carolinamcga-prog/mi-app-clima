@@ -194,7 +194,6 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return '<div class="anim-tormenta" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 26H44.7C43.3 19.6 37.6 15 31 15C24.1 15 18.5 20.4 18.1 27.3C13.6 28.1 10 32 10 36.8C10 42 14.2 46.2 19.4 46.2H46C51 46.2 55 42.2 55 37.2C55 32.2 51 28.2 46 26Z" fill="#64748B"/><path d="M34 42L24 52H34L30 60L42 47H34L34 42Z" fill="#FBBF24"/></svg></div>'
     else:
         return '<div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
-
 def obtener_ruta_logo():
     posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
     for nombre in posibles_nombres:
@@ -205,11 +204,16 @@ def obtener_ruta_logo():
 def mostrar_logo():
     logo_path = obtener_ruta_logo()
     if logo_path:
-        st.image(logo_path, use_container_width=True)
+        # Mostramos la imagen aplicando un filtro para integrar el fondo blanco con el celeste de la web
+        st.markdown(
+            f'<div style="text-align: center; margin-bottom: 5px;">'
+            f'<img src="app/static/{logo_path}" style="max-width: 270px; mix-blend-mode: multiply; display: inline-block;">'
+            f'</div>', 
+            unsafe_allow_html=True
+        )
     else:
         st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
-
-
+    st.markdown("<p style='text-align: center; color: #0369a1; font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-top: 0;'>PRONÓSTICO PROFESIONAL URUGUAY</p>", unsafe_allow_html=True)
 # =========================================================
 # PANTALLA 1: INICIO
 # =========================================================
