@@ -52,7 +52,6 @@ COORDS_URUGUAY = {
     "río negro": (-32.7333, -58.2833),
     "fray bentos": (-33.1333, -58.3000),
     "rivera": (-30.9053, -55.5505),
-    "tranqueras": (-31.2056, -55.7394),
     "rocha": (-34.4833, -54.3333),
     "salto": (-31.3833, -57.9667),
     "salinas": (-34.7833, -55.8500),
@@ -196,9 +195,19 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
     else:
         return '<div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
 
-def mostrar_logo_limpio():
-    st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; margin: 0; padding: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #0369a1; font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-top: 0;'>PRONÓSTICO PROFESIONAL URUGUAY</p>", unsafe_allow_html=True)
+def obtener_ruta_logo():
+    posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
+    for nombre in posibles_nombres:
+        if os.path.exists(nombre):
+            return nombre
+    return None
+
+def mostrar_logo():
+    logo_path = obtener_ruta_logo()
+    if logo_path:
+        st.image(logo_path, use_container_width=True)
+    else:
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.2rem; font-weight: 800; font-family: \"Plus Jakarta Sans\", sans-serif; margin: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
 
 
 # =========================================================
@@ -213,69 +222,9 @@ if not st.session_state.resultado_activo:
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
-    /* FONDO CELESTE CLARO PROFESIONAL */
+    /* ESTILO SEGURO: FONDO CELESTE CLARO PROFESIONAL */
     .stApp {
         background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0f2fe 100%) !important;
-        position: relative !important;
-        overflow-x: hidden !important;
-    }
-
-    /* NUBES FLOTANTES ANIMADAS DE FONDO */
-    .cloud-anim-1, .cloud-anim-2 {
-        position: fixed;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 100px;
-        pointer-events: none;
-        z-index: 0;
-        filter: blur(1px);
-    }
-
-    .cloud-anim-1 {
-        width: 180px;
-        height: 60px;
-        top: 15%;
-        left: -200px;
-        animation: floatCloud1 35s linear infinite;
-    }
-    .cloud-anim-1::before, .cloud-anim-1::after {
-        content: '';
-        position: absolute;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 50%;
-    }
-    .cloud-anim-1::before { width: 70px; height: 70px; top: -35px; left: 25px; }
-    .cloud-anim-1::after { width: 90px; height: 90px; top: -50px; left: 75px; }
-
-    .cloud-anim-2 {
-        width: 240px;
-        height: 80px;
-        top: 65%;
-        left: -300px;
-        animation: floatCloud2 50s linear infinite;
-        animation-delay: 8s;
-    }
-    .cloud-anim-2::before, .cloud-anim-2::after {
-        content: '';
-        position: absolute;
-        background: rgba(255, 255, 255, 0.5);
-        border-radius: 50%;
-    }
-    .cloud-anim-2::before { width: 90px; height: 90px; top: -45px; left: 40px; }
-    .cloud-anim-2::after { width: 110px; height: 110px; top: -60px; left: 100px; }
-
-    @keyframes floatCloud1 {
-        0% { transform: translateX(0vw); }
-        100% { transform: translateX(120vw); }
-    }
-    @keyframes floatCloud2 {
-        0% { transform: translateX(0vw); }
-        100% { transform: translateX(130vw); }
-    }
-
-    /* Asegurar contenido por encima de las nubes */
-    .block-container {
-        position: relative !important;
-        z-index: 10 !important;
     }
 
     @keyframes pulseGlow {
@@ -348,11 +297,24 @@ if not st.session_state.resultado_activo:
         border: 1.5px solid rgba(56, 189, 248, 0.3);
         margin-bottom: 20px;
     }
+
+    .frase-dia {
+        text-align: center;
+        font-style: italic;
+        color: #0369a1;
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin: 6px 0 18px 0;
+    }
+
+    div[data-testid="stForm"] {
+        border: 1.5px solid #bae6fd !important;
+        border-radius: 20px !important;
+        padding: 24px !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+    }
     </style>
-    
-    <!-- ELEMENTOS HTML DE LAS NUBES FLOTANTES -->
-    <div class="cloud-anim-1"></div>
-    <div class="cloud-anim-2"></div>
     """, unsafe_allow_html=True)
 
     nav1, nav2, nav3 = st.columns(3)
@@ -370,10 +332,13 @@ if not st.session_state.resultado_activo:
             st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
-    mostrar_logo_limpio()
+
+    col1, col2, col3 = st.columns([0.2, 5.6, 0.2])
+    with col2:
+        mostrar_logo()
 
     frase_hoy = obtener_frase_dinamica_clima()
-    st.markdown(f"<p style='text-align: center; font-style: italic; color: #0369a1; font-size: 0.95rem; font-weight: 600; margin: 10px 0 20px 0;'>{frase_hoy}</p>", unsafe_allow_html=True)
+    st.markdown(f"<div class='frase-dia'>{frase_hoy}</div>", unsafe_allow_html=True)
 
     if st.session_state.seccion_activa == "meteo_uy":
         st.subheader("¿Qué es MeteoUy?")
@@ -386,6 +351,8 @@ if not st.session_state.resultado_activo:
         st.markdown("- **Modelos Numéricos Globales y Regionales:** ECMWF, GFS, ICON y WRF.")
         st.markdown("- **Telemetría Satelital:** Imágenes de alta frecuencia en bandas visibles e infrarrojas del satélite **GOES-19 (GOES-East)**.")
         st.markdown("- **Radares & Estaciones de Superficie:** Cobertura Doppler regional integrada con redes de estaciones automáticas (Davis Vantage Pro2, Netatmo y sensores IoT).")
+        
+        st.write("MeteoUy se capacita constantemente en nuevas herramientas y tecnologías de vanguardia para optimizar sus análisis, garantizando así un servicio de excelencia y máxima precisión para todos los usuarios.")
         st.markdown("<br>", unsafe_allow_html=True)
 
     elif st.session_state.seccion_activa == "servicios":
@@ -510,9 +477,14 @@ else:
             pass
 
     if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
+        st.markdown("""
+        <style>
+        .stApp { background-color: #f0f4f8 !important; }
+        </style>
+        """, unsafe_allow_html=True)
         st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
         st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegurate de ingresar una ciudad, pueblo, departamento o barrio uruguayo.")
-        if st.button("🌧️↩️ Volver al buscador"):
+        if st.button("🌧️↩️ Volver al buscador", help="Hacé clic para volver"):
             st.session_state.resultado_activo = False
             st.session_state.lugar_actual = ""
             st.session_state.seccion_activa = "inicio"
@@ -542,44 +514,158 @@ else:
         frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
         desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
         dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
+
+        st.markdown("""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        .stApp, html, body, [class*="st-"] {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .stApp {
+            background: linear-gradient(180deg, #0b1d3a 0%, #1e3c72 50%, #0a192f 100%) !important;
+            background-attachment: fixed !important;
+        }
+
+        @keyframes spinGlow {
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+            50% { transform: rotate(180deg) scale(1.04); filter: drop-shadow(0 0 8px rgba(251,191,36,0.8)); }
+            100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(251,191,36,0.4)); }
+        }
+        @keyframes moonGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(56,189,248,0.4)); }
+        }
+        @keyframes slideRain {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(3px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes flashStorm {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.35); }
+            100% { filter: brightness(1); }
+        }
+        @keyframes floatCloud {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .anim-sol svg { animation: spinGlow 14s linear infinite; }
+        .anim-luna svg { animation: moonGlow 4s ease-in-out infinite; }
+        .anim-lluvia svg { animation: slideRain 2.2s ease-in-out infinite; }
+        .anim-tormenta svg { animation: flashStorm 1.6s ease-in-out infinite; }
+        .anim-nube svg { animation: floatCloud 3.5s ease-in-out infinite; }
+
+        .card-editorial-hoy {
+            background: rgba(15, 32, 56, 0.75) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px !important;
+            padding: 28px !important;
+            color: #ffffff !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
+            margin-bottom: 20px !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+
+        .card-editorial-semana {
+            background: rgba(255, 255, 255, 0.96) !important;
+            border-radius: 20px !important;
+            padding: 20px 24px !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+            margin-bottom: 16px !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .alerta-banner {
+            background: rgba(239, 68, 68, 0.25);
+            border: 1.5px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px 18px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .footer-metodologico {
+            text-align: center !important;
+            margin-top: 35px !important;
+            padding: 18px 20px !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #94a3b8 !important;
+            font-size: 0.78rem !important;
+            line-height: 1.5 !important;
+        }
+        
+        .titulo-pantalla {
+            text-align: center !important;
+            color: #ffffff !important;
+            font-size: 2rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.5px;
+            margin: 0 !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .subtitulo-pantalla {
+            text-align: center !important;
+            color: #38bdf8 !important;
+            font-size: 1.05rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px;
+            margin-top: 2px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
         
         col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
         with col_top1:
-            if st.button("← Volver"):
+            if st.button("← Volver", help="Buscar otra localidad"):
                 st.session_state.resultado_activo = False
                 st.session_state.lugar_actual = ""
                 st.session_state.seccion_activa = "inicio"
                 st.rerun()
         with col_top2:
-            st.markdown(f"<h2 style='text-align: center; margin: 0; color: #0284c7;'>📍 {lugar_encontrado}</h2>", unsafe_allow_html=True)
+            st.markdown("<h1 class='titulo-pantalla'>MeteoUy</h1>", unsafe_allow_html=True)
+            st.markdown(f"<p class='subtitulo-pantalla'>📍 {lugar_encontrado}</p>", unsafe_allow_html=True)
         with col_top3:
-            st.markdown("<div style='text-align: right;'><span style='background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 12px; font-weight: 800; font-size: 0.75rem;'>LIVE</span></div>", unsafe_allow_html=True)
+            st.markdown("<div style='text-align: right; padding-top: 10px;'><span style='background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #f87171; padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px;'>LIVE</span></div>", unsafe_allow_html=True)
 
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+
+        # BANNER DE ALERTA REAL (Solo aparece si hay condiciones severas reales)
+        hay_alerta_severa = (viento_actual > 50) or (prob_lluvia_hoy > 80 and lluvia_diaria_hoy > 15) or (wcode_actual in [95, 96, 99])
+        if hay_alerta_severa:
+            st.markdown(f"<div class='alerta-banner'>🚨 <b>ALERTA METEOROLÓGICA VIGENTE:</b> Se registran condiciones severas en la zona ({desc_actual}). Manténgase resguardado.</div>", unsafe_allow_html=True)
 
         t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
         
-        # Tarjeta principal de clima actual
-        st.markdown(
-            f'<div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 20px; padding: 24px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px;">'
-            f'<div style="display: flex; justify-content: space-between; align-items: center;">'
-            f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px;">CONDICIÓN ACTUAL</span>'
+        card_html = (
+            '<div class="card-editorial-hoy">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">'
+            f'<div><span style="font-size: 0.8rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">CONDICIÓN ACTUAL</span>'
             f'<div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div></div>'
-            f'<div style="display: flex; align-items: center; gap: 14px;">'
+            f'<div style="display: flex; align-items: center; gap: 16px;">'
             f'<div>{dibujo_hoy}</div>'
-            f'<div style="text-align: right;"><span style="font-size: 3rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>'
-            f'<span style="font-size: 1.1rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div>'
-            f'<p style="font-size: 1rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.4;">{frase_humana}</p>'
-            '<div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 14px 0;"></div>'
+            f'<div style="text-align: right;"><span style="font-size: 3.2rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>'
+            f'<span style="font-size: 1.2rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div>'
+            f'<p style="font-size: 1.05rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.5;">{frase_humana}</p>'
+            '<div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 16px 0;"></div>'
             '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">'
-            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">VIENTO</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div></div>'
-            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">HUMEDAD</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div></div>'
-            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">PRECIPITACIÓN</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div></div>'
-            '</div></div>',
-            unsafe_allow_html=True
+            f'<div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Viento</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div></div>'
+            f'<div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Humedad</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div></div>'
+            f'<div><div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Precipitación</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div></div>'
+            '</div></div>'
         )
+        st.markdown(card_html, unsafe_allow_html=True)
 
-        # Gráfico Plotly
+        # GRÁFICO PLOTLY (Si está disponible)
         if PLOTLY_DISPONIBLE and "temperature_2m" in hourly and "time" in hourly:
             try:
                 horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
@@ -594,19 +680,19 @@ else:
                     hovertemplate='%{x}hs: <b>%{y}°C</b><extra></extra>'
                 ))
                 fig.update_layout(
-                    title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#0f172a", size=14)),
+                    title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#ffffff", size=14)),
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
                     margin=dict(l=10, r=10, t=35, b=10),
                     height=180,
-                    xaxis=dict(showgrid=False, tickfont=dict(color='#334155', size=10)),
-                    yaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.08)', tickfont=dict(color='#334155', size=10))
+                    xaxis=dict(showgrid=False, tickfont=dict(color='#94a3b8', size=10)),
+                    yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#94a3b8', size=10))
                 )
                 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
             except Exception:
                 pass
 
-        st.subheader("📅 Pronóstico Extendido")
+        st.markdown("<h3 style='color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px;'>📅 Pronóstico Extendido</h3>", unsafe_allow_html=True)
         
         fechas = daily.get("time", [])
         t_max = daily.get("temperature_2m_max", [])
@@ -628,24 +714,23 @@ else:
             viento_val = viento_diario[i] if i < len(viento_diario) else "--"
             fecha_val = fechas[i] if i < len(fechas) else ""
             
-            st.markdown(
-                f'<div style="background: #ffffff; border-radius: 16px; padding: 18px 22px; color: #0f172a; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 14px; border: 1px solid #e2e8f0;">'
-                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">'
-                f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px;">{etiquetas[i-1]}</span>'
+            card_semana = (
+                '<div class="card-editorial-semana">'
+                '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">'
+                f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px; text-transform: uppercase;">{etiquetas[i-1]}</span>'
                 f'<div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div></div>'
                 f'<div style="display: flex; align-items: center; gap: 14px;">'
                 f'<div>{dibujo_ext}</div>'
                 f'<div style="text-align: right;"><span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div></div></div>'
-                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">'
+                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">'
                 f'<div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>'
                 f'<div style="font-size: 0.82rem; color: #475569; font-weight: 600;">Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b></div></div>'
-                '</div>',
-                unsafe_allow_html=True
+                '</div>'
             )
+            st.markdown(card_semana, unsafe_allow_html=True)
 
-        st.markdown(
-            '<div style="text-align: center; margin-top: 30px; padding: 15px; border-top: 1px solid #cbd5e1; color: #64748b; font-size: 0.78rem;">'
-            '<b>MeteoUy Data Engine:</b> Pronóstico en tiempo real mediante ensamble multimodelo (ECMWF, GFS, ICON) y telemetría satelital GOES-19.'
-            '</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown("""
+        <div class="footer-metodologico">
+            <b>MeteoUy Data Engine:</b> Pronóstico procesado en tiempo real mediante ensamble multimodelo de alta resolución (ECMWF, GFS, ICON, WRF, GEM), telemetría geostacional <b>GOES-19 (GOES-East)</b>, cobertura Doppler de radares regionales y red de estaciones automáticas de superficie (Davis Vantage Pro2 / Netatmo).
+        </div>
+        """, unsafe_allow_html=True)
