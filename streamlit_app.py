@@ -467,4 +467,188 @@ if not st.session_state.resultado_activo:
         else:
             st.warning("⚠️ Por favor, escribí una localidad del Uruguay.")
 
-    st.markdown("<br><br>", unsafe_allow_html=
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #0284c7; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;'>CONTACTATE CON METEO UY</p>", unsafe_allow_html=True)
+    
+    c1, c2, c3, c4, c5 = st.columns(5)
+    with c1: st.button("✉️ Contacto", key="btn_contact", use_container_width=True)
+    with c2: st.button("📸 Instagram", key="btn_ig", use_container_width=True)
+    with c3: st.button("💼 LinkedIn", key="btn_li", use_container_width=True)
+    with c4: st.button("▶️ YouTube", key="btn_yt", use_container_width=True)
+    with c5: st.button("🎵 TikTok", key="btn_tk", use_container_width=True)
+
+# =========================================================
+# PANTALLA 2: RESULTADOS DE CLIMA
+# =========================================================
+else:
+    lugar_ingresado = st.session_state.lugar_actual.strip()
+    lugar_lower = lugar_ingresado.lower()
+    
+    lat, lon = None, None
+    lugar_encontrado = lugar_ingresado.title()
+    
+    for clave, coords in COORDS_URUGUAY.items():
+        if clave in lugar_lower or lugar_lower in clave:
+            lat, lon = coords
+            lugar_encontrado = clave.title()
+            break
+            
+    if lat is None and lon is None:
+        try:
+            query_uy = urllib.parse.quote(f"{lugar_ingresado}, Uruguay")
+            url_geo = f"https://geocoding-api.open-meteo.com/v1/search?name={query_uy}&count=5&language=es&format=json"
+            res_geo = requests.get(url_geo, timeout=8).json()
+            
+            if "results" in res_geo and len(res_geo["results"]) > 0:
+                for res in res_geo["results"]:
+                    cand_lat = float(res["latitude"])
+                    cand_lon = float(res["longitude"])
+                    pais = res.get("country", "").lower()
+                    
+                    if "uruguay" in pais or es_coordenada_uruguay(cand_lat, cand_lon):
+                        lat, lon = cand_lat, cand_lon
+                        lugar_encontrado = res.get("name", lugar_ingresado.title())
+                        break
+        except Exception:
+            pass
+
+    if lat is None or lon is None or not es_coordenada_uruguay(lat, lon):
+        st.warning("⚠️ **MeteoUy es un servicio exclusivo para el territorio de Uruguay.**")
+        st.info("No encontramos la localidad ingresada dentro de Uruguay. Por favor, asegurate de ingresar una ciudad, pueblo, departamento o barrio uruguayo.")
+        if st.button("🌧️↩️ Volver al buscador"):
+            st.session_state.resultado_activo = False
+            st.session_state.lugar_actual = ""
+            st.session_state.seccion_activa = "inicio"
+            st.rerun()
+    else:
+        url_meteo = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,weathercode,wind_speed_10m,visibility,uv_index,is_day&hourly=temperature_2m,precipitation_probability,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max,uv_index_max&forecast_days=3&models=best_match&timezone=auto"
+        
+        try:
+            data = requests.get(url_meteo, timeout=10).json()
+        except Exception:
+            data = {}
+            
+        current = data.get("current", {})
+        daily = data.get("daily", {})
+        hourly = data.get("hourly", {})
+        
+        temp_actual = current.get("temperature_2m", 0)
+        humedad_actual = current.get("relative_humidity_2m", 0)
+        viento_actual = current.get("wind_speed_10m", 0)
+        wcode_actual = current.get("weathercode", 0)
+        uv_actual = current.get("uv_index", 0.0)
+        is_day_actual = current.get("is_day", 1)
+        
+        prob_lluvia_hoy = daily.get("precipitation_probability_max", [0])[0] or 0
+        lluvia_diaria_hoy = daily.get("precipitation_sum", [0.0])[0] or 0.0
+
+        frase_humana = generar_titular_pronostico_horas(wcode_actual, lluvia_diaria_hoy, prob_lluvia_hoy, viento_actual, uv_actual)
+        desc_actual = obtener_descripcion_clima(wcode_actual, is_day_actual)
+        dibujo_hoy = obtener_dibujo_animado(wcode_actual, desc_actual, is_day_actual)
+        
+        col_top1, col_top2, col_top3 = st.columns([1.2, 3.8, 1.5])
+        with col_top1:
+            if st.button("← Volver"):
+                st.session_state.resultado_activo = False
+                st.session_state.lugar_actual = ""
+                st.session_state.seccion_activa = "inicio"
+                st.rerun()
+        with col_top2:
+            st.markdown(f"<h2 style='text-align: center; margin: 0; color: #0284c7;'>📍 {lugar_encontrado}</h2>", unsafe_allow_html=True)
+        with col_top3:
+            st.markdown("<div style='text-align: right;'><span style='background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 12px; font-weight: 800; font-size: 0.75rem;'>LIVE</span></div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+        t_max_hoy = daily.get("temperature_2m_max", [temp_actual])[0]
+        
+        # Tarjeta principal de clima actual
+        st.markdown(
+            f'<div style="background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 20px; padding: 24px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px;">'
+            f'<div style="display: flex; justify-content: space-between; align-items: center;">'
+            f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px;">CONDICIÓN ACTUAL</span>'
+            f'<div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin-top: 4px;">{desc_actual}</div></div>'
+            f'<div style="display: flex; align-items: center; gap: 14px;">'
+            f'<div>{dibujo_hoy}</div>'
+            f'<div style="text-align: right;"><span style="font-size: 3rem; font-weight: 800; color: #ffffff; line-height: 1;">{temp_actual}°</span>'
+            f'<span style="font-size: 1.1rem; color: #94a3b8; font-weight: 600;"> / {t_max_hoy}°</span></div></div></div>'
+            f'<p style="font-size: 1rem; font-weight: 600; color: #f1f5f9; margin: 16px 0; line-height: 1.4;">{frase_humana}</p>'
+            '<div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 14px 0;"></div>'
+            '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem; color: #cbd5e1;">'
+            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">VIENTO</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{viento_actual} km/h</div></div>'
+            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">HUMEDAD</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{humedad_actual}%</div></div>'
+            f'<div><div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">PRECIPITACIÓN</div><div style="font-weight: 700; color: #ffffff; margin-top: 2px;">{prob_lluvia_hoy}%</div></div>'
+            '</div></div>',
+            unsafe_allow_html=True
+        )
+
+        # Gráfico Plotly
+        if PLOTLY_DISPONIBLE and "temperature_2m" in hourly and "time" in hourly:
+            try:
+                horas = [t.split("T")[1][:5] for t in hourly["time"][:24]]
+                temps = hourly["temperature_2m"][:24]
+
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=horas, y=temps,
+                    mode='lines+markers',
+                    line=dict(color='#38bdf8', width=3, shape='spline'),
+                    marker=dict(size=6, color='#ffffff'),
+                    hovertemplate='%{x}hs: <b>%{y}°C</b><extra></extra>'
+                ))
+                fig.update_layout(
+                    title=dict(text="📈 Evolución Térmica (Próximas 24hs)", font=dict(color="#0f172a", size=14)),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=10, r=10, t=35, b=10),
+                    height=180,
+                    xaxis=dict(showgrid=False, tickfont=dict(color='#334155', size=10)),
+                    yaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.08)', tickfont=dict(color='#334155', size=10))
+                )
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+            except Exception:
+                pass
+
+        st.subheader("📅 Pronóstico Extendido")
+        
+        fechas = daily.get("time", [])
+        t_max = daily.get("temperature_2m_max", [])
+        t_min = daily.get("temperature_2m_min", [])
+        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
+        viento_diario = daily.get("windspeed_10m_max", [])
+        wcodes_daily = daily.get("weathercode", [])
+        
+        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
+        
+        for i in range(1, min(3, len(fechas))):
+            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
+            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
+            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
+            
+            tmax_val = t_max[i] if i < len(t_max) else "--"
+            tmin_val = t_min[i] if i < len(t_min) else "--"
+            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
+            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
+            fecha_val = fechas[i] if i < len(fechas) else ""
+            
+            st.markdown(
+                f'<div style="background: #ffffff; border-radius: 16px; padding: 18px 22px; color: #0f172a; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 14px; border: 1px solid #e2e8f0;">'
+                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">'
+                f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px;">{etiquetas[i-1]}</span>'
+                f'<div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div></div>'
+                f'<div style="display: flex; align-items: center; gap: 14px;">'
+                f'<div>{dibujo_ext}</div>'
+                f'<div style="text-align: right;"><span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div></div></div>'
+                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">'
+                f'<div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>'
+                f'<div style="font-size: 0.82rem; color: #475569; font-weight: 600;">Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b></div></div>'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            '<div style="text-align: center; margin-top: 30px; padding: 15px; border-top: 1px solid #cbd5e1; color: #64748b; font-size: 0.78rem;">'
+            '<b>MeteoUy Data Engine:</b> Pronóstico en tiempo real mediante ensamble multimodelo (ECMWF, GFS, ICON) y telemetría satelital GOES-19.'
+            '</div>',
+            unsafe_allow_html=True
+        )
