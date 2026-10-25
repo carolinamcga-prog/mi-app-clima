@@ -201,13 +201,20 @@ def obtener_ruta_logo():
             return nombre
     return None
 
+def obtener_ruta_logo():
+    posibles_nombres = ["logo.jpeg", "logo.jpg", "logo.png", "LOGO.JPEG", "LOGO.JPG", "LOGO.PNG"]
+    for nombre in posibles_nombres:
+        if os.path.exists(nombre):
+            return nombre
+    return None
+
 def mostrar_logo():
     logo_path = obtener_ruta_logo()
     if logo_path:
-        # Mostramos la imagen aplicando un filtro para integrar el fondo blanco con el celeste de la web
+        # Usamos st.image pero con un truco de estilo directo en Streamlit para el fondo
         st.markdown(
             f'<div style="text-align: center; margin-bottom: 5px;">'
-            f'<img src="app/static/{logo_path}" style="max-width: 270px; mix-blend-mode: multiply; display: inline-block;">'
+            f'<img src="data:image/png;base64,{obtener_base64_logo(logo_path)}" style="max-width: 270px; display: inline-block;">'
             f'</div>', 
             unsafe_allow_html=True
         )
