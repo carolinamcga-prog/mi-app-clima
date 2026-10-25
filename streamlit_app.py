@@ -197,10 +197,7 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return '<div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
 
 def mostrar_logo_limpio():
-    if os.path.exists("logo.png"):
-        st.image("logo.png", width=250)
-    else:
-        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; margin: 0; padding: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; margin: 0; padding: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0369a1; font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-top: 0;'>PRONÓSTICO PROFESIONAL URUGUAY</p>", unsafe_allow_html=True)
 
 
