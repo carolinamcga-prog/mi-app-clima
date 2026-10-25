@@ -197,7 +197,10 @@ def obtener_dibujo_animado(wcode, texto_clima, is_day=1):
         return '<div class="anim-nube" style="width: 52px; height: 52px; display: inline-block;"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;"><path d="M46 28H44.7C43.3 21.6 37.6 17 31 17C24.1 17 18.5 22.4 18.1 29.3C13.6 30.1 10 34 10 38.8C10 44 14.2 48.2 19.4 48.2H46C51 48.2 55 44.2 55 39.2C55 34.2 51 30.2 46 28Z" fill="#94A3B8"/></svg></div>'
 
 def mostrar_logo_limpio():
-    st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; margin: 0; padding: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=250)
+    else:
+        st.markdown("<h1 style='text-align: center; color: #0284c7; font-size: 3.5rem; font-weight: 800; margin: 0; padding: 0;'>MeteoUy</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #0369a1; font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-top: 0;'>PRONÓSTICO PROFESIONAL URUGUAY</p>", unsafe_allow_html=True)
 
 
@@ -603,49 +606,3 @@ else:
                     yaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.08)', tickfont=dict(color='#334155', size=10))
                 )
                 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-            except Exception:
-                pass
-
-        st.subheader("📅 Pronóstico Extendido")
-        
-        fechas = daily.get("time", [])
-        t_max = daily.get("temperature_2m_max", [])
-        t_min = daily.get("temperature_2m_min", [])
-        prob_lluvia_diaria = daily.get("precipitation_probability_max", [])
-        viento_diario = daily.get("windspeed_10m_max", [])
-        wcodes_daily = daily.get("weathercode", [])
-        
-        etiquetas = ["MAÑANA", "PASADO MAÑANA"]
-        
-        for i in range(1, min(3, len(fechas))):
-            codigo_clima = wcodes_daily[i] if i < len(wcodes_daily) else 0
-            estado_texto = obtener_descripcion_clima(codigo_clima, is_day=1)
-            dibujo_ext = obtener_dibujo_animado(codigo_clima, estado_texto, is_day=1)
-            
-            tmax_val = t_max[i] if i < len(t_max) else "--"
-            tmin_val = t_min[i] if i < len(t_min) else "--"
-            prob_val = prob_lluvia_diaria[i] if i < len(prob_lluvia_diaria) else 0
-            viento_val = viento_diario[i] if i < len(viento_diario) else "--"
-            fecha_val = fechas[i] if i < len(fechas) else ""
-            
-            st.markdown(
-                f'<div style="background: #ffffff; border-radius: 16px; padding: 18px 22px; color: #0f172a; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 14px; border: 1px solid #e2e8f0;">'
-                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">'
-                f'<div><span style="font-size: 0.75rem; font-weight: 800; color: #0284c7; letter-spacing: 1px;">{etiquetas[i-1]}</span>'
-                f'<div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">{fecha_val}</div></div>'
-                f'<div style="display: flex; align-items: center; gap: 14px;">'
-                f'<div>{dibujo_ext}</div>'
-                f'<div style="text-align: right;"><span style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">{tmin_val}° / {tmax_val}°</span></div></div></div>'
-                f'<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">'
-                f'<div style="font-size: 0.9rem; font-weight: 700; color: #334155;">{estado_texto}</div>'
-                f'<div style="font-size: 0.82rem; color: #475569; font-weight: 600;">Lluvia: <b>{prob_val}%</b> &nbsp;|&nbsp; Viento: <b>{viento_val} km/h</b></div></div>'
-                '</div>',
-                unsafe_allow_html=True
-            )
-
-        st.markdown(
-            '<div style="text-align: center; margin-top: 30px; padding: 15px; border-top: 1px solid #cbd5e1; color: #64748b; font-size: 0.78rem;">'
-            '<b>MeteoUy Data Engine:</b> Pronóstico en tiempo real mediante ensamble multimodelo (ECMWF, GFS, ICON) y telemetría satelital GOES-19.'
-            '</div>',
-            unsafe_allow_html=True
-        )
