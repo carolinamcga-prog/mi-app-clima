@@ -37,6 +37,16 @@ ETIQUETAS_CLIMA = {
     "thunder": "⛈️ Tormenta",
 }
 
+FRASES_PRONOSTICO = {
+    "clear": "Jornada soleada y de cielo despejado, ideal para actividades al aire libre.",
+    "partly_cloudy": "Cielo con intervalos de sol y nubes pasajeras a lo largo del día.",
+    "cloudy": "Ambiente mayormente nublado y gris, con baja presencia de sol.",
+    "fog": "Presencia de neblina o niebla; precaución por visibilidad reducida.",
+    "drizzle": "Posibilidad de lloviznas aisladas; llevá paraguas o abrigo liviano.",
+    "rain": "Episodios de lluvia o chubascos; se recomienda planificar bajo techo.",
+    "thunder": "Actividad eléctrica y tormentas; extremá las precauciones.",
+}
+
 # ---------------------------------------------------------
 # CONTROL DE ESTADO DE NAVEGACIÓN
 # ---------------------------------------------------------
@@ -318,6 +328,14 @@ else:
                 box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
                 margin-bottom: 20px;
             }}
+
+            .frase-pronostico {{
+                font-size: 0.92em;
+                color: #334155;
+                font-style: italic;
+                margin: 10px 0 14px 0;
+                line-height: 1.35;
+            }}
             </style>
 
             <video autoplay loop muted playsinline id="video-fondo" key="{tipo_clima}">
@@ -351,13 +369,17 @@ else:
         for i in range(min(3, len(fechas))):
             wcode_dia = obtener_tipo_clima(int(wcodes[i])) if i < len(wcodes) else tipo_clima
             icono_dia = ETIQUETAS_CLIMA.get(wcode_dia, "").split(" ")[0]
+            frase_dia = FRASES_PRONOSTICO.get(
+                wcode_dia, "Condiciones variables previstas para esta jornada."
+            )
             with cols[i]:
                 st.markdown(
                     f"""
                     <div class="cuadrado-pronostico">
                         <div style="font-size: 1.8rem; margin-bottom: 4px;">{icono_dia}</div>
                         <h2 style="color: #0f172a; margin-bottom: 4px; font-weight: 700; font-size: 1.4rem;">{etiquetas[i]}</h2>
-                        <p style="font-size: 0.88em; color: #64748b; margin-bottom: 12px; font-weight: 600;">{fechas[i]}</p>
+                        <p style="font-size: 0.88em; color: #64748b; margin-bottom: 8px; font-weight: 600;">{fechas[i]}</p>
+                        <p class="frase-pronostico">“{frase_dia}”</p>
                         <hr style="border-color: #e2e8f0; margin-bottom: 14px;">
                         <p style="font-size: 1.1em; margin: 8px 0;"><b>🌡️ Máx:</b> {t_max[i]} °C</p>
                         <p style="font-size: 1.1em; margin: 8px 0;"><b>❄️ Mín:</b> {t_min[i]} °C</p>
